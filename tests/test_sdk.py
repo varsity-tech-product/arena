@@ -8,6 +8,7 @@ from arena_agent import Arena, ArenaAgent
 class FakeClient:
     def __init__(self):
         self.calls = []
+        self.closed = False
 
     def call_tool(self, name, arguments=None):
         arguments = arguments or {}
@@ -39,6 +40,15 @@ class FakeClient:
         if name == "varsity.last_transition":
             return {"transition": {"action": {"type": "HOLD"}}}
         raise AssertionError(name)
+
+    def close(self):
+        self.closed = True
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self.close()
 
 
 class SDKTest(unittest.TestCase):
@@ -75,6 +85,16 @@ class SDKTest(unittest.TestCase):
 
     def test_arena_alias_points_to_same_sdk(self) -> None:
         self.assertIs(Arena, ArenaAgent)
+
+    def test_disconnect_and_trade_close_are_separate(self) -> None:
+        client = FakeClient()
+        agent = ArenaAgent(client=client)
+
+        agent.disconnect()
+        self.assertTrue(client.closed)
+
+        result = agent.close()
+        self.assertEqual(result.action.type, "CLOSE_POSITION")
 
 
 if __name__ == "__main__":
