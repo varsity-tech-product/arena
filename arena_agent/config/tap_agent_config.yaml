@@ -13,6 +13,8 @@ adapter_retry_attempts: 3
 adapter_retry_backoff_seconds: 0.5
 adapter_min_call_spacing_seconds: 0.0
 
+# Optional signal bundle computed centrally by the framework.
+# TA-Lib is used automatically when available; builtin indicators are used otherwise.
 signal_indicators:
   - indicator: SMA
     params:

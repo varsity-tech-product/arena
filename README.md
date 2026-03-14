@@ -1,6 +1,6 @@
 # Arena Trading Agent Runtime
 
-Current status: this repo contains a working v1 trading-agent runtime for the Varsity Arena API, plus the older script-based bots that predate the runtime package.
+Current status: this repo contains a working v1 trading-agent runtime for the Varsity Arena API, plus the older script-based bots that predate the runtime package. The current runtime also includes a versioned `signal_state.v1` contract backed by a feature engine that prefers TA-Lib when available and falls back to builtin indicators otherwise.
 
 ## What exists now
 
@@ -48,9 +48,62 @@ The runtime is intentionally small:
 
 The runtime does not own reward logic. If an agent wants a scalar objective, it can derive one from transitions in `arena_agent/agents/reward_models.py`.
 
-The runtime now also owns a versioned `signal_state` contract. Agents can request a curated set of indicators and parameters, and the framework computes them centrally through the feature engine.
+The runtime now also owns a versioned `signal_state` contract. Agents can request indicator bundles, and the framework computes them centrally through the feature engine.
 
-If TA-Lib is available in the runtime environment, the engine can serve the full TA-Lib surface. Indicators that need extra non-OHLCV inputs, such as `MAVP`, can still be used by supplying those series explicitly in the indicator params.
+Indicator support policy:
+
+- TA-Lib backend is used automatically when available in the runtime environment.
+- Builtin fallback backend is used otherwise.
+- All TA-Lib indicators that can be computed from runtime market data are supported.
+- Indicators that need extra non-OHLCV inputs, such as `MAVP`, are also supported if those extra series are supplied in the indicator params.
+- If an indicator needs inputs the runtime does not have and the agent does not supply, the request fails clearly instead of silently degrading.
+
+## Signal State Contract
+
+`AgentState` now contains:
+
+```python
+state.signal_state
+```
+
+Contract shape:
+
+```json
+{
+  "version": "signal_state.v1",
+  "backend": "talib",
+  "requested": [
+    {"indicator": "SMA", "params": {"period": 20}, "key": null}
+  ],
+  "values": {
+    "sma_20": 70477.005
+  },
+  "warmup_complete": true,
+  "metadata": {
+    "timestamp": 1773483839999,
+    "candle_count": 120,
+    "indicator_metadata": [
+      {
+        "key": "sma_20",
+        "indicator": "SMA",
+        "params": {"timeperiod": 20},
+        "outputs": ["value"],
+        "lookback_required": 20,
+        "supported_inputs_only": true,
+        "unsupported_inputs": []
+      }
+    ]
+  }
+}
+```
+
+Notes:
+
+- `version` is the stable contract version for external agents.
+- `backend` is `talib`, `builtin`, or `none`.
+- `warmup_complete` tells the agent whether every requested feature is ready.
+- `indicator_metadata[*].lookback_required` is the normalized warmup requirement for that indicator.
+- Use explicit `key` values for indicators with large or structured params.
 
 ## External-agent support
 
@@ -84,6 +137,7 @@ Examples:
 echo '{"action":"OPEN_LONG","size":0.001}' | ./arena_trade --execute
 ./arena_last_transition
 ./arena_market_state --signal-indicators '[{"indicator":"SMA","params":{"period":20}},{"indicator":"RSI","params":{"period":14}}]'
+./arena_market_state --signal-indicators '[{"indicator":"MAVP","key":"mavp_test","params":{"minperiod":2,"maxperiod":5,"periods":[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]}}]'
 ```
 
 ## MCP server
@@ -113,6 +167,14 @@ The server reuses the same local runtime env file and underlying runtime compone
 
 Both CLI tools and MCP tools accept optional `signal_indicators` input so agents can request the indicator bundle they want without changing the runtime code.
 
+The MCP and CLI contract is the same:
+
+- `signal_indicators` is a list of `FeatureSpec` objects
+- each item may include:
+  - `indicator`
+  - `params`
+  - `key`
+
 ## Arena Agent SDK
 
 There is also a thin SDK on top of the MCP layer in `arena_agent/sdk/`.
@@ -129,7 +191,13 @@ Minimal example:
 ```python
 from arena_agent import Arena
 
-agent = Arena()
+agent = Arena(
+    signal_indicators=[
+        {"indicator": "SMA", "params": {"period": 20}},
+        {"indicator": "RSI", "params": {"period": 14}},
+        {"indicator": "OBV", "params": {}},
+    ]
+)
 
 state = agent.state()
 info = agent.competition_info()
@@ -145,6 +213,7 @@ Signal features are available under:
 ```python
 state.signal_state.values["sma_20"]
 state.features.sma_20
+state.signal_state.metadata.indicator_metadata[0].lookback_required
 ```
 
 For indicators with long or structured params, set an explicit key:
@@ -217,6 +286,7 @@ Current automated tests cover:
 
 - state normalization
 - versioned signal-state contract
+- generic TA-Lib-backed indicators plus builtin fallback
 - inferred position fallback from unresolved live trades
 - execution sizing and validation
 - transition-oriented runtime flow
@@ -228,16 +298,29 @@ Current automated tests cover:
 
 ## Known limitations
 
-- Live Arena reads and one dry-run TAP-backed runtime iteration have been verified from this environment.
+- Live Arena reads, MCP calls, SDK calls, and requested indicator computation have been verified from this environment.
 - Real Arena trade writes have not been exercised yet.
 - The repo still contains legacy script bots alongside the new runtime.
 - The repo currently includes generated files and caches from earlier work; cleanup has not been completed yet.
+
+Live indicator checks completed in this environment include:
+
+- `SMA`
+- `RSI`
+- `OBV`
+- `MACD`
+- `AVGPRICE`
+- `STOCH`
+- `CDLDOJI`
+- `ATR`
+- `MAVP` with an explicit `periods` input series
 
 ## File map
 
 ```text
 arena_agent/
   core/         runtime loop, models, adapter, state builder
+  features/     versioned feature engine and indicator registry
   interfaces/   action schema and policy interface
   execution/    order execution
   memory/       transition store and journal
