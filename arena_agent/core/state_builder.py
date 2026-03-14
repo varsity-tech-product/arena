@@ -1,0 +1,258 @@
+"""Build agent state from raw Arena API responses."""
+
+from __future__ import annotations
+
+import math
+import statistics
+import time
+from typing import Any
+
+from arena_agent.core.environment_adapter import EnvironmentAdapter
+from arena_agent.core.models import (
+    AccountSnapshot,
+    AgentState,
+    Candle,
+    CompetitionSnapshot,
+    MarketSnapshot,
+    PositionSnapshot,
+    RuntimeConfig,
+)
+
+
+class StateBuilder:
+    def __init__(self, adapter: EnvironmentAdapter, config: RuntimeConfig) -> None:
+        self.adapter = adapter
+        self.config = config
+
+    def build(self) -> AgentState:
+        market_info = self.adapter.get_market_info(self.config.symbol)
+        klines_payload = self.adapter.get_klines(
+            self.config.symbol,
+            self.config.interval,
+            self.config.kline_limit,
+        )
+        orderbook = self.adapter.get_orderbook(self.config.symbol, self.config.orderbook_depth)
+        account = self.adapter.get_live_account(self.config.competition_id)
+        position = self.adapter.get_live_position(self.config.competition_id)
+        trades = self.adapter.get_live_trades(self.config.competition_id)
+        competition = self.adapter.get_competition_detail(self.config.competition_id)
+
+        candles = self._parse_candles(klines_payload)
+        market_snapshot = self._build_market_snapshot(market_info, orderbook, candles)
+        account_snapshot = self._build_account_snapshot(account, trades)
+        position_snapshot = self._build_position_snapshot(position, account_snapshot)
+        competition_snapshot = self._build_competition_snapshot(competition, account_snapshot, trades)
+
+        return AgentState(
+            timestamp=time.time(),
+            market=market_snapshot,
+            account=account_snapshot,
+            position=position_snapshot,
+            competition=competition_snapshot,
+            raw={
+                "market_info": market_info,
+                "orderbook": orderbook,
+                "account": account,
+                "position": position,
+                "trades": trades,
+                "competition": competition,
+            },
+        )
+
+    def _build_market_snapshot(
+        self,
+        market_info: dict[str, Any],
+        orderbook: dict[str, Any],
+        candles: list[Candle],
+    ) -> MarketSnapshot:
+        closes = [candle.close for candle in candles]
+        last_price = _float(market_info.get("lastPrice"), default=closes[-1] if closes else 0.0)
+        mark_price = _optional_float(market_info.get("markPrice"))
+        return MarketSnapshot(
+            symbol=self.config.symbol,
+            interval=self.config.interval,
+            last_price=last_price,
+            mark_price=mark_price,
+            volatility=self._estimate_volatility(closes),
+            orderbook_imbalance=self._compute_orderbook_imbalance(orderbook),
+            recent_candles=candles,
+            funding_rate=_optional_float(market_info.get("fundingRate")),
+            metadata=market_info,
+        )
+
+    def _build_account_snapshot(
+        self,
+        account: dict[str, Any],
+        trades: list[dict[str, Any]],
+    ) -> AccountSnapshot:
+        balance = _first_float(account, "walletBalance", "availableBalance", "balance", "capital")
+        equity = _first_float(account, "totalEquity", "equity", default=balance)
+        unrealized_pnl = _first_float(account, "unrealizedPnl", "unrealized_pnl", default=0.0)
+        realized_pnl = _first_float(account, "realizedPnl", "realized_pnl", default=0.0)
+        trade_count = int(
+            account.get("tradeCount")
+            or account.get("currentTrades")
+            or account.get("trades")
+            or len(trades)
+        )
+        return AccountSnapshot(
+            balance=balance,
+            equity=equity,
+            unrealized_pnl=unrealized_pnl,
+            realized_pnl=realized_pnl,
+            trade_count=trade_count,
+            metadata=account,
+        )
+
+    def _build_position_snapshot(
+        self,
+        position: dict[str, Any] | None,
+        account_snapshot: AccountSnapshot,
+    ) -> PositionSnapshot | None:
+        if not position:
+            return None
+
+        direction = str(position.get("direction") or position.get("positionSide") or "").lower()
+        if direction == "long":
+            normalized_direction = "long"
+        elif direction == "short":
+            normalized_direction = "short"
+        else:
+            normalized_direction = direction
+
+        return PositionSnapshot(
+            direction=normalized_direction,
+            size=_first_float(position, "size"),
+            entry_price=_first_float(position, "entryPrice", "entry_price"),
+            unrealized_pnl=_first_float(position, "unrealizedPnl", "unrealized_pnl", default=account_snapshot.unrealized_pnl),
+            leverage=_optional_float(position.get("leverage")),
+            take_profit=_optional_float(position.get("takeProfit")),
+            stop_loss=_optional_float(position.get("stopLoss")),
+            metadata=position,
+        )
+
+    def _build_competition_snapshot(
+        self,
+        competition: dict[str, Any],
+        account_snapshot: AccountSnapshot,
+        trades: list[dict[str, Any]],
+    ) -> CompetitionSnapshot:
+        source = competition.get("matchInfo", competition)
+        current_trades = int(
+            source.get("currentTrades")
+            or source.get("tradeCount")
+            or competition.get("currentTrades")
+            or competition.get("tradeCount")
+            or account_snapshot.trade_count
+            or len(trades)
+        )
+        max_trades_value = source.get("maxTrades") or competition.get("maxTrades") or self.config.risk_limits.max_trades
+        max_trades = None if max_trades_value is None else int(max_trades_value)
+
+        close_only_at_seconds = _milliseconds_to_seconds(source.get("closeOnlyAt") or competition.get("closeOnlyAt"))
+        close_only_mode = bool(
+            source.get("closeOnlyMode")
+            or source.get("close_only_mode")
+            or source.get("closeOnly")
+            or competition.get("closeOnlyMode")
+            or competition.get("close_only_mode")
+            or competition.get("closeOnly")
+        )
+        end_time_seconds = _milliseconds_to_seconds(source.get("endTime") or competition.get("endTime"))
+        now = time.time()
+        time_remaining = None if end_time_seconds is None else max(0.0, end_time_seconds - now)
+        if close_only_at_seconds is not None and now >= close_only_at_seconds:
+            close_only_mode = True
+        status = str(source.get("status") or competition.get("status") or "unknown")
+        is_live = (
+            status.lower() in {"live", "active", "running", "ongoing"}
+            or bool(source.get("isLive"))
+            or bool(competition.get("isLive"))
+            or (time_remaining is not None and time_remaining > 0)
+        )
+
+        return CompetitionSnapshot(
+            competition_id=self.config.competition_id,
+            symbol=str(source.get("symbol") or competition.get("symbol") or self.config.symbol),
+            status=status,
+            is_live=is_live,
+            is_close_only=close_only_mode,
+            current_trades=current_trades,
+            max_trades=max_trades,
+            max_trades_remaining=None if max_trades is None else max(0, max_trades - current_trades),
+            time_remaining_seconds=time_remaining,
+            metadata=competition,
+        )
+
+    def _parse_candles(self, payload: dict[str, Any] | list[dict[str, Any]]) -> list[Candle]:
+        rows = payload.get("klines", payload) if isinstance(payload, dict) else payload
+        candles: list[Candle] = []
+        for row in rows:
+            candles.append(
+                Candle(
+                    open_time=int(row.get("openTime", row.get("open_time", 0))),
+                    close_time=int(row.get("closeTime", row.get("close_time", row.get("openTime", 0)))),
+                    open=_first_float(row, "open"),
+                    high=_first_float(row, "high"),
+                    low=_first_float(row, "low"),
+                    close=_first_float(row, "close"),
+                    volume=_first_float(row, "volume", default=0.0),
+                    is_final=bool(row.get("isFinal", True)),
+                )
+            )
+        return candles
+
+    def _estimate_volatility(self, closes: list[float]) -> float:
+        if len(closes) < 3:
+            return 0.0
+        returns = []
+        for previous, current in zip(closes, closes[1:]):
+            if previous <= 0:
+                continue
+            returns.append((current - previous) / previous)
+        if len(returns) < 2:
+            return 0.0
+        return float(statistics.pstdev(returns))
+
+    def _compute_orderbook_imbalance(self, orderbook: dict[str, Any]) -> float | None:
+        bids = orderbook.get("bids") or []
+        asks = orderbook.get("asks") or []
+        bid_volume = sum(_float(level[1] if isinstance(level, list) else level.get("size"), default=0.0) for level in bids)
+        ask_volume = sum(_float(level[1] if isinstance(level, list) else level.get("size"), default=0.0) for level in asks)
+        total = bid_volume + ask_volume
+        if math.isclose(total, 0.0):
+            return None
+        return (bid_volume - ask_volume) / total
+
+
+def _first_float(data: dict[str, Any], *keys: str, default: float = 0.0) -> float:
+    for key in keys:
+        if key in data and data[key] is not None:
+            return _float(data[key], default=default)
+    return default
+
+
+def _float(value: Any, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _optional_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _milliseconds_to_seconds(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return None
+    return numeric / 1000.0

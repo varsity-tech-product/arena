@@ -1,0 +1,113 @@
+from __future__ import annotations
+
+import unittest
+
+from arena_agent.core.environment_adapter import EnvironmentAdapter
+from arena_agent.core.models import RuntimeConfig
+from arena_agent.core.state_builder import StateBuilder
+
+
+class FakeArenaClient:
+    def get_market_info(self, symbol: str):
+        return {
+            "symbol": symbol,
+            "lastPrice": 105.0,
+            "markPrice": 104.5,
+            "fundingRate": 0.0001,
+        }
+
+    def get_klines(self, symbol: str, interval: str, size: int = 120):
+        return {
+            "klines": [
+                {
+                    "openTime": 1,
+                    "closeTime": 2,
+                    "open": 100,
+                    "high": 101,
+                    "low": 99,
+                    "close": 100,
+                    "volume": 10,
+                    "isFinal": True,
+                },
+                {
+                    "openTime": 3,
+                    "closeTime": 4,
+                    "open": 100,
+                    "high": 103,
+                    "low": 99,
+                    "close": 102,
+                    "volume": 11,
+                    "isFinal": True,
+                },
+                {
+                    "openTime": 5,
+                    "closeTime": 6,
+                    "open": 102,
+                    "high": 106,
+                    "low": 101,
+                    "close": 105,
+                    "volume": 12,
+                    "isFinal": True,
+                },
+            ]
+        }
+
+    def get_orderbook(self, symbol: str, depth: int = 20):
+        return {
+            "bids": [["104.9", "2.0"], ["104.8", "1.0"]],
+            "asks": [["105.1", "1.0"], ["105.2", "1.0"]],
+        }
+
+    def get_live_account(self, competition_id: int):
+        return {
+            "availableBalance": 1000.0,
+            "equity": 1015.0,
+            "unrealizedPnl": 15.0,
+            "tradeCount": 2,
+        }
+
+    def get_live_position(self, competition_id: int):
+        return {
+            "direction": "long",
+            "size": 0.02,
+            "entryPrice": 100.0,
+            "takeProfit": 110.0,
+            "stopLoss": 97.0,
+        }
+
+    def get_live_trades(self, competition_id: int):
+        return [{"id": 1}, {"id": 2}]
+
+    def get_competition_detail(self, competition_id: int):
+        return {
+            "id": competition_id,
+            "status": "live",
+            "symbol": "BTCUSDT",
+            "currentTrades": 2,
+            "maxTrades": 10,
+            "closeOnlyMode": False,
+            "endTime": 4102444800000,
+        }
+
+
+class StateBuilderTest(unittest.TestCase):
+    def test_build_normalizes_market_account_position_and_competition(self) -> None:
+        config = RuntimeConfig.from_mapping({"competition_id": 4, "symbol": "BTCUSDT"})
+        adapter = EnvironmentAdapter(client=FakeArenaClient())
+        builder = StateBuilder(adapter, config)
+
+        state = builder.build()
+
+        self.assertEqual(state.market.symbol, "BTCUSDT")
+        self.assertAlmostEqual(state.market.last_price, 105.0)
+        self.assertGreater(state.market.volatility, 0.0)
+        self.assertAlmostEqual(state.market.orderbook_imbalance, 0.2)
+        self.assertEqual(state.account.trade_count, 2)
+        self.assertIsNotNone(state.position)
+        self.assertEqual(state.position.direction, "long")
+        self.assertEqual(state.competition.max_trades_remaining, 8)
+        self.assertTrue(state.competition.is_live)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,197 @@
+"""Risk-aware action executor for Arena runtime actions."""
+
+from __future__ import annotations
+
+import math
+import time
+from typing import Any
+
+from arena_agent.core.environment_adapter import EnvironmentAdapter
+from arena_agent.core.models import AgentState, ExecutionResult, RiskLimits
+from arena_agent.interfaces.action_schema import Action, ActionType
+
+
+class OrderExecutor:
+    def __init__(
+        self,
+        adapter: EnvironmentAdapter,
+        competition_id: int,
+        risk_limits: RiskLimits,
+        dry_run: bool = False,
+    ) -> None:
+        self.adapter = adapter
+        self.competition_id = competition_id
+        self.risk_limits = risk_limits
+        self.dry_run = dry_run
+        self._last_trade_time = 0.0
+
+    def execute(self, action: Action, state: AgentState) -> ExecutionResult:
+        if action.type == ActionType.HOLD:
+            return self._result(action, True, False, "hold")
+
+        validation_error = self._validate(action, state)
+        if validation_error is not None:
+            return self._result(action, False, False, validation_error)
+
+        if action.type in {ActionType.OPEN_LONG, ActionType.OPEN_SHORT}:
+            size = self._resolve_size(action, state)
+            take_profit = self._rounded_price(action.take_profit)
+            stop_loss = self._rounded_price(action.stop_loss)
+            payload = {
+                "direction": action.direction,
+                "size": size,
+                "take_profit": take_profit,
+                "stop_loss": stop_loss,
+            }
+            if self.dry_run:
+                self._last_trade_time = time.time()
+                return self._result(action, True, False, "dry-run open", payload=payload, order_size=size)
+
+            response = self.adapter.trade_open(
+                self.competition_id,
+                action.direction or "",
+                size,
+                take_profit=take_profit,
+                stop_loss=stop_loss,
+            )
+            self._last_trade_time = time.time()
+            return self._result(
+                action,
+                True,
+                True,
+                "opened position",
+                payload=response,
+                realized_pnl=_extract_float(response, "pnl", "realizedPnl", "realized_pnl"),
+                fee=_extract_float(response, "fee", "totalFee", default=0.0),
+                order_size=size,
+                take_profit=take_profit,
+                stop_loss=stop_loss,
+            )
+
+        if action.type == ActionType.CLOSE_POSITION:
+            if self.dry_run:
+                self._last_trade_time = time.time()
+                return self._result(action, True, False, "dry-run close")
+
+            response = self.adapter.trade_close(self.competition_id)
+            self._last_trade_time = time.time()
+            return self._result(
+                action,
+                True,
+                True,
+                "closed position",
+                payload=response,
+                realized_pnl=_extract_float(response, "pnl", "realizedPnl", "realized_pnl"),
+                fee=_extract_float(response, "fee", "totalFee", default=0.0),
+            )
+
+        if action.type == ActionType.UPDATE_TPSL:
+            take_profit = self._rounded_price(action.take_profit)
+            stop_loss = self._rounded_price(action.stop_loss)
+            if self.dry_run:
+                return self._result(
+                    action,
+                    True,
+                    False,
+                    "dry-run update tpsl",
+                    order_size=state.position.size if state.position else None,
+                    take_profit=take_profit,
+                    stop_loss=stop_loss,
+                )
+
+            response = self.adapter.trade_update_tpsl(
+                self.competition_id,
+                take_profit=take_profit,
+                stop_loss=stop_loss,
+            )
+            return self._result(
+                action,
+                True,
+                True,
+                "updated tpsl",
+                payload=response,
+                order_size=state.position.size if state.position else None,
+                take_profit=take_profit,
+                stop_loss=stop_loss,
+            )
+
+        return self._result(action, False, False, f"unsupported action type: {action.type}")
+
+    def _validate(self, action: Action, state: AgentState) -> str | None:
+        if action.type == ActionType.OPEN_LONG and not self.risk_limits.allow_long:
+            return "long positions are disabled"
+        if action.type == ActionType.OPEN_SHORT and not self.risk_limits.allow_short:
+            return "short positions are disabled"
+        if action.type in {ActionType.OPEN_LONG, ActionType.OPEN_SHORT} and state.position is not None:
+            return "cannot open a new position while another is active"
+        if action.type == ActionType.CLOSE_POSITION and state.position is None:
+            return "no open position to close"
+        if action.type == ActionType.UPDATE_TPSL and state.position is None:
+            return "cannot update TP/SL without an open position"
+        if action.type in {ActionType.OPEN_LONG, ActionType.OPEN_SHORT}:
+            if state.competition.is_close_only:
+                return "competition is in close-only mode"
+            if state.competition.max_trades_remaining is not None and state.competition.max_trades_remaining <= 0:
+                return "trade limit reached"
+            if self.risk_limits.min_seconds_between_trades > 0:
+                elapsed = time.time() - self._last_trade_time
+                if elapsed < self.risk_limits.min_seconds_between_trades:
+                    return "trade cooldown active"
+        return None
+
+    def _resolve_size(self, action: Action, state: AgentState) -> float:
+        if action.size is not None:
+            size = float(action.size)
+        else:
+            buying_power = max(state.account.balance, state.account.equity)
+            raw_size = buying_power * self.risk_limits.max_position_size_pct / state.market.last_price
+            size = raw_size
+
+        if self.risk_limits.max_absolute_size is not None:
+            size = min(size, self.risk_limits.max_absolute_size)
+
+        precision = 10 ** self.risk_limits.quantity_precision
+        rounded = math.floor(size * precision) / precision
+        return max(self.risk_limits.min_size, rounded)
+
+    def _rounded_price(self, value: float | None) -> float | None:
+        if value is None:
+            return None
+        return round(float(value), self.risk_limits.price_precision)
+
+    def _result(
+        self,
+        action: Action,
+        accepted: bool,
+        executed: bool,
+        message: str,
+        payload: dict[str, Any] | None = None,
+        realized_pnl: float = 0.0,
+        fee: float = 0.0,
+        order_size: float | None = None,
+        take_profit: float | None = None,
+        stop_loss: float | None = None,
+    ) -> ExecutionResult:
+        return ExecutionResult(
+            action_type=action.type.value,
+            accepted=accepted,
+            executed=executed,
+            message=message,
+            timestamp=time.time(),
+            realized_pnl=realized_pnl,
+            fee=fee,
+            order_size=order_size,
+            take_profit=take_profit,
+            stop_loss=stop_loss,
+            venue_response=payload or {},
+        )
+
+
+def _extract_float(data: dict[str, Any], *keys: str, default: float = 0.0) -> float:
+    for key in keys:
+        if key in data and data[key] is not None:
+            try:
+                return float(data[key])
+            except (TypeError, ValueError):
+                return default
+    return default

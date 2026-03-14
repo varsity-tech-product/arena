@@ -1,0 +1,37 @@
+competition_id: 4
+symbol: BTCUSDT
+interval: 1m
+tick_interval_seconds: 30
+kline_limit: 120
+orderbook_depth: 20
+max_iterations: 5
+stop_when_competition_inactive: true
+error_backoff_seconds: 5
+dry_run: true
+adapter_retry_attempts: 3
+adapter_retry_backoff_seconds: 0.5
+adapter_min_call_spacing_seconds: 0.0
+
+policy:
+  type: tap_http
+  endpoint: http://127.0.0.1:8080/decision
+  timeout_seconds: 10
+  fail_open_to_hold: true
+  headers:
+    Content-Type: application/json
+
+risk_limits:
+  max_position_size_pct: 0.1
+  max_absolute_size: 0.01
+  min_size: 0.001
+  quantity_precision: 3
+  price_precision: 2
+  max_trades: 40
+  min_seconds_between_trades: 60
+  allow_long: true
+  allow_short: true
+
+storage:
+  transition_path: ./artifacts/transitions.jsonl
+  journal_path: ./artifacts/journal.jsonl
+  max_in_memory_transitions: 1000
