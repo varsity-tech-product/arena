@@ -90,7 +90,7 @@ class MarketRuntime:
                 output_path=config.storage.transition_path,
             )
         self.journal = journal or TradeJournal(config.storage.journal_path)
-        self.policy = policy or build_policy(config.policy)
+        self.policy = policy or build_policy(config.policy, runtime_config=config)
         self.monitor = monitor or RuntimeMonitor(config.observability, logger=self.logger)
 
     def run(self) -> RuntimeReport:

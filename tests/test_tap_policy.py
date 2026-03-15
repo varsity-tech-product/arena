@@ -90,10 +90,11 @@ class TapPolicyTest(unittest.TestCase):
         action = parse_decision_response(
             {
                 "action": {
-                    "type": "OPEN_LONG",
+                    "type": "open_long",
                     "size": 0.25,
                     "tp": 110.0,
                     "sl": 99.0,
+                    "confidence": 0.9,
                     "metadata": {"source": "external"},
                 },
                 "reason": "bullish breakout",
@@ -107,6 +108,7 @@ class TapPolicyTest(unittest.TestCase):
         self.assertAlmostEqual(action.take_profit or 0.0, 110.0)
         self.assertEqual(action.metadata["source"], "external")
         self.assertEqual(action.metadata["reason"], "bullish breakout")
+        self.assertAlmostEqual(action.metadata["confidence"], 0.9)
 
     def test_local_claude_payload_is_normalized_with_reason_and_raw_response(self) -> None:
         payload = _normalize_claude_payload(

@@ -29,6 +29,9 @@ Current status: this repo contains a working v1 trading-agent runtime for the Va
 - SDK:
   - `arena_agent/sdk/`
   - `examples/sdk_quickstart.py`
+- Codex policy:
+  - `arena_agent/agents/codex_policy.py`
+  - `arena_agent/config/codex_agent_config.yaml`
 - Terminal monitor:
   - `arena_agent/tui/`
   - `python3 -m arena_agent monitor`
@@ -250,6 +253,27 @@ def policy(state):
 
 agent.run(policy, max_steps=1)
 ```
+
+## Run CLI
+
+The runtime now also supports agent selection from the terminal:
+
+```bash
+python3 -m arena_agent run --agent rule --config arena_agent/config/agent_config.yaml
+python3 -m arena_agent run --agent claude --config arena_agent/config/tap_agent_config.yaml
+python3 -m arena_agent run --agent codex --config arena_agent/config/codex_agent_config.yaml
+```
+
+`--agent codex` keeps the runtime loop stateless at the model level. Each tick sends:
+
+- current market and account state
+- current position
+- computed features
+- recent transition summaries
+- risk limits
+- a compact agent summary
+
+The Codex policy then returns one strict JSON action through `codex exec`. The runtime remains the single owner of execution, validation, and transition persistence.
 
 ## Terminal Observability Monitor
 

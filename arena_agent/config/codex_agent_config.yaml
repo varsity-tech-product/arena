@@ -1,0 +1,56 @@
+# Inject VARSITY_API_KEY via the runtime environment before starting the runtime.
+competition_id: 4
+symbol: BTCUSDT
+interval: 1m
+tick_interval_seconds: 30
+kline_limit: 120
+orderbook_depth: 20
+max_iterations: 5
+stop_when_competition_inactive: true
+error_backoff_seconds: 5
+dry_run: true
+adapter_retry_attempts: 3
+adapter_retry_backoff_seconds: 0.5
+adapter_min_call_spacing_seconds: 0.0
+
+signal_indicators:
+  - indicator: SMA
+    params:
+      period: 20
+  - indicator: RSI
+    params:
+      period: 14
+  - indicator: OBV
+    params: {}
+
+policy:
+  type: codex_exec
+  timeout_seconds: 45
+  recent_transition_limit: 5
+  fail_open_to_hold: true
+  sandbox_mode: read-only
+  bootstrap_from_transition_log: true
+  extra_instructions: ""
+
+risk_limits:
+  max_position_size_pct: 0.1
+  max_absolute_size: 0.01
+  min_size: 0.001
+  quantity_precision: 3
+  price_precision: 2
+  max_trades: 40
+  min_seconds_between_trades: 60
+  allow_long: true
+  allow_short: true
+
+storage:
+  transition_path: ./artifacts/transitions_codex.jsonl
+  journal_path: ./artifacts/journal_codex.jsonl
+  max_in_memory_transitions: 1000
+
+observability:
+  enabled: true
+  host: 127.0.0.1
+  port: 8767
+  max_transitions: 20
+  max_logs: 50

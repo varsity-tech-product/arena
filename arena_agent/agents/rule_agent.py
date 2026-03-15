@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Sequence
 
+from arena_agent.agents.codex_policy import CodexExecPolicy
 from arena_agent.agents.indicators import rolling_sma, rsi
 from arena_agent.core.models import AgentState, TransitionEvent
 from arena_agent.interfaces.action_schema import Action, ActionType
@@ -133,7 +134,7 @@ class EnsemblePolicy(Policy):
             policy.update(memory)
 
 
-def build_policy(config: dict) -> Policy:
+def build_policy(config: dict, *, runtime_config=None) -> Policy:
     policy_type = str(config.get("type", "hold")).lower()
     params = dict(config.get("params", {}))
 
@@ -157,7 +158,37 @@ def build_policy(config: dict) -> Policy:
             fail_open_to_hold=fail_open_to_hold,
             **params,
         )
+    if policy_type == "codex_exec":
+        model = config.get("model") or params.pop("model", None)
+        command = config.get("command") or params.pop("command", "codex")
+        timeout_seconds = float(config.get("timeout_seconds", params.pop("timeout_seconds", 45.0)))
+        recent_transition_limit = int(
+            config.get("recent_transition_limit", params.pop("recent_transition_limit", 5))
+        )
+        fail_open_to_hold = bool(config.get("fail_open_to_hold", params.pop("fail_open_to_hold", True)))
+        sandbox_mode = str(config.get("sandbox_mode", params.pop("sandbox_mode", "read-only")))
+        cwd = config.get("cwd") or params.pop("cwd", None)
+        extra_instructions = str(config.get("extra_instructions", params.pop("extra_instructions", "")))
+        bootstrap_from_transition_log = bool(
+            config.get("bootstrap_from_transition_log", params.pop("bootstrap_from_transition_log", True))
+        )
+        transition_path = None if runtime_config is None else runtime_config.storage.transition_path
+        risk_limits = None if runtime_config is None else runtime_config.risk_limits
+        return CodexExecPolicy(
+            model=model,
+            command=command,
+            timeout_seconds=timeout_seconds,
+            recent_transition_limit=recent_transition_limit,
+            fail_open_to_hold=fail_open_to_hold,
+            sandbox_mode=sandbox_mode,
+            cwd=cwd,
+            extra_instructions=extra_instructions,
+            transition_path=transition_path,
+            bootstrap_from_transition_log=bootstrap_from_transition_log,
+            risk_limits=risk_limits,
+            **params,
+        )
     if policy_type == "ensemble":
-        members = [build_policy(member) for member in config.get("members", [])]
+        members = [build_policy(member, runtime_config=runtime_config) for member in config.get("members", [])]
         return EnsemblePolicy(members or [HoldPolicy()])
     return HoldPolicy()

@@ -25,7 +25,7 @@ def parse_decision_response(payload: dict[str, Any]) -> Action:
         raise ValueError(f"TAP action payload must be an object, got: {action_payload!r}")
 
     raw_type = action_payload.get("type", ActionType.HOLD.value)
-    action_type = ActionType(str(raw_type))
+    action_type = ActionType(str(raw_type).upper())
 
     take_profit = _optional_float(action_payload.get("tp", action_payload.get("take_profit")))
     stop_loss = _optional_float(action_payload.get("sl", action_payload.get("stop_loss")))
@@ -38,6 +38,10 @@ def parse_decision_response(payload: dict[str, Any]) -> Action:
         metadata["reason"] = str(payload["reason"])
     if "analysis" in payload and "reason" not in metadata:
         metadata["reason"] = str(payload["analysis"])
+    if "confidence" in action_payload and "confidence" not in metadata:
+        metadata["confidence"] = _optional_float(action_payload["confidence"])
+    if "confidence" in payload and "confidence" not in metadata:
+        metadata["confidence"] = _optional_float(payload["confidence"])
 
     return Action(
         type=action_type,
