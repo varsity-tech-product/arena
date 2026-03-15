@@ -80,6 +80,11 @@ def _run_runtime(argv: list[str]) -> None:
         help="Optional extra prompt instructions for the Codex policy.",
     )
     parser.add_argument(
+        "--strategy-context",
+        default="",
+        help="Optional fixed strategy context for Codex decisions.",
+    )
+    parser.add_argument(
         "--tap-endpoint",
         default="http://127.0.0.1:8080/decision",
         help="Decision endpoint when --agent claude is used.",
@@ -133,15 +138,17 @@ def _apply_agent_override(config, args: Any):
         )
         return replace(config, policy=policy)
     if agent == "codex":
+        timeout_seconds = min(args.codex_timeout_seconds, max(1.0, float(config.tick_interval_seconds) * 0.8))
         policy = {
             "type": "codex_exec",
             "model": args.codex_model,
-            "timeout_seconds": args.codex_timeout_seconds,
+            "timeout_seconds": timeout_seconds,
             "recent_transition_limit": args.codex_recent_transitions,
             "fail_open_to_hold": True,
             "sandbox_mode": "read-only",
             "cwd": str(Path.cwd()),
             "extra_instructions": args.codex_extra_instructions,
+            "strategy_context": args.strategy_context,
             "bootstrap_from_transition_log": True,
         }
         return replace(config, policy=policy)

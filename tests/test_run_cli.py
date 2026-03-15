@@ -22,9 +22,10 @@ class RunCLITest(unittest.TestCase):
             {
                 "agent": "codex",
                 "codex_model": "gpt-5",
-                "codex_timeout_seconds": 30.0,
+                "codex_timeout_seconds": 60.0,
                 "codex_recent_transitions": 5,
                 "codex_extra_instructions": "Stay conservative.",
+                "strategy_context": "momentum",
             },
         )()
 
@@ -32,8 +33,9 @@ class RunCLITest(unittest.TestCase):
 
         self.assertEqual(updated.policy["type"], "codex_exec")
         self.assertEqual(updated.policy["model"], "gpt-5")
-        self.assertEqual(updated.policy["timeout_seconds"], 30.0)
+        self.assertEqual(updated.policy["timeout_seconds"], 24.0)
         self.assertEqual(updated.policy["recent_transition_limit"], 5)
+        self.assertEqual(updated.policy["strategy_context"], "momentum")
         self.assertIn("cwd", updated.policy)
 
     def test_run_subcommand_invokes_runtime(self) -> None:

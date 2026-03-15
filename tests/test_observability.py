@@ -69,6 +69,9 @@ class ObservabilityTest(unittest.TestCase):
         transition_update = monitor.current_snapshot()
         self.assertEqual(transition_update["transitions"][0]["action"]["type"], "OPEN_LONG")
         self.assertEqual(transition_update["health"]["status"], "ok")
+        monitor.record_position_drift(message="position drift")
+        drift_update = monitor.current_snapshot()
+        self.assertEqual(drift_update["health"]["position_drift_count"], 1)
 
         monitor.stop(report=None, final_state=state_after, reason="stopped")
 
@@ -97,6 +100,9 @@ class ObservabilityTest(unittest.TestCase):
                 "tap_error_count": 1,
                 "codex_error_count": 0,
                 "rejected_action_count": 0,
+                "position_drift_count": 1,
+                "last_position_drift_timestamp": now - 10,
+                "last_position_drift_message": "drift",
             },
             "connection": {"status": "connected", "host": "127.0.0.1", "port": 8765, "error": None},
             "decision_state": {
@@ -135,6 +141,7 @@ class ObservabilityTest(unittest.TestCase):
         self.assertIn("connection=connected", controller.status_line())
         self.assertEqual(controller.health_state()["status"], "warning")
         self.assertGreater(controller.health_state()["last_transition_age_seconds"], 60.0)
+        self.assertEqual(controller.health_state()["position_drift_count"], 1)
 
     def test_derive_health_marks_runtime_error_as_error(self) -> None:
         snapshot = {

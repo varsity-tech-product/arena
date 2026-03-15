@@ -28,7 +28,7 @@ signal_indicators:
 policy:
   type: tap_http
   endpoint: http://127.0.0.1:8080/decision
-  timeout_seconds: 60
+  timeout_seconds: 20
   fail_open_to_hold: true
   headers:
     Content-Type: application/json
@@ -55,3 +55,8 @@ observability:
   port: 8766
   max_transitions: 20
   max_logs: 50
+  no_transition_threshold_seconds: 90
+  no_transition_error_threshold_seconds: 180
+  max_decision_latency_seconds: 20
+  max_consecutive_runtime_errors: 3
+  supervisor_stop_on_error: true

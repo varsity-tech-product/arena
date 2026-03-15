@@ -33,6 +33,7 @@ class CodexExecPolicy(Policy):
     sandbox_mode: str = "read-only"
     cwd: str | None = None
     extra_instructions: str = ""
+    strategy_context: str = ""
     prompt_template_path: str | None = None
     transition_path: str | None = None
     bootstrap_from_transition_log: bool = True
@@ -114,6 +115,8 @@ class CodexExecPolicy(Policy):
             "risk_limits": to_jsonable(self.risk_limits) if self.risk_limits is not None else None,
             "agent_summary": _build_agent_summary(state, self._recent_transition_summaries),
         }
+        if self.strategy_context.strip():
+            context["strategy_context"] = self.strategy_context.strip()
         extra_instructions_block = (
             "Additional policy instructions:\n" + self.extra_instructions.strip()
             if self.extra_instructions.strip()

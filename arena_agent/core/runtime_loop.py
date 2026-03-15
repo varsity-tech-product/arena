@@ -8,6 +8,7 @@ import time
 from arena_agent.agents.rule_agent import build_policy
 from arena_agent.core.environment_adapter import EnvironmentAdapter
 from arena_agent.core.models import RuntimeConfig, RuntimeReport, TransitionEvent, TransitionMetrics
+from arena_agent.core.runtime_safety import detect_position_drift, evaluate_state_guard
 from arena_agent.core.serialization import to_jsonable
 from arena_agent.observability import RuntimeMonitor
 from arena_agent.core.state_builder import StateBuilder
@@ -103,6 +104,7 @@ class MarketRuntime:
         total_realized_pnl = 0.0
         total_fees = 0.0
         last_state = None
+        previous_live_state = None
         stop_reason = "stopped"
 
         while True:
@@ -114,6 +116,14 @@ class MarketRuntime:
             try:
                 state = self.state_builder.build()
                 last_state = state
+                drift_message = detect_position_drift(previous_live_state, state)
+                if drift_message is not None:
+                    self.logger.warning(drift_message)
+                    self.monitor.record_position_drift(message=drift_message)
+                    self.journal.record(
+                        "position_drift",
+                        {"iteration": iterations, "timestamp": time.time(), "message": drift_message},
+                    )
                 self.monitor.record_state(
                     iteration=iterations,
                     decisions=decisions,
@@ -130,9 +140,31 @@ class MarketRuntime:
                     stop_reason = "competition_inactive"
                     break
 
-                decision_started_at = time.time()
-                action = self.policy.decide(state)
-                decision_latency = time.time() - decision_started_at
+                guard = evaluate_state_guard(
+                    state,
+                    max_feature_age_seconds=_feature_age_threshold_seconds(self.config),
+                    require_feature_timestamp_match=bool(
+                        self.config.observability.get("require_feature_timestamp_match", True)
+                    ),
+                )
+                if not guard.ok:
+                    self.logger.warning("State guard forced HOLD: %s", guard.reason)
+                    self.monitor.record_state_guard_failure(reason=guard.reason or "unknown", details=guard.details)
+                    self.journal.record(
+                        "state_guard_failure",
+                        {
+                            "iteration": iterations,
+                            "timestamp": time.time(),
+                            "reason": guard.reason,
+                            "details": guard.details,
+                        },
+                    )
+                    action = self._build_guard_hold_action(guard)
+                    decision_latency = 0.0
+                else:
+                    decision_started_at = time.time()
+                    action = self.policy.decide(state)
+                    decision_latency = time.time() - decision_started_at
                 decisions += 1
                 self.monitor.record_decision(
                     iteration=iterations,
@@ -146,6 +178,7 @@ class MarketRuntime:
 
                 next_state = self.state_builder.build()
                 last_state = next_state
+                previous_live_state = next_state
                 transition = self._build_transition(state, action, execution_result, next_state)
                 total_realized_pnl += transition.metrics.realized_pnl_delta
                 total_fees += transition.metrics.fee
@@ -201,10 +234,18 @@ class MarketRuntime:
                     "error",
                     {"iteration": iterations, "timestamp": time.time(), "error": str(exc)},
                 )
+                if _should_stop_for_health(self.config, self.monitor.current_snapshot()):
+                    self.logger.error("Supervisor stopping runtime after health error.")
+                    stop_reason = "supervisor_health_error"
+                    break
                 time.sleep(self.config.error_backoff_seconds)
                 continue
 
             if self.config.max_iterations is not None and iterations >= self.config.max_iterations:
+                break
+            if _should_stop_for_health(self.config, self.monitor.current_snapshot()):
+                self.logger.error("Supervisor stopping runtime after health error.")
+                stop_reason = "supervisor_health_error"
                 break
             time.sleep(self.config.tick_interval_seconds)
 
@@ -229,3 +270,25 @@ class MarketRuntime:
 
     def _build_transition(self, state, action, execution_result, next_state) -> TransitionEvent:
         return build_transition_event(state, action, execution_result, next_state)
+
+    def _build_guard_hold_action(self, guard) -> Any:
+        from arena_agent.interfaces.action_schema import Action
+
+        return Action.hold(
+            reason=f"state_guard:{guard.reason or 'unknown'}",
+            guard_details=guard.details,
+        )
+
+
+def _feature_age_threshold_seconds(config: RuntimeConfig) -> float:
+    raw = config.observability.get("state_feature_max_age_seconds")
+    if raw is not None:
+        return float(raw)
+    return max(30.0, float(config.tick_interval_seconds) * 2.0)
+
+
+def _should_stop_for_health(config: RuntimeConfig, snapshot: dict[str, Any]) -> bool:
+    if not bool(config.observability.get("supervisor_stop_on_error", False)):
+        return False
+    health = dict(snapshot.get("health") or {})
+    return str(health.get("status") or "") == "error"

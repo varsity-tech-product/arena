@@ -33,6 +33,8 @@ def build_empty_snapshot() -> dict[str, Any]:
             "status": "unknown",
             "decision_latency_seconds": None,
             "decision_timeout_seconds": None,
+            "max_decision_latency_seconds": None,
+            "max_consecutive_runtime_errors": None,
             "last_decision_timestamp": None,
             "last_decision_age_seconds": None,
             "last_transition_timestamp": None,
@@ -47,7 +49,13 @@ def build_empty_snapshot() -> dict[str, Any]:
             "tap_error_count": 0,
             "codex_error_count": 0,
             "rejected_action_count": 0,
+            "state_guard_failure_count": 0,
+            "position_drift_count": 0,
+            "last_position_drift_timestamp": None,
+            "last_position_drift_age_seconds": None,
+            "last_position_drift_message": None,
             "no_transition_threshold_seconds": None,
+            "no_transition_error_threshold_seconds": None,
         },
         "decision_state": None,
         "current_state": None,
@@ -64,9 +72,13 @@ def derive_health(snapshot: dict[str, Any], *, now: float | None = None) -> dict
     runtime = dict(snapshot.get("runtime") or {})
     health = dict(snapshot.get("health") or {})
     no_transition_threshold = _optional_float(health.get("no_transition_threshold_seconds"))
+    no_transition_error_threshold = _optional_float(health.get("no_transition_error_threshold_seconds"))
+    max_decision_latency_seconds = _optional_float(health.get("max_decision_latency_seconds"))
+    max_consecutive_runtime_errors = _optional_float(health.get("max_consecutive_runtime_errors"))
     last_transition_timestamp = _optional_float(health.get("last_transition_timestamp"))
     last_decision_timestamp = _optional_float(health.get("last_decision_timestamp"))
     last_error_timestamp = _optional_float(health.get("last_error_timestamp"))
+    last_position_drift_timestamp = _optional_float(health.get("last_position_drift_timestamp"))
 
     health["last_transition_age_seconds"] = (
         None if last_transition_timestamp is None else max(0.0, now - last_transition_timestamp)
@@ -77,12 +89,32 @@ def derive_health(snapshot: dict[str, Any], *, now: float | None = None) -> dict
     health["last_error_age_seconds"] = (
         None if last_error_timestamp is None else max(0.0, now - last_error_timestamp)
     )
+    health["last_position_drift_age_seconds"] = (
+        None if last_position_drift_timestamp is None else max(0.0, now - last_position_drift_timestamp)
+    )
 
     recent_issue_window = no_transition_threshold if no_transition_threshold is not None else 60.0
     last_error_category = str(health.get("last_error_category") or "")
     last_error_age = health.get("last_error_age_seconds")
 
-    if runtime.get("status") == "degraded" or int(health.get("consecutive_runtime_error_count") or 0) > 0:
+    if (
+        runtime.get("status") == "degraded"
+        or (
+            max_consecutive_runtime_errors is not None
+            and int(health.get("consecutive_runtime_error_count") or 0) >= int(max_consecutive_runtime_errors)
+        )
+        or (
+            max_decision_latency_seconds is not None
+            and _optional_float(health.get("decision_latency_seconds")) is not None
+            and float(health["decision_latency_seconds"]) > max_decision_latency_seconds
+        )
+        or (
+            no_transition_error_threshold is not None
+            and runtime.get("decisions", 0) > 0
+            and health.get("last_transition_age_seconds") is not None
+            and float(health["last_transition_age_seconds"]) > no_transition_error_threshold
+        )
+    ):
         health["status"] = "error"
     elif (
         runtime.get("status") == "running"
@@ -94,6 +126,11 @@ def derive_health(snapshot: dict[str, Any], *, now: float | None = None) -> dict
         health["status"] = "warning"
     elif last_error_age is not None and float(last_error_age) <= recent_issue_window:
         health["status"] = "error" if last_error_category == "runtime_error" else "warning"
+    elif (
+        health.get("last_position_drift_age_seconds") is not None
+        and float(health["last_position_drift_age_seconds"]) <= recent_issue_window
+    ):
+        health["status"] = "warning"
     else:
         health["status"] = "ok"
 
@@ -157,8 +194,17 @@ class RuntimeMonitor:
                     max(30.0, float(getattr(runtime_config, "tick_interval_seconds", 30.0)) * 2.0),
                 )
             )
+            health["no_transition_error_threshold_seconds"] = _optional_float(
+                self.config.get("no_transition_error_threshold_seconds")
+            )
             timeout_seconds = getattr(runtime_config, "policy", {}).get("timeout_seconds")
             health["decision_timeout_seconds"] = _optional_float(timeout_seconds)
+            health["max_decision_latency_seconds"] = _optional_float(
+                self.config.get("max_decision_latency_seconds")
+            )
+            health["max_consecutive_runtime_errors"] = _optional_float(
+                self.config.get("max_consecutive_runtime_errors")
+            )
             self._snapshot["stream"] = {"host": self.host, "port": self.port, "active": self.stream_active}
         self._started = True
         self._publish_snapshot()
@@ -308,6 +354,29 @@ class RuntimeMonitor:
             health["last_error_message"] = str(error)
             health["last_error_timestamp"] = time.time()
             self._append_log_locked("ERROR", "arena_agent.runtime", str(error))
+        self._publish_snapshot()
+
+    def record_state_guard_failure(self, *, reason: str, details: dict[str, Any]) -> None:
+        if not self.enabled:
+            return
+        with self._lock:
+            health = self._snapshot["health"]
+            health["state_guard_failure_count"] = int(health.get("state_guard_failure_count") or 0) + 1
+            health["last_error_category"] = "state_guard"
+            health["last_error_message"] = f"{reason}: {details}"
+            health["last_error_timestamp"] = time.time()
+            self._append_log_locked("WARNING", "arena_agent.runtime", f"state_guard:{reason}")
+        self._publish_snapshot()
+
+    def record_position_drift(self, *, message: str) -> None:
+        if not self.enabled:
+            return
+        with self._lock:
+            health = self._snapshot["health"]
+            health["position_drift_count"] = int(health.get("position_drift_count") or 0) + 1
+            health["last_position_drift_timestamp"] = time.time()
+            health["last_position_drift_message"] = message
+            self._append_log_locked("WARNING", "arena_agent.runtime", message)
         self._publish_snapshot()
 
     def record_log(self, level: str, logger_name: str, message: str, *, timestamp: float | None = None) -> None:

@@ -25,11 +25,12 @@ signal_indicators:
 
 policy:
   type: codex_exec
-  timeout_seconds: 45
+  timeout_seconds: 20
   recent_transition_limit: 5
   fail_open_to_hold: true
   sandbox_mode: read-only
   bootstrap_from_transition_log: true
+  strategy_context: conservative_directional_confirmation
   extra_instructions: ""
 
 risk_limits:
@@ -54,3 +55,8 @@ observability:
   port: 8767
   max_transitions: 20
   max_logs: 50
+  no_transition_threshold_seconds: 90
+  no_transition_error_threshold_seconds: 180
+  max_decision_latency_seconds: 20
+  max_consecutive_runtime_errors: 3
+  supervisor_stop_on_error: true

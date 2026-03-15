@@ -111,6 +111,7 @@ class CodexPolicyTest(unittest.TestCase):
             subprocess_runner=runner,
             recent_transition_limit=5,
             cwd="/tmp",
+            strategy_context="momentum",
         )
         policy.reset()
         policy.update([transition])
@@ -126,6 +127,7 @@ class CodexPolicyTest(unittest.TestCase):
         self.assertAlmostEqual(result.metadata["confidence"], 0.82)
         self.assertIn('"recent_transitions"', captured["input"])
         self.assertIn('"last_action": "HOLD"', captured["input"])
+        self.assertIn('"strategy_context": "momentum"', captured["input"])
         self.assertIn("Action schema JSON:", captured["input"])
         self.assertIn("Additional policy instructions:", captured["input"])
         self.assertIn("--output-schema", captured["command"])

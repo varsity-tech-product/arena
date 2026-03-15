@@ -169,6 +169,7 @@ def build_policy(config: dict, *, runtime_config=None) -> Policy:
         sandbox_mode = str(config.get("sandbox_mode", params.pop("sandbox_mode", "read-only")))
         cwd = config.get("cwd") or params.pop("cwd", None)
         extra_instructions = str(config.get("extra_instructions", params.pop("extra_instructions", "")))
+        strategy_context = str(config.get("strategy_context", params.pop("strategy_context", "")))
         bootstrap_from_transition_log = bool(
             config.get("bootstrap_from_transition_log", params.pop("bootstrap_from_transition_log", True))
         )
@@ -183,6 +184,7 @@ def build_policy(config: dict, *, runtime_config=None) -> Policy:
             sandbox_mode=sandbox_mode,
             cwd=cwd,
             extra_instructions=extra_instructions,
+            strategy_context=strategy_context,
             transition_path=transition_path,
             bootstrap_from_transition_log=bootstrap_from_transition_log,
             risk_limits=risk_limits,
