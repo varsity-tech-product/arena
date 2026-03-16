@@ -1,18 +1,24 @@
 import { existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
+import { defaultArenaHome, isArenaHome, localPythonSourcePath } from "./home.js";
 
 /**
  * Find the arena project root by walking up from cwd or using ARENA_ROOT env.
  */
 export function findArenaRoot(): string {
   const envRoot = process.env.ARENA_ROOT;
-  if (envRoot && existsSync(resolve(envRoot, "arena_agent", "__init__.py"))) {
+  if (envRoot && isArenaHome(resolve(envRoot))) {
     return resolve(envRoot);
+  }
+
+  const envHome = process.env.ARENA_HOME;
+  if (envHome && isArenaHome(resolve(envHome))) {
+    return resolve(envHome);
   }
 
   let dir = process.cwd();
   for (let i = 0; i < 10; i++) {
-    if (existsSync(resolve(dir, "arena_agent", "__init__.py"))) {
+    if (isArenaHome(dir)) {
       return dir;
     }
     const parent = dirname(dir);
@@ -20,8 +26,18 @@ export function findArenaRoot(): string {
     dir = parent;
   }
 
+  const managedHome = defaultArenaHome();
+  if (isArenaHome(managedHome)) {
+    return managedHome;
+  }
+
+  const localSource = localPythonSourcePath();
+  if (localSource && isArenaHome(localSource)) {
+    return localSource;
+  }
+
   throw new Error(
-    "Cannot find arena project root. Set ARENA_ROOT or run from inside the arena directory."
+    "Cannot find an Arena home. Run `arena-agent init`, or set ARENA_ROOT to a configured Arena directory."
   );
 }
 
@@ -38,6 +54,6 @@ export function findPython(arenaRoot: string): string {
     if (existsSync(p)) return p;
   }
   throw new Error(
-    `No Python venv found at ${arenaRoot}/.venv. Run: python3 -m venv ${arenaRoot}/.venv && ${arenaRoot}/.venv/bin/pip install -e ${arenaRoot}`
+    `No Python venv found at ${arenaRoot}/.venv. Run \`arena-agent init\` to bootstrap the runtime.`
   );
 }

@@ -4,7 +4,8 @@
   "description": "MCP server for Arena trading agent runtime — use Claude Code or any MCP client to trade on Varsity Arena",
   "type": "module",
   "bin": {
-    "arena-mcp": "./dist/cli.js"
+    "arena-mcp": "./dist/cli.js",
+    "arena-agent": "./dist/cli.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -34,7 +35,9 @@
     "trading",
     "varsity",
     "claude",
-    "agent"
+    "gemini",
+    "agent",
+    "tui"
   ],
   "license": "MIT"
 }

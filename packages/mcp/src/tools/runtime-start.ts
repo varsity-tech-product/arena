@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { spawn, type ChildProcess } from "node:child_process";
+import { existsSync } from "node:fs";
+import { resolve, isAbsolute } from "node:path";
 import { findPython } from "../util/paths.js";
 import { buildChildEnv } from "../util/env.js";
+import { isManagedArenaHome, readArenaHomeState } from "../util/home.js";
 
 export const name = "arena.runtime_start";
 export const description =
@@ -11,10 +14,9 @@ export const inputSchema = z.object({
   config: z
     .string()
     .optional()
-    .default("arena_agent/config/codex_agent_config.yaml")
     .describe("Path to runtime YAML config."),
   agent: z
-    .enum(["config", "rule", "claude", "codex", "auto", "tap"])
+    .enum(["config", "rule", "claude", "gemini", "codex", "auto", "tap"])
     .optional()
     .default("auto")
     .describe("Agent type."),
@@ -31,11 +33,12 @@ export function execute(
   args: z.infer<typeof inputSchema>,
   arenaRoot: string
 ): { pid: number | null; status: string; config: string; agent: string } {
+  const configPath = resolveConfigPath(arenaRoot, args.config, args.agent);
   if (runtimeProcess && !runtimeProcess.killed) {
     return {
       pid: runtimeProcess.pid ?? null,
       status: "already_running",
-      config: args.config,
+      config: configPath,
       agent: args.agent,
     };
   }
@@ -50,7 +53,7 @@ export function execute(
     "--agent",
     args.agent,
     "--config",
-    args.config,
+    configPath,
   ];
   if (args.model) cmdArgs.push("--model", args.model);
   if (args.iterations !== undefined)
@@ -70,7 +73,7 @@ export function execute(
     runtimeProcess = null;
   });
 
-  return { pid, status: "started", config: args.config, agent: args.agent };
+  return { pid, status: "started", config: configPath, agent: args.agent };
 }
 
 export function stop(): { status: string; pid: number | null } {
@@ -82,4 +85,42 @@ export function stop(): { status: string; pid: number | null } {
   runtimeProcess.kill("SIGTERM");
   runtimeProcess = null;
   return { status: "stopped", pid };
+}
+
+function resolveConfigPath(
+  arenaRoot: string,
+  rawConfig: string | undefined,
+  agent: string
+): string {
+  const candidates: string[] = [];
+  if (rawConfig) {
+    if (isAbsolute(rawConfig)) {
+      return rawConfig;
+    }
+    candidates.push(resolve(arenaRoot, rawConfig));
+    candidates.push(resolve(arenaRoot, "arena_agent", "config", rawConfig));
+  } else if (isManagedArenaHome(arenaRoot)) {
+    const state = readArenaHomeState(arenaRoot);
+    if (agent === "rule" || agent === "config") {
+      candidates.push(
+        state?.profiles.rule ?? resolve(arenaRoot, "config", "rule.yaml")
+      );
+    } else {
+      candidates.push(
+        state?.profiles.agentExec ??
+          resolve(arenaRoot, "config", "agent_exec.yaml")
+      );
+    }
+  } else if (agent === "rule" || agent === "config") {
+    candidates.push(resolve(arenaRoot, "arena_agent", "config", "agent_config.yaml"));
+  } else {
+    candidates.push(resolve(arenaRoot, "arena_agent", "config", "codex_agent_config.yaml"));
+  }
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return candidates[0];
 }

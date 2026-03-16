@@ -6,12 +6,49 @@ import os
 from pathlib import Path
 
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
-DEFAULT_ENV_FILE = ROOT_DIR / ".env.runtime.local"
+PACKAGE_DIR = Path(__file__).resolve().parent
+ROOT_DIR = PACKAGE_DIR.parent
+CONFIG_DIR = PACKAGE_DIR / "config"
+
+
+def runtime_root_dir() -> Path:
+    env_root = os.environ.get("ARENA_ROOT") or os.environ.get("ARENA_HOME")
+    if env_root:
+        return Path(env_root).expanduser().resolve()
+
+    cwd = Path.cwd()
+    if any(
+        (
+            (cwd / ".arena-home.json").exists(),
+            (cwd / ".env.runtime.local").exists(),
+            (cwd / "config").exists(),
+            (cwd / "arena_agent" / "__init__.py").exists(),
+        )
+    ):
+        return cwd
+
+    return ROOT_DIR
+
+
+def default_env_file_path() -> Path:
+    return runtime_root_dir() / ".env.runtime.local"
+
+
+def default_runtime_config_path(filename: str) -> Path:
+    runtime_root = runtime_root_dir()
+    candidates = [
+        runtime_root / "config" / filename,
+        runtime_root / "arena_agent" / "config" / filename,
+        CONFIG_DIR / filename,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[-1]
 
 
 def load_local_runtime_env(env_file: str | None = None, *, override: bool = False) -> Path | None:
-    path = Path(env_file) if env_file else DEFAULT_ENV_FILE
+    path = Path(env_file).expanduser() if env_file else default_env_file_path()
     if not path.exists():
         return None
 

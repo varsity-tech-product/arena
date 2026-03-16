@@ -19,10 +19,10 @@ from arena_agent.execution.order_executor import OrderExecutor
 from arena_agent.interfaces.action_schema import Action, ActionType
 from arena_agent.interfaces.action_validator import validate_action
 from arena_agent.memory.transition_store import TransitionStore
-from arena_agent.runtime_env import ROOT_DIR, load_local_runtime_env, require_runtime_environment
+from arena_agent.runtime_env import default_runtime_config_path, load_local_runtime_env, require_runtime_environment
 
 
-DEFAULT_CONFIG = ROOT_DIR / "arena_agent" / "config" / "tap_agent_config.yaml"
+DEFAULT_CONFIG = default_runtime_config_path("tap_agent_config.yaml")
 
 
 def build_runtime_components(config_path: str | None = None, signal_indicators: list[dict[str, Any]] | None = None):

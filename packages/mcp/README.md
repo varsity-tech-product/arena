@@ -1,30 +1,52 @@
 # @arena/trade-mcp
 
-MCP server for the Arena trading agent runtime. Connect Claude Code, Claude Desktop, Cursor, or any MCP client to trade on Varsity Arena.
+Single-package install for the Arena trading agent runtime.
+
+This package exposes two CLIs:
+
+- `arena-agent`
+  - bootstrap a managed Arena home
+  - save `VARSITY_API_KEY`
+  - start the runtime and attach the terminal dashboard
+- `arena-mcp`
+  - expose the same runtime through MCP for Claude Code, Claude Desktop, Cursor, and other MCP clients
 
 ## Quick Start
 
+### End-user workflow
+
 ```bash
-# From the arena project root
-cd packages/mcp
-npm install
-npm run build
+npm install -g @arena/trade-mcp
 
-# Check Python environment
-node dist/cli.js check
+# One-time setup
+arena-agent init
 
-# Setup for your MCP client
-node dist/cli.js setup --client claude-code
-node dist/cli.js setup --client claude-desktop
-node dist/cli.js setup --client cursor
+# Start trading and open the TUI monitor
+arena-agent up --agent gemini
 ```
 
-Or install globally:
+Useful follow-ups:
 
 ```bash
-npm install -g .
+arena-agent doctor
+arena-agent monitor
+```
+
+### MCP workflow
+
+```bash
+npm install -g @arena/trade-mcp
+
+# Bootstrap the managed home if needed
+arena-agent init
+
+# Verify Python runtime and deps
 arena-mcp check
+
+# Setup for your MCP client
 arena-mcp setup --client claude-code
+arena-mcp setup --client claude-desktop
+arena-mcp setup --client cursor
 ```
 
 ## Tools
@@ -40,22 +62,30 @@ arena-mcp setup --client claude-code
 
 ## Architecture
 
-```
-MCP Client (Claude)  <--stdio-->  arena-mcp (Node.js)  <--stdio-->  Python MCP server
-                                      │
-                                      ├── arena.market_state      → Python bridge
-                                      ├── arena.competition_info  → Python bridge
-                                      ├── arena.trade_action      → Python bridge
-                                      ├── arena.last_transition   → Python bridge
-                                      ├── arena.runtime_start     → spawns Python runtime
-                                      └── arena.runtime_stop      → kills runtime process
+```text
+MCP Client / User CLI
+        |
+        +-- arena-mcp serve/setup/check
+        |      |
+        |      +-- Python MCP server in managed home
+        |
+        +-- arena-agent init/doctor/up/monitor
+               |
+               +-- managed home at ~/.arena-agent
+               +-- Python runtime in ~/.arena-agent/.venv
+               +-- configs in ~/.arena-agent/config
+               +-- env file in ~/.arena-agent/.env.runtime.local
 ```
 
-The Node.js layer is a thin wrapper. All trading logic stays in Python.
+The Node.js layer handles bootstrap, lifecycle, and MCP wiring. All trading logic still lives in Python.
 
 ## Prerequisites
 
 - Node.js >= 18
-- Python 3.12+ with venv at `<arena_root>/.venv`
-- `pip install -e <arena_root> mcp` in the venv
-- `.env.runtime.local` with `VARSITY_API_KEY`
+- Python 3.10+
+- For agent-exec mode, at least one supported CLI backend installed and authenticated:
+  - `claude`
+  - `gemini`
+  - `codex`
+
+`arena-agent init` creates a managed home at `~/.arena-agent`, installs the Python runtime into `~/.arena-agent/.venv`, writes `.env.runtime.local`, and creates starter configs under `~/.arena-agent/config/`.

@@ -35,5 +35,10 @@ export function loadEnvFile(arenaRoot: string): Record<string, string> {
 export function buildChildEnv(arenaRoot: string): Record<string, string> {
   const base = { ...process.env } as Record<string, string>;
   const local = loadEnvFile(arenaRoot);
-  return { ...base, ...local };
+  return {
+    ...base,
+    ARENA_ROOT: arenaRoot,
+    ARENA_HOME: arenaRoot,
+    ...local,
+  };
 }

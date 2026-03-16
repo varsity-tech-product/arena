@@ -1,6 +1,7 @@
-import { execSync } from "node:child_process";
+import { execSync, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { isManagedArenaHome } from "../util/home.js";
 
 export interface PythonCheck {
   ok: boolean;
@@ -28,7 +29,9 @@ export function checkPythonEnvironment(arenaRoot: string): PythonCheck {
     venv = true;
   } else {
     errors.push(
-      `No venv found. Run: python3 -m venv ${arenaRoot}/.venv`
+      isManagedArenaHome(arenaRoot)
+        ? "No venv found. Run: arena-agent init"
+        : `No venv found. Run: python3 -m venv ${arenaRoot}/.venv`
     );
     // Try system python
     try {
@@ -43,14 +46,23 @@ export function checkPythonEnvironment(arenaRoot: string): PythonCheck {
 
   // Check deps
   try {
-    execSync(`${python} -c "import mcp; import arena_agent"`, {
-      stdio: "pipe",
-      cwd: arenaRoot,
-    });
-    deps = true;
+    const result = spawnSync(
+      python,
+      ["-c", "import mcp; import arena_agent"],
+      {
+        stdio: "pipe",
+        cwd: arenaRoot,
+      }
+    );
+    deps = result.status === 0;
+    if (!deps) {
+      throw new Error("python dependency probe failed");
+    }
   } catch {
     errors.push(
-      `Missing Python deps. Run: ${python} -m pip install -e ${arenaRoot} mcp`
+      isManagedArenaHome(arenaRoot)
+        ? "Missing Python deps. Run: arena-agent init --reinstall"
+        : `Missing Python deps. Run: ${python} -m pip install -e ${arenaRoot} mcp`
     );
   }
 

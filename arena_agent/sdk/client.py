@@ -14,11 +14,36 @@ from typing import Any
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
+def _repo_root_candidates() -> list[Path]:
+    candidates: list[Path] = []
+    env_root = os.environ.get("ARENA_ROOT") or os.environ.get("ARENA_HOME")
+    if env_root:
+        candidates.append(Path(env_root).expanduser())
+    candidates.append(ROOT_DIR)
+    return candidates
+
+
+def _default_command() -> str:
+    for root in _repo_root_candidates():
+        script = root / "run_mcp_server.sh"
+        if script.exists():
+            return str(script)
+    return "arena-agent-mcp"
+
+
+def _default_cwd() -> str | None:
+    for root in _repo_root_candidates():
+        script = root / "run_mcp_server.sh"
+        if script.exists():
+            return str(root)
+    return None
+
+
 @dataclass
 class ArenaMCPClient:
-    command: str = str(ROOT_DIR / "run_mcp_server.sh")
+    command: str = field(default_factory=_default_command)
     args: list[str] = field(default_factory=lambda: ["--transport", "stdio"])
-    cwd: str | None = str(ROOT_DIR)
+    cwd: str | None = field(default_factory=_default_cwd)
     env: dict[str, str] | None = None
     request_timeout_seconds: float = 30.0
     _portal_cm: Any | None = field(init=False, default=None, repr=False)
@@ -109,7 +134,7 @@ class ArenaMCPClient:
         server = StdioServerParameters(
             command=self.command,
             args=self.args,
-            cwd=self.cwd or str(ROOT_DIR),
+            cwd=self.cwd,
             env=(os.environ.copy() | (self.env or {})),
         )
         async with stdio_client(server) as (read_stream, write_stream):
