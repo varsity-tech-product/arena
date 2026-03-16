@@ -25,6 +25,7 @@ import { serve } from "./index.js";
 import { findArenaRoot, findPython } from "./util/paths.js";
 import { checkPythonEnvironment } from "./setup/detect-python.js";
 import { CLIENT_SETUP } from "./setup/client-configs.js";
+import { ensureOpenClawTradingAgent } from "./setup/openclaw-agent.js";
 import { probeBackend } from "./setup/backend-probe.js";
 import {
   bootstrapPythonRuntime,
@@ -254,6 +255,10 @@ async function initManagedHome(): Promise<void> {
     installMonitor: true,
     installMcp: true,
   });
+  if (agent === "openclaw") {
+    console.log("Provisioning dedicated OpenClaw trading agent...");
+    ensureOpenClawTradingAgent(home);
+  }
 
   console.log("\nArena agent is ready.");
   console.log(`Home:          ${home}`);
@@ -341,6 +346,9 @@ async function runUp(): Promise<number> {
     console.log("LIVE trading is enabled for this Arena home.");
   } else {
     console.log("Dry-run mode is enabled for this Arena home.");
+  }
+  if (agent === "openclaw") {
+    ensureOpenClawTradingAgent(home);
   }
 
   const configPath = resolveUserConfigPath(
@@ -731,6 +739,9 @@ async function runUpgrade(): Promise<void> {
     installMonitor: true,
     installMcp: true,
   });
+  if (state.defaultAgent === "openclaw") {
+    ensureOpenClawTradingAgent(home);
+  }
   console.log("Managed runtime upgraded.");
 }
 

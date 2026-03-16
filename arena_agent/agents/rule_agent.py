@@ -174,6 +174,9 @@ def build_policy(config: dict, *, runtime_config=None) -> Policy:
         bootstrap_from_transition_log = bool(
             config.get("bootstrap_from_transition_log", params.pop("bootstrap_from_transition_log", True))
         )
+        openclaw_agent_id = str(
+            config.get("openclaw_agent_id", params.pop("openclaw_agent_id", "arena-trader"))
+        )
         transition_path = None if runtime_config is None else runtime_config.storage.transition_path
         risk_limits = None if runtime_config is None else runtime_config.risk_limits
         return AgentExecPolicy(
@@ -190,6 +193,7 @@ def build_policy(config: dict, *, runtime_config=None) -> Policy:
             transition_path=transition_path,
             bootstrap_from_transition_log=bootstrap_from_transition_log,
             risk_limits=risk_limits,
+            openclaw_agent_id=openclaw_agent_id,
             **params,
         )
     if policy_type == "ensemble":

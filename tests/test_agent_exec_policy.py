@@ -461,10 +461,11 @@ class OpenClawBackendTest(unittest.TestCase):
         self.assertAlmostEqual(result.size or 0.0, 0.01)
         self.assertEqual(result.metadata["source"], "openclaw_exec")
         self.assertEqual(result.metadata["cli_backend"], "openclaw")
-        # OpenClaw uses "agent --local --json --agent main --message"
+        # OpenClaw uses a dedicated trading agent workspace.
         self.assertIn("agent", captured["command"])
         self.assertIn("--local", captured["command"])
         self.assertIn("--json", captured["command"])
+        self.assertIn("arena-trader", captured["command"])
 
     def test_openclaw_handles_log_lines_in_stdout(self) -> None:
         """OpenClaw mixes ANSI-colored log lines with JSON on stdout."""
@@ -597,6 +598,7 @@ class PolicyFactoryTest(unittest.TestCase):
         self.assertIsInstance(policy, AgentExecPolicy)
         self.assertEqual(policy._resolved_backend, "openclaw")
         self.assertEqual(policy.command, "openclaw")
+        self.assertEqual(policy.openclaw_agent_id, "arena-trader")
 
 
 if __name__ == "__main__":

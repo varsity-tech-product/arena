@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "OPEN_LONG",
+            "OPEN_SHORT",
+            "CLOSE_POSITION",
+            "UPDATE_TPSL",
+            "HOLD"
+          ]
+        },
+        "size": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "take_profit": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "stop_loss": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "confidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "type",
+        "size",
+        "take_profit",
+        "stop_loss",
+        "confidence",
+        "reason"
+      ]
+    }
+  },
+  "required": [
+    "action"
+  ]
+}

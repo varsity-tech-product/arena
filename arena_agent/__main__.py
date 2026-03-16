@@ -151,12 +151,11 @@ def _apply_agent_override(config, args: Any):
         return replace(config, policy=policy)
     if agent in _AGENT_EXEC_BACKENDS:
         backend = _AGENT_EXEC_BACKENDS[agent]
-        timeout_seconds = min(args.timeout_seconds, max(1.0, float(config.tick_interval_seconds) * 0.8))
         policy = {
             "type": "agent_exec",
             "backend": backend,
             "model": args.model,
-            "timeout_seconds": timeout_seconds,
+            "timeout_seconds": args.timeout_seconds,
             "recent_transition_limit": args.recent_transitions,
             "fail_open_to_hold": True,
             "sandbox_mode": "read-only",
@@ -165,6 +164,8 @@ def _apply_agent_override(config, args: Any):
             "strategy_context": args.strategy_context,
             "bootstrap_from_transition_log": True,
         }
+        if backend == "openclaw":
+            policy["openclaw_agent_id"] = "arena-trader"
         return replace(config, policy=policy)
     return config
 

@@ -21,6 +21,7 @@ from arena_agent.tap.protocol import parse_decision_response
 
 
 DEFAULT_SCHEMA_PATH = Path(__file__).with_name("action_schema.json")
+CODEX_SCHEMA_PATH = Path(__file__).with_name("action_schema_codex.json")
 DEFAULT_PROMPT_TEMPLATE_PATH = Path(__file__).with_name("prompt_template.md")
 
 VALID_BACKENDS = ("auto", "codex", "claude", "gemini", "openclaw")
@@ -89,6 +90,7 @@ class AgentExecPolicy(Policy):
     transition_path: str | None = None
     bootstrap_from_transition_log: bool = True
     risk_limits: RiskLimits | None = None
+    openclaw_agent_id: str = "arena-trader"
     name: str = "agent_exec"
     subprocess_runner: Any | None = None
     _resolved_backend: str = field(init=False, repr=False)
@@ -207,10 +209,12 @@ class AgentExecPolicy(Policy):
             "--skip-git-repo-check",
             "--color",
             "never",
+            "-c",
+            "model_reasoning_effort=\"medium\"",
             "-s",
             self.sandbox_mode,
             "--output-schema",
-            str(DEFAULT_SCHEMA_PATH),
+            str(CODEX_SCHEMA_PATH),
         ]
         if self.model:
             command.extend(["-m", self.model])
@@ -352,7 +356,7 @@ class AgentExecPolicy(Policy):
             "agent",
             "--local",
             "--json",
-            "--agent", "main",
+            "--agent", self.openclaw_agent_id,
             "--message", prompt,
         ]
         if self.model:

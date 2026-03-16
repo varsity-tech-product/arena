@@ -34,7 +34,7 @@ class RunCLITest(unittest.TestCase):
         self.assertEqual(updated.policy["type"], "agent_exec")
         self.assertEqual(updated.policy["backend"], "claude")
         self.assertEqual(updated.policy["model"], "sonnet")
-        self.assertEqual(updated.policy["timeout_seconds"], 24.0)
+        self.assertEqual(updated.policy["timeout_seconds"], 60.0)
         self.assertEqual(updated.policy["strategy_context"], "momentum")
 
     def test_agent_codex_sets_codex_backend(self) -> None:
