@@ -17,7 +17,7 @@ from arena_agent.core.models import (
     PositionSnapshot,
     RuntimeConfig,
 )
-from arena_agent.features.engine import FeatureEngine, resolve_indicator_specs
+from arena_agent.features.engine import FeatureEngine, compute_kline_limit, resolve_indicator_specs
 from arena_agent.features.registry import feature_key
 
 
@@ -27,12 +27,18 @@ class StateBuilder:
         self.config = config
         resolved_specs = resolve_indicator_specs(config.policy, config.signal_indicators)
         self.feature_engine = FeatureEngine(resolved_specs)
+        self._kline_limit = compute_kline_limit(
+            resolved_specs,
+            minimum=config.kline_limit,
+        )
 
     def add_indicators(self, raw_specs: list[dict]) -> int:
         """Merge dynamic indicator specs into the feature engine.
 
         Called by the runtime loop when the agent requests new indicators
         via ``action.metadata["indicators"]``.  Deduplicates by feature key.
+        Automatically recalculates ``kline_limit`` so new indicators have
+        enough history to avoid warmup.
         Returns the number of new indicators actually added.
         """
         from arena_agent.core.models import FeatureSpec as FS
@@ -51,6 +57,11 @@ class StateBuilder:
                 self.feature_engine.feature_specs.append(spec)
                 existing_keys.add(key)
                 added += 1
+        if added:
+            self._kline_limit = compute_kline_limit(
+                self.feature_engine.feature_specs,
+                minimum=self.config.kline_limit,
+            )
         return added
 
     def build(self) -> AgentState:
@@ -58,7 +69,7 @@ class StateBuilder:
         klines_payload = self.adapter.get_klines(
             self.config.symbol,
             self.config.interval,
-            self.config.kline_limit,
+            self._kline_limit,
         )
         orderbook = self.adapter.get_orderbook(self.config.symbol, self.config.orderbook_depth)
         account = self.adapter.get_live_account(self.config.competition_id)

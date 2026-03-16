@@ -3,6 +3,8 @@ competition_id: 4
 symbol: BTCUSDT
 interval: 1m
 tick_interval_seconds: 30
+# Minimum candle history. Auto-increases based on indicator lookback needs.
+# API max is 1000 candles. The runtime fetches max(kline_limit, max_lookback + 20).
 kline_limit: 120
 orderbook_depth: 20
 max_iterations: null

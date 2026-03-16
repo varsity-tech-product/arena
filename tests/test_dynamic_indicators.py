@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 from arena_agent.core.models import Candle, FeatureSpec, RuntimeConfig
 from arena_agent.core.state_builder import StateBuilder
-from arena_agent.features.engine import FeatureEngine
+from arena_agent.features.engine import FeatureEngine, compute_kline_limit, API_MAX_KLINES
 from arena_agent.features.registry import feature_key
 
 
@@ -93,6 +93,88 @@ class StateBuilderAddIndicatorsTest(unittest.TestCase):
         self.assertIn("sma_20", state2.values)
         self.assertIn("sma_100", state2.values)
         self.assertIsNotNone(state2.values["sma_100"])
+
+
+class ComputeKlineLimitTest(unittest.TestCase):
+    def test_small_indicators_use_minimum(self) -> None:
+        specs = [
+            FeatureSpec(indicator="SMA", params={"period": 20}),
+            FeatureSpec(indicator="RSI", params={"period": 14}),
+        ]
+        # max lookback = 20, + margin 20 = 40, but minimum is 120
+        self.assertEqual(compute_kline_limit(specs, minimum=120), 120)
+
+    def test_large_indicator_increases_limit(self) -> None:
+        specs = [
+            FeatureSpec(indicator="SMA", params={"period": 200}),
+        ]
+        # lookback 200 + margin 20 = 220, > minimum 120
+        self.assertEqual(compute_kline_limit(specs, minimum=120), 220)
+
+    def test_capped_at_api_max(self) -> None:
+        specs = [
+            FeatureSpec(indicator="SMA", params={"period": 990}),
+        ]
+        # lookback 990 + margin 20 = 1010, but API max is 1000
+        self.assertEqual(compute_kline_limit(specs, minimum=120), API_MAX_KLINES)
+
+    def test_empty_specs_use_minimum(self) -> None:
+        self.assertEqual(compute_kline_limit([], minimum=120), 120)
+
+    def test_macd_lookback(self) -> None:
+        specs = [
+            FeatureSpec(indicator="MACD", params={"fast_period": 12, "slow_period": 26, "signal_period": 9}),
+        ]
+        # MACD lookback = 26 + 9 = 35, + margin 20 = 55, minimum 120 wins
+        self.assertEqual(compute_kline_limit(specs, minimum=120), 120)
+
+
+class KlineLimitAutoAdjustTest(unittest.TestCase):
+    def test_state_builder_auto_calculates_kline_limit(self) -> None:
+        config = RuntimeConfig.from_mapping({
+            "competition_id": 4,
+            "symbol": "BTCUSDT",
+            "kline_limit": 120,
+            "signal_indicators": [
+                {"indicator": "SMA", "params": {"period": 200}},
+            ],
+        })
+        adapter = MagicMock()
+        builder = StateBuilder(adapter, config)
+        # SMA(200) lookback = 200 + 20 margin = 220 > config's 120
+        self.assertEqual(builder._kline_limit, 220)
+
+    def test_dynamic_indicator_recalculates(self) -> None:
+        config = RuntimeConfig.from_mapping({
+            "competition_id": 4,
+            "symbol": "BTCUSDT",
+            "kline_limit": 120,
+            "signal_indicators": [
+                {"indicator": "RSI", "params": {"period": 14}},
+            ],
+        })
+        adapter = MagicMock()
+        builder = StateBuilder(adapter, config)
+        # Initially: RSI(14) lookback=14, +20=34, minimum=120
+        self.assertEqual(builder._kline_limit, 120)
+
+        # Agent requests SMA(500) dynamically
+        builder.add_indicators([{"indicator": "SMA", "params": {"period": 500}}])
+        # Now: SMA(500) lookback=500, +20=520 > 120
+        self.assertEqual(builder._kline_limit, 520)
+
+    def test_dynamic_indicator_capped_at_api_max(self) -> None:
+        config = RuntimeConfig.from_mapping({
+            "competition_id": 4,
+            "symbol": "BTCUSDT",
+            "kline_limit": 120,
+        })
+        adapter = MagicMock()
+        builder = StateBuilder(adapter, config)
+
+        builder.add_indicators([{"indicator": "SMA", "params": {"period": 999}}])
+        # 999 + 20 = 1019 → capped at 1000
+        self.assertEqual(builder._kline_limit, API_MAX_KLINES)
 
 
 class ProtocolIndicatorsTest(unittest.TestCase):

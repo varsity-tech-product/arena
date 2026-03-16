@@ -19,10 +19,33 @@ from arena_agent.features.registry import (
     normalize_params,
 )
 
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    pass
+API_MAX_KLINES = 1000
+
+
+def compute_kline_limit(
+    feature_specs: list[FeatureSpec],
+    minimum: int = 120,
+    margin: int = 20,
+) -> int:
+    """Compute the optimal kline_limit so every indicator has enough history.
+
+    ``kline_limit = max(max_lookback + margin, minimum)`` capped at the API max (1000).
+    """
+    if not feature_specs:
+        return min(minimum, API_MAX_KLINES)
+
+    max_lb = 0
+    for spec in feature_specs:
+        lb = lookback_required(
+            normalize_indicator_name(spec.indicator),
+            normalize_params(spec.params),
+        )
+        if lb > max_lb:
+            max_lb = lb
+
+    needed = max(max_lb + margin, minimum)
+    return min(needed, API_MAX_KLINES)
 
 
 def resolve_indicator_specs(
