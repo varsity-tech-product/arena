@@ -1,5 +1,5 @@
 {
-  "name": "@arena/trade-agent",
+  "name": "@varsity-arena/agent",
   "version": "0.1.0",
   "description": "Arena trading agent runtime with managed install, TUI monitoring, and MCP support",
   "type": "module",

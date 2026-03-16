@@ -1,4 +1,4 @@
-# @arena/trade-agent
+# @varsity-arena/agent
 
 Single-package install for the Arena trading agent runtime.
 
@@ -16,7 +16,7 @@ This package exposes two CLIs:
 ### End-user workflow
 
 ```bash
-npm install -g @arena/trade-agent
+npm install -g @varsity-arena/agent
 
 # One-time setup
 arena-agent init
@@ -45,7 +45,7 @@ arena-agent logs
 ### MCP workflow
 
 ```bash
-npm install -g @arena/trade-agent
+npm install -g @varsity-arena/agent
 
 # Bootstrap the managed home if needed
 arena-agent init
