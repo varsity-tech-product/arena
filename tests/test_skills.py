@@ -45,6 +45,18 @@ class SkillsTest(unittest.TestCase):
 
         self.assertEqual(transition, {"transition": 2})
 
+    def test_parse_action_payload_rejects_invalid_hold_payload(self) -> None:
+        with self.assertRaises(SystemExit) as exc:
+            parse_action_payload(
+                json.dumps({"action": "HOLD", "size": 0.25}),
+                action=None,
+                size=None,
+                tp=None,
+                sl=None,
+            )
+
+        self.assertIn("HOLD must not include size", str(exc.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

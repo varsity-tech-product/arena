@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from arena_agent.core.runtime_loop import build_transition_event
 from arena_agent.interfaces.action_schema import Action, ActionType
+from arena_agent.interfaces.action_validator import validate_action
 from arena_agent.skills.shared import build_runtime_components, read_last_transition
 
 
@@ -37,6 +38,14 @@ def trade_action(
     config_path: str | None = None,
     signal_indicators: list[dict] | None = None,
 ):
+    action = validate_action(
+        Action(
+            type=ActionType(str(type).upper()),
+            size=size,
+            take_profit=tp,
+            stop_loss=sl,
+        )
+    )
     config, _, state_builder, executor, transition_store, _ = build_runtime_components(
         config_path,
         signal_indicators=signal_indicators,
@@ -44,12 +53,6 @@ def trade_action(
     executor.dry_run = config.dry_run if not execute else False
 
     state_before = state_builder.build()
-    action = Action(
-        type=ActionType(str(type).upper()),
-        size=size,
-        take_profit=tp,
-        stop_loss=sl,
-    )
     execution_result = executor.execute(action, state_before)
     state_after = state_builder.build()
     transition = build_transition_event(state_before, action, execution_result, state_after)

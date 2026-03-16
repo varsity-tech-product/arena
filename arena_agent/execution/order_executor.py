@@ -9,6 +9,7 @@ from typing import Any
 from arena_agent.core.environment_adapter import EnvironmentAdapter
 from arena_agent.core.models import AgentState, ExecutionResult, RiskLimits
 from arena_agent.interfaces.action_schema import Action, ActionType
+from arena_agent.interfaces.action_validator import validate_action
 
 
 class OrderExecutor:
@@ -26,12 +27,12 @@ class OrderExecutor:
         self._last_trade_time = 0.0
 
     def execute(self, action: Action, state: AgentState) -> ExecutionResult:
-        if action.type == ActionType.HOLD:
-            return self._result(action, True, False, "hold")
-
         validation_error = self._validate(action, state)
         if validation_error is not None:
             return self._result(action, False, False, validation_error)
+
+        if action.type == ActionType.HOLD:
+            return self._result(action, True, False, "hold")
 
         if action.type in {ActionType.OPEN_LONG, ActionType.OPEN_SHORT}:
             size = self._resolve_size(action, state)
@@ -135,6 +136,10 @@ class OrderExecutor:
         return self._result(action, False, False, f"unsupported action type: {action.type}")
 
     def _validate(self, action: Action, state: AgentState) -> str | None:
+        try:
+            validate_action(action)
+        except ValueError as exc:
+            return f"invalid action: {exc}"
         if action.type == ActionType.OPEN_LONG and not self.risk_limits.allow_long:
             return "long positions are disabled"
         if action.type == ActionType.OPEN_SHORT and not self.risk_limits.allow_short:
@@ -146,6 +151,8 @@ class OrderExecutor:
         if action.type == ActionType.UPDATE_TPSL and state.position is None:
             return "cannot update TP/SL without an open position"
         if action.type in {ActionType.OPEN_LONG, ActionType.OPEN_SHORT}:
+            if action.size is None and not self._can_auto_size(state):
+                return "market price unavailable for sizing"
             if state.competition.is_close_only:
                 return "competition is in close-only mode"
             if state.competition.max_trades_remaining is not None and state.competition.max_trades_remaining <= 0:
@@ -175,6 +182,10 @@ class OrderExecutor:
         if value is None:
             return None
         return round(float(value), self.risk_limits.price_precision)
+
+    def _can_auto_size(self, state: AgentState) -> bool:
+        price = state.market.last_price
+        return math.isfinite(price) and price > 0
 
     def _result(
         self,

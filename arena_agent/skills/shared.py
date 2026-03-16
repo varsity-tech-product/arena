@@ -17,6 +17,7 @@ from arena_agent.core.serialization import to_jsonable
 from arena_agent.core.state_builder import StateBuilder
 from arena_agent.execution.order_executor import OrderExecutor
 from arena_agent.interfaces.action_schema import Action, ActionType
+from arena_agent.interfaces.action_validator import validate_action
 from arena_agent.memory.transition_store import TransitionStore
 from arena_agent.runtime_env import ROOT_DIR, load_local_runtime_env, require_runtime_environment
 
@@ -87,13 +88,18 @@ def parse_action_payload(raw_payload: str | None, *, action: str | None, size: f
         raise SystemExit("Provide an action via --action, stdin JSON, or a JSON argument.")
 
     action_type = ActionType(str(action_name).upper())
-    return Action(
-        type=action_type,
-        size=_coalesce_float(payload.get("size"), size),
-        take_profit=_coalesce_float(payload.get("tp", payload.get("take_profit")), tp),
-        stop_loss=_coalesce_float(payload.get("sl", payload.get("stop_loss")), sl),
-        metadata=dict(payload.get("metadata", {})),
-    )
+    try:
+        return validate_action(
+            Action(
+                type=action_type,
+                size=_coalesce_float(payload.get("size"), size),
+                take_profit=_coalesce_float(payload.get("tp", payload.get("take_profit")), tp),
+                stop_loss=_coalesce_float(payload.get("sl", payload.get("stop_loss")), sl),
+                metadata=dict(payload.get("metadata", {})),
+            )
+        )
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 def read_last_transition(path: str | None) -> TransitionEvent | dict[str, Any] | None:

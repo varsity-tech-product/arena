@@ -108,6 +108,14 @@ class MCPToolsTest(unittest.TestCase):
         self.assertEqual(len(store.items), 1)
         self.assertEqual(payload["transition"].metrics.trade_count_after, 2)
 
+    def test_trade_action_rejects_invalid_payload_before_runtime_setup(self) -> None:
+        with patch("arena_agent.mcp.tools.build_runtime_components") as mocked:
+            with self.assertRaises(ValueError) as exc:
+                tools.trade_action(type="hold", size=1.0)
+
+        mocked.assert_not_called()
+        self.assertIn("HOLD must not include size", str(exc.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

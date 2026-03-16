@@ -42,14 +42,18 @@ class ErroringAdapter(FakeAdapter):
         raise RuntimeError("no position")
 
 
-def make_state(position: PositionSnapshot | None = None, equity: float = 1000.0) -> AgentState:
+def make_state(
+    position: PositionSnapshot | None = None,
+    equity: float = 1000.0,
+    price: float = 100.0,
+) -> AgentState:
     return AgentState(
         timestamp=time.time(),
         market=MarketSnapshot(
             symbol="BTCUSDT",
             interval="1m",
-            last_price=100.0,
-            mark_price=99.5,
+            last_price=price,
+            mark_price=price,
             volatility=0.02,
             orderbook_imbalance=0.1,
             recent_candles=[],
@@ -195,6 +199,57 @@ class ExecutorAndRewardTest(unittest.TestCase):
         self.assertFalse(result.accepted)
         self.assertFalse(result.executed)
         self.assertIn("trade_close failed", result.message)
+
+    def test_executor_rejects_invalid_hold_payload(self) -> None:
+        executor = OrderExecutor(
+            adapter=FakeAdapter(),
+            competition_id=4,
+            risk_limits=RiskLimits(),
+            dry_run=True,
+        )
+
+        result = executor.execute(
+            Action(type=ActionType.HOLD, size=1.0, take_profit=110.0),
+            make_state(),
+        )
+
+        self.assertFalse(result.accepted)
+        self.assertFalse(result.executed)
+        self.assertIn("invalid action", result.message)
+
+    def test_executor_rejects_negative_open_size(self) -> None:
+        executor = OrderExecutor(
+            adapter=FakeAdapter(),
+            competition_id=4,
+            risk_limits=RiskLimits(min_size=0.001),
+            dry_run=True,
+        )
+
+        result = executor.execute(
+            Action(type=ActionType.OPEN_LONG, size=-5.0),
+            make_state(),
+        )
+
+        self.assertFalse(result.accepted)
+        self.assertFalse(result.executed)
+        self.assertIn("size must be > 0", result.message)
+
+    def test_executor_rejects_auto_sizing_when_price_is_unavailable(self) -> None:
+        executor = OrderExecutor(
+            adapter=FakeAdapter(),
+            competition_id=4,
+            risk_limits=RiskLimits(),
+            dry_run=True,
+        )
+
+        result = executor.execute(
+            Action(type=ActionType.OPEN_LONG),
+            make_state(price=0.0),
+        )
+
+        self.assertFalse(result.accepted)
+        self.assertFalse(result.executed)
+        self.assertIn("market price unavailable for sizing", result.message)
 
 
 if __name__ == "__main__":

@@ -15,4 +15,5 @@ if [[ ! -x "${ROOT_DIR}/.venv/bin/python" ]]; then
   exit 1
 fi
 
+cd "${ROOT_DIR}"
 exec "${ROOT_DIR}/.venv/bin/python" -m arena_agent.mcp.server "$@"
