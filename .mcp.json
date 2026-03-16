@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "arena": {
+      "type": "stdio",
+      "command": "arena-mcp",
+      "args": [
+        "serve"
+      ],
+      "env": {
+        "ARENA_ROOT": "/home/rick/Desktop/arena"
+      }
+    }
+  }
+}
