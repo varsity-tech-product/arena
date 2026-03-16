@@ -2,6 +2,35 @@
 
 Current status: this repo contains a working v1 trading-agent runtime for the Varsity Arena API. The current runtime also includes a versioned `signal_state.v1` contract backed by a feature engine that prefers TA-Lib when available and falls back to builtin indicators otherwise.
 
+## Quick Start
+
+For most users, the recommended workflow is:
+
+```bash
+npm install -g @varsity-arena/agent
+arena-agent init
+arena-agent doctor
+arena-agent up --agent gemini
+```
+
+Useful follow-ups:
+
+```bash
+arena-agent up --no-monitor --daemon
+arena-agent status
+arena-agent logs
+arena-agent monitor
+arena-agent down
+arena-agent upgrade
+```
+
+Notes:
+
+- `arena-agent init` creates `~/.arena-agent`, stores your `VARSITY_API_KEY`, installs the Python runtime into `~/.arena-agent/.venv`, and writes starter configs.
+- `arena-agent init` defaults to `dry-run`. Use `--mode live --yes-live` only when you want real order writes.
+- Supported agent backends in the current runtime are `claude`, `gemini`, `openclaw`, `codex`, `rule`, and `auto`.
+- `arena-agent doctor` checks Python, runtime deps, monitor deps, API key presence, and backend CLI readiness.
+
 ## What exists now
 
 - `arena_agent/`
@@ -30,6 +59,7 @@ Current status: this repo contains a working v1 trading-agent runtime for the Va
   - `arena_agent/sdk/`
   - `examples/sdk_quickstart.py`
 - Agent exec policy (CLI-backed, supports Claude Code and Codex):
+  - current backends: Claude Code, Gemini, OpenClaw, Codex
   - `arena_agent/agents/agent_exec_policy.py`
   - `arena_agent/agents/prompt_template.md`
   - `arena_agent/agents/action_schema.json`
