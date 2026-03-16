@@ -36,6 +36,12 @@ arena-agent down
 arena-agent logs
 ```
 
+`arena-agent doctor` now checks:
+- Python and managed venv
+- runtime and monitor deps
+- API key presence
+- backend CLI readiness for `claude`, `gemini`, `openclaw`, and `codex`
+
 ### MCP workflow
 
 ```bash

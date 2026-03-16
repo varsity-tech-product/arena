@@ -25,10 +25,10 @@ import { serve } from "./index.js";
 import { findArenaRoot, findPython } from "./util/paths.js";
 import { checkPythonEnvironment } from "./setup/detect-python.js";
 import { CLIENT_SETUP } from "./setup/client-configs.js";
+import { probeBackend } from "./setup/backend-probe.js";
 import {
   bootstrapPythonRuntime,
   commandAvailable,
-  probeCliCommand,
 } from "./setup/bootstrap-python.js";
 import { buildChildEnv, loadEnvFile } from "./util/env.js";
 import {
@@ -293,10 +293,10 @@ function runDoctor(): void {
     if (!existsSync(state.profiles.rule)) {
       errors.push(`Missing managed config: ${state.profiles.rule}`);
     }
-    const backendStatus = describeBackendStatus(state.defaultAgent);
-    console.log(`Backend CLI:   ${backendStatus}`);
-    if (backendStatus.startsWith("missing")) {
-      errors.push(`Missing CLI backend for ${state.defaultAgent}.`);
+    const backendProbe = probeBackend(state.defaultAgent);
+    console.log(`Backend CLI:   ${backendProbe.summary}`);
+    if (!backendProbe.ready) {
+      errors.push(backendProbe.details);
     }
   } else if (isManagedArenaHome(home)) {
     errors.push(`Arena home marker exists but is invalid: ${home}`);
@@ -571,23 +571,7 @@ function detectInstalledCliBackends(): ManagedAgent[] {
 }
 
 function describeBackendStatus(agent: ManagedAgent): string {
-  if (agent === "rule") {
-    return "builtin";
-  }
-  if (agent === "auto") {
-    const available = detectInstalledCliBackends();
-    return available.length > 0
-      ? `ok (${available.join(", ")})`
-      : "missing (no claude/gemini/openclaw/codex CLI found)";
-  }
-  const probe = probeCliCommand(agent);
-  if (!probe.available) {
-    return `missing (${agent})`;
-  }
-  if (!probe.runnable) {
-    return `degraded (${probe.detail})`;
-  }
-  return `ok (${probe.detail})`;
+  return probeBackend(agent).summary;
 }
 
 function validateAgentAvailability(
@@ -598,6 +582,10 @@ function validateAgentAvailability(
     return;
   }
   if (agent === "auto" && availableCliBackends.length > 0) {
+    const autoProbe = probeBackend("auto");
+    if (!autoProbe.ready) {
+      throw new Error(autoProbe.details);
+    }
     return;
   }
   if (agent === "auto") {
@@ -605,8 +593,9 @@ function validateAgentAvailability(
       "No CLI backend found in PATH for auto mode. Install claude, gemini, openclaw, or codex, or use --agent rule."
     );
   }
-  if (!commandAvailable(agent)) {
-    throw new Error(`The ${agent} CLI is not available in PATH.`);
+  const probe = probeBackend(agent);
+  if (!probe.available || !probe.ready) {
+    throw new Error(probe.details);
   }
 }
 
