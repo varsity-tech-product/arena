@@ -11,6 +11,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "prepare": "npm run build",
+    "prepack": "npm run build",
     "dev": "tsc --watch",
     "serve": "node dist/index.js"
   },

@@ -46,6 +46,14 @@ import {
   writeArenaHomeState,
   writeManagedConfigs,
 } from "./util/home.js";
+import {
+  clearRuntimeState,
+  isProcessRunning,
+  latestRuntimeLogPath,
+  readRuntimeState,
+  tailLines,
+  writeRuntimeState,
+} from "./util/runtime-state.js";
 
 const argv = process.argv.slice(2);
 const invokedAs = basename(process.argv[1] ?? "arena-agent");
@@ -131,6 +139,21 @@ async function main(): Promise<void> {
   if (command === "monitor") {
     const code = await runMonitorOnly();
     process.exit(code);
+  }
+
+  if (command === "status") {
+    runStatus();
+    return;
+  }
+
+  if (command === "down") {
+    runDown();
+    return;
+  }
+
+  if (command === "logs") {
+    runLogs();
+    return;
   }
 
   printUsage(invokedAs);
@@ -327,7 +350,38 @@ async function runUp(): Promise<number> {
   const monitorPort = Number(
     optionValue("--port") ?? String(state.monitorPort ?? DEFAULT_MONITOR_PORT)
   );
+  const daemonMode = hasFlag("--daemon");
+  if (daemonMode && !hasFlag("--no-monitor")) {
+    throw new Error("Use --daemon together with --no-monitor. Attach later with `arena-agent monitor`.");
+  }
   if (hasFlag("--no-monitor")) {
+    const logPath = resolve(logsDirPath(home), `runtime-${Date.now()}.log`);
+    if (daemonMode) {
+      const logFd = openSync(logPath, "a");
+      const child = spawn(python, runtimeArgs, {
+        cwd: home,
+        env,
+        stdio: ["ignore", logFd, logFd],
+        detached: true,
+      });
+      closeSync(logFd);
+      child.unref();
+      if (child.pid) {
+        writeRuntimeState(home, {
+          pid: child.pid,
+          agent,
+          configPath,
+          logPath,
+          startedAt: new Date().toISOString(),
+          monitorPort,
+        });
+      }
+      console.log(`Runtime started in background with pid ${child.pid ?? "unknown"}`);
+      console.log(`Logs: ${logPath}`);
+      console.log(`Monitor: arena-agent monitor --home ${home}`);
+      return 0;
+    }
+
     const child = spawn(python, runtimeArgs, {
       cwd: home,
       env,
@@ -344,6 +398,16 @@ async function runUp(): Promise<number> {
     stdio: ["ignore", logFd, logFd],
   });
   closeSync(logFd);
+  if (runtimeChild.pid) {
+    writeRuntimeState(home, {
+      pid: runtimeChild.pid,
+      agent,
+      configPath,
+      logPath,
+      startedAt: new Date().toISOString(),
+      monitorPort,
+    });
+  }
 
   console.log(`Runtime started with pid ${runtimeChild.pid ?? "unknown"}`);
   console.log(`Runtime logs: ${logPath}`);
@@ -389,6 +453,7 @@ async function runUp(): Promise<number> {
     runtimeChild.kill("SIGTERM");
     await waitForExit(runtimeChild);
   }
+  clearRuntimeState(home);
   return monitorCode;
 }
 
@@ -545,10 +610,14 @@ function printUsage(invocation: string): void {
   console.log("  doctor                   Check managed home, Python, deps, and backend CLI");
   console.log("  up                       Start trading runtime and open the TUI monitor");
   console.log("  monitor                  Attach to the TUI monitor only");
+  console.log("  status                   Show runtime pid, config, and monitor port");
+  console.log("  down                     Stop the background runtime");
+  console.log("  logs                     Print recent runtime logs");
   console.log("");
   console.log("Examples:");
   console.log("  arena-agent init");
   console.log("  arena-agent up --agent gemini");
+  console.log("  arena-agent up --no-monitor --daemon");
   console.log("  arena-mcp setup --client claude-code");
 }
 
@@ -620,6 +689,59 @@ function waitForExit(child: ChildProcess): Promise<number> {
       resolvePromise(code ?? 0);
     });
   });
+}
+
+function runStatus(): void {
+  const home = resolveConfiguredHome(optionValue("--home"));
+  const runtimeState = readRuntimeState(home);
+  if (!runtimeState) {
+    console.log(`Arena home: ${home}`);
+    console.log("Runtime:    stopped");
+    return;
+  }
+
+  const running = isProcessRunning(runtimeState.pid);
+  console.log(`Arena home:   ${home}`);
+  console.log(`Runtime:      ${running ? "running" : "stopped"}`);
+  console.log(`PID:          ${runtimeState.pid}`);
+  console.log(`Agent:        ${runtimeState.agent}`);
+  console.log(`Config:       ${runtimeState.configPath}`);
+  console.log(`Logs:         ${runtimeState.logPath}`);
+  console.log(`Monitor port: ${runtimeState.monitorPort}`);
+  console.log(`Started at:   ${runtimeState.startedAt}`);
+
+  if (!running) {
+    clearRuntimeState(home);
+  }
+}
+
+function runDown(): void {
+  const home = resolveConfiguredHome(optionValue("--home"));
+  const runtimeState = readRuntimeState(home);
+  if (!runtimeState) {
+    console.log("Runtime is not running.");
+    return;
+  }
+  if (!isProcessRunning(runtimeState.pid)) {
+    clearRuntimeState(home);
+    console.log("Runtime is already stopped.");
+    return;
+  }
+
+  process.kill(runtimeState.pid, "SIGTERM");
+  clearRuntimeState(home);
+  console.log(`Stopped runtime pid ${runtimeState.pid}.`);
+}
+
+function runLogs(): void {
+  const home = resolveConfiguredHome(optionValue("--home"));
+  const runtimeState = readRuntimeState(home);
+  const logPath = runtimeState?.logPath ?? latestRuntimeLogPath(home);
+  if (!logPath || !existsSync(logPath)) {
+    throw new Error("No runtime log file found.");
+  }
+  const lines = Number(optionValue("--lines") ?? "50");
+  console.log(tailLines(logPath, lines));
 }
 
 main().catch((err) => {

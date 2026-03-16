@@ -30,6 +30,9 @@ Useful follow-ups:
 ```bash
 arena-agent doctor
 arena-agent monitor
+arena-agent status
+arena-agent down
+arena-agent logs
 ```
 
 ### MCP workflow
@@ -89,3 +92,12 @@ The Node.js layer handles bootstrap, lifecycle, and MCP wiring. All trading logi
   - `codex`
 
 `arena-agent init` creates a managed home at `~/.arena-agent`, installs the Python runtime into `~/.arena-agent/.venv`, writes `.env.runtime.local`, and creates starter configs under `~/.arena-agent/config/`.
+
+`arena-agent up` starts trading and opens the TUI by default. For background mode:
+
+```bash
+arena-agent up --no-monitor --daemon
+arena-agent status
+arena-agent monitor
+arena-agent down
+```
