@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { mergeArenaMcpServer, type OpenClawGlobalConfig } from "./openclaw-config.js";
+import { mergeCodexToml } from "./client-configs.js";
 
 describe("mergeArenaMcpServer", () => {
   it("creates fresh config from null", () => {
@@ -123,5 +124,90 @@ describe("mergeArenaMcpServer", () => {
     const before = JSON.stringify(existing);
     mergeArenaMcpServer(existing, "/arena");
     expect(JSON.stringify(existing)).toBe(before);
+  });
+});
+
+describe("mergeCodexToml", () => {
+  it("creates fresh TOML from empty content", () => {
+    const result = mergeCodexToml("", "/home/user/.arena-agent");
+
+    expect(result).toContain("[mcp_servers.arena]");
+    expect(result).toContain('command = "arena-mcp"');
+    expect(result).toContain('args = ["serve"]');
+    expect(result).toContain("[mcp_servers.arena.env]");
+    expect(result).toContain('ARENA_ROOT = "/home/user/.arena-agent"');
+  });
+
+  it("appends to existing content without arena section", () => {
+    const existing = [
+      "[mcp_servers.context7]",
+      'command = "npx"',
+      'args = ["-y", "@upstash/context7-mcp"]',
+      "",
+    ].join("\n");
+
+    const result = mergeCodexToml(existing, "/arena");
+
+    // Original preserved
+    expect(result).toContain("[mcp_servers.context7]");
+    expect(result).toContain('command = "npx"');
+
+    // Arena added
+    expect(result).toContain("[mcp_servers.arena]");
+    expect(result).toContain('command = "arena-mcp"');
+  });
+
+  it("replaces existing arena section", () => {
+    const existing = [
+      "[mcp_servers.arena]",
+      'command = "old-command"',
+      'args = ["old"]',
+      "",
+      "[mcp_servers.arena.env]",
+      'ARENA_ROOT = "/old/path"',
+      "",
+      "[mcp_servers.other]",
+      'command = "other-cmd"',
+    ].join("\n");
+
+    const result = mergeCodexToml(existing, "/new/path");
+
+    // Old arena removed, new arena added
+    expect(result).not.toContain("old-command");
+    expect(result).not.toContain("/old/path");
+    expect(result).toContain('command = "arena-mcp"');
+    expect(result).toContain('ARENA_ROOT = "/new/path"');
+
+    // Other section preserved
+    expect(result).toContain("[mcp_servers.other]");
+    expect(result).toContain('command = "other-cmd"');
+  });
+
+  it("preserves other TOML sections", () => {
+    const existing = [
+      "[general]",
+      'model = "o3"',
+      "",
+      "[mcp_servers.figma]",
+      'url = "https://mcp.figma.com"',
+      "",
+    ].join("\n");
+
+    const result = mergeCodexToml(existing, "/arena");
+
+    expect(result).toContain("[general]");
+    expect(result).toContain('model = "o3"');
+    expect(result).toContain("[mcp_servers.figma]");
+    expect(result).toContain("[mcp_servers.arena]");
+  });
+
+  it("escapes backslashes in paths", () => {
+    const result = mergeCodexToml("", "C:\\Users\\user\\.arena-agent");
+    expect(result).toContain('ARENA_ROOT = "C:\\\\Users\\\\user\\\\.arena-agent"');
+  });
+
+  it("never contains VARSITY_API_KEY", () => {
+    const result = mergeCodexToml("", "/arena");
+    expect(result).not.toContain("VARSITY_API_KEY");
   });
 });

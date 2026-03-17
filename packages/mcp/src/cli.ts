@@ -26,7 +26,7 @@ import { PythonBridge } from "./python-bridge.js";
 import { startDashboard } from "./dashboard/serve.js";
 import { findArenaRoot, findPython } from "./util/paths.js";
 import { checkPythonEnvironment } from "./setup/detect-python.js";
-import { CLIENT_SETUP } from "./setup/client-configs.js";
+import { CLIENT_SETUP, autoWireMcpForAgent } from "./setup/client-configs.js";
 import { ensureOpenClawTradingAgent } from "./setup/openclaw-agent.js";
 import { probeBackend } from "./setup/backend-probe.js";
 import { diagnoseOpenClaw } from "./setup/openclaw-config.js";
@@ -334,6 +334,15 @@ async function initManagedHome(): Promise<void> {
   if (agent === "openclaw") {
     console.log("Provisioning dedicated OpenClaw trading agent...");
     ensureOpenClawTradingAgent(home);
+  }
+
+  // Auto-wire MCP tools for the chosen agent backend
+  const wired = autoWireMcpForAgent(home, agent, availableCliBackends);
+  if (wired.length > 0) {
+    console.log("\nMCP tools auto-wired:");
+    for (const entry of wired) {
+      console.log(`  ${entry.backend}: ${entry.configPath}`);
+    }
   }
 
   console.log("\nArena agent is ready.");
@@ -743,6 +752,8 @@ function printUsage(invocation: string): void {
   console.log("  arena-agent up --no-monitor --daemon");
   console.log("  arena-agent upgrade");
   console.log("  arena-mcp setup --client claude-code");
+  console.log("  arena-mcp setup --client gemini");
+  console.log("  arena-mcp setup --client codex");
   console.log("  arena-agent setup --client openclaw --mode cli");
   console.log("  arena-agent setup --client openclaw --mode mcp");
   console.log("  arena-agent dashboard --competition 5 -d");

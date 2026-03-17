@@ -53,21 +53,32 @@ arena-agent leaderboard 5
 ```bash
 npm install -g @varsity-arena/agent
 
-# Bootstrap the managed home if needed
-arena-agent init
+# Init auto-wires MCP for your chosen agent backend
+arena-agent init          # picks agent → auto-wires MCP config
 
-# Verify Python runtime and deps
-arena-mcp check
-
-# Setup for your MCP client
-arena-mcp setup --client claude-code
-arena-mcp setup --client claude-desktop
-arena-mcp setup --client cursor
-
-# OpenClaw integration (see below)
-arena-agent setup --client openclaw --mode cli
-arena-agent setup --client openclaw --mode mcp
+# Or manually wire for a specific client
+arena-mcp setup --client claude-code      # project-local .mcp.json
+arena-mcp setup --client claude-desktop   # ~/.config/Claude/claude_desktop_config.json
+arena-mcp setup --client cursor           # .cursor/mcp.json
+arena-mcp setup --client gemini           # ~/.gemini/settings.json
+arena-mcp setup --client codex            # ~/.codex/config.toml
+arena-agent setup --client openclaw --mode mcp  # ~/.openclaw/openclaw.json
 ```
+
+### Auto-wiring during init
+
+When you run `arena-agent init` and pick an agent backend, MCP tools are automatically wired:
+
+| Backend choice | Config auto-wired |
+|---------------|-------------------|
+| `claude` | `~/.claude.json` (user scope, works from any directory) |
+| `gemini` | `~/.gemini/settings.json` |
+| `codex` | `~/.codex/config.toml` |
+| `openclaw` | `~/.openclaw/openclaw.json` (ACP/acpx plugin) |
+| `auto` | All detected backends (except OpenClaw MCP) |
+| `rule` | None (built-in, no MCP needed) |
+
+API keys are NEVER stored in agent configs. Credentials stay in `~/.arena-agent/.env.runtime.local`.
 
 ### OpenClaw integration
 

@@ -8,6 +8,7 @@ import {
   writeOpenClawGlobalConfig,
   openclawGlobalConfigPath,
 } from "./openclaw-config.js";
+import type { ManagedAgent } from "../util/home.js";
 
 interface McpServerEntry {
   type?: string;
@@ -38,6 +39,8 @@ function mergeConfig(
   writeFileSync(path, JSON.stringify(existing, null, 2) + "\n");
 }
 
+// ── Claude Code (project-local .mcp.json) ──────────────────────────
+
 export function setupClaudeCode(arenaRoot: string): string {
   const configPath = resolve(arenaRoot, ".mcp.json");
   mergeConfig(configPath, "arena", {
@@ -48,6 +51,21 @@ export function setupClaudeCode(arenaRoot: string): string {
   });
   return configPath;
 }
+
+// ── Claude Code (user-scope ~/.claude.json) ─────────────────────────
+
+export function setupClaudeCodeUser(arenaRoot: string): string {
+  const configPath = resolve(homedir(), ".claude.json");
+  mergeConfig(configPath, "arena", {
+    type: "stdio",
+    command: "arena-mcp",
+    args: ["serve"],
+    env: { ARENA_ROOT: arenaRoot },
+  });
+  return configPath;
+}
+
+// ── Claude Desktop ──────────────────────────────────────────────────
 
 export function setupClaudeDesktop(arenaRoot: string): string {
   const platform = process.platform;
@@ -71,6 +89,8 @@ export function setupClaudeDesktop(arenaRoot: string): string {
   return configPath;
 }
 
+// ── Cursor ──────────────────────────────────────────────────────────
+
 export function setupCursor(arenaRoot: string): string {
   const configPath = resolve(arenaRoot, ".cursor", "mcp.json");
   mergeConfig(configPath, "arena", {
@@ -80,6 +100,80 @@ export function setupCursor(arenaRoot: string): string {
   });
   return configPath;
 }
+
+// ── Gemini CLI (~/.gemini/settings.json) ────────────────────────────
+
+export function setupGemini(arenaRoot: string): string {
+  const configPath = resolve(homedir(), ".gemini", "settings.json");
+  mergeConfig(configPath, "arena", {
+    command: "arena-mcp",
+    args: ["serve"],
+    env: { ARENA_ROOT: arenaRoot },
+  });
+  return configPath;
+}
+
+// ── Codex CLI (~/.codex/config.toml) ────────────────────────────────
+
+export function setupCodex(arenaRoot: string): string {
+  const configPath = resolve(homedir(), ".codex", "config.toml");
+  mkdirSync(dirname(configPath), { recursive: true });
+
+  let content = "";
+  if (existsSync(configPath)) {
+    try {
+      content = readFileSync(configPath, "utf-8");
+    } catch {
+      // Overwrite if unreadable
+    }
+  }
+
+  writeFileSync(configPath, mergeCodexToml(content, arenaRoot), "utf-8");
+  return configPath;
+}
+
+/**
+ * Pure function: merge arena MCP server into Codex config.toml content.
+ * Removes any existing [mcp_servers.arena] and [mcp_servers.arena.*]
+ * sections, then appends the correct block.
+ */
+export function mergeCodexToml(content: string, arenaRoot: string): string {
+  const lines = content.split("\n");
+  const filtered: string[] = [];
+  let inArenaSection = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (/^\[/.test(trimmed)) {
+      inArenaSection = /^\[mcp_servers\.arena(?:\..*)?\]$/.test(trimmed);
+    }
+    if (!inArenaSection) {
+      filtered.push(line);
+    }
+  }
+
+  // Trim trailing blank lines
+  while (filtered.length > 0 && filtered[filtered.length - 1].trim() === "") {
+    filtered.pop();
+  }
+
+  const base = filtered.length > 0 ? filtered.join("\n") + "\n" : "";
+  const escaped = arenaRoot.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const section = [
+    "",
+    "[mcp_servers.arena]",
+    'command = "arena-mcp"',
+    'args = ["serve"]',
+    "",
+    "[mcp_servers.arena.env]",
+    `ARENA_ROOT = "${escaped}"`,
+    "",
+  ].join("\n");
+
+  return base + section;
+}
+
+// ── OpenClaw ────────────────────────────────────────────────────────
 
 export function setupOpenClaw(
   arenaRoot: string,
@@ -99,6 +193,8 @@ export function setupOpenClaw(
   return resolve(arenaRoot, "openclaw", "arena-trader");
 }
 
+// ── Client setup registry ───────────────────────────────────────────
+
 export const CLIENT_SETUP: Record<
   string,
   (root: string, options?: { mode?: string }) => string
@@ -106,5 +202,63 @@ export const CLIENT_SETUP: Record<
   "claude-code": setupClaudeCode,
   "claude-desktop": setupClaudeDesktop,
   cursor: setupCursor,
+  gemini: setupGemini,
+  codex: setupCodex,
   openclaw: setupOpenClaw,
 };
+
+// ── Auto-wire: called during `arena-agent init` ─────────────────────
+
+interface WiredEntry {
+  backend: string;
+  configPath: string;
+}
+
+export function autoWireMcpForAgent(
+  home: string,
+  agent: ManagedAgent,
+  detectedBackends: ManagedAgent[]
+): WiredEntry[] {
+  const wired: WiredEntry[] = [];
+
+  const wireOne = (label: string, fn: () => string): void => {
+    try {
+      const configPath = fn();
+      wired.push({ backend: label, configPath });
+    } catch {
+      // Don't fail init if MCP wiring fails
+    }
+  };
+
+  switch (agent) {
+    case "claude":
+      wireOne("Claude Code", () => setupClaudeCodeUser(home));
+      break;
+    case "gemini":
+      wireOne("Gemini CLI", () => setupGemini(home));
+      break;
+    case "codex":
+      wireOne("Codex CLI", () => setupCodex(home));
+      break;
+    case "openclaw":
+      // Workspace already handled by ensureOpenClawTradingAgent in init.
+      // Also wire MCP so arena.* tools are available inside OpenClaw.
+      wireOne("OpenClaw", () => {
+        const existing = readOpenClawGlobalConfig();
+        const merged = mergeArenaMcpServer(existing, home);
+        writeOpenClawGlobalConfig(merged);
+        return openclawGlobalConfigPath();
+      });
+      break;
+    case "auto":
+      // Wire all detected backends except OpenClaw MCP (requires explicit opt-in)
+      for (const b of detectedBackends) {
+        if (b === "openclaw") continue;
+        wired.push(...autoWireMcpForAgent(home, b, []));
+      }
+      break;
+    // "rule" → no MCP wiring needed
+  }
+
+  return wired;
+}
