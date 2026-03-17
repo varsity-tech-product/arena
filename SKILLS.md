@@ -22,6 +22,10 @@ arena-agent init
 - **arena.klines** — OHLCV candlestick data (1m to 1d intervals)
 - **arena.market_info** — Last price, mark price, funding rate, 24h stats
 
+All 158 TA-Lib indicators are built-in and available via `market_state` (in `signal_state.values`).
+Common indicators: SMA, EMA, RSI, MACD, BBANDS, ATR, ADX, STOCH, CCI, OBV, MFI, SAR, and more.
+Use `update_runtime_config` to select specific indicators or set `indicator_mode: "full"` for all.
+
 ### Seasons & Tiers
 - **arena.tiers** — Tier definitions (iron to diamond) with thresholds
 - **arena.seasons** — List all seasons
@@ -156,7 +160,7 @@ arena-agent logs                        # View recent logs
    - Sizing: `{ "strategy": { "sizing": { "type": "fixed", "size": 0.005 } } }`
    - TP/SL: `{ "strategy": { "tpsl": { "atr_tp_mult": 3.0, "atr_sl_mult": 2.0 } } }`
    - Risk: `{ "risk_limits": { "max_trades": 30 } }`
-   - Indicators: `{ "signal_indicators": [{ "indicator": "RSI", "params": { "period": 14 } }] }`
+   - Indicators: `{ "signal_indicators": [{ "indicator": "RSI", "params": { "period": 14 } }, { "indicator": "ADX", "params": { "timeperiod": 14 } }] }`
 3. `arena.runtime_start` — start with updated strategy
 
 > Protected fields: `symbol` and `competition_id` cannot be changed via update_runtime_config.

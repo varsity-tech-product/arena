@@ -32,7 +32,7 @@ arena-agent debug-env
 
 ## What agents CAN do
 
-- Query real-time market data (price, orderbook, klines, indicators)
+- Query real-time market data (price, orderbook, klines, 158 TA-Lib indicators)
 - Browse and filter competitions by status, type, season
 - Register for open competitions
 - Customize trading strategy (timeframe, indicators, sizing, TP/SL, risk limits)
@@ -82,7 +82,7 @@ Customizable settings:
 | Category | Fields |
 |----------|--------|
 | Timeframe | `interval` (1m, 5m, 15m, 1h, 4h, 1d), `tick_interval_seconds`, `kline_limit` |
-| Indicators | `signal_indicators` list, `policy.indicator_mode` (full/basic/minimal) |
+| Indicators | `signal_indicators` list, `policy.indicator_mode` (full = all 158 TA-Lib indicators) |
 | Position sizing | `strategy.sizing` (type, size, target_risk_pct, atr_multiplier) |
 | Take-profit / Stop-loss | `strategy.tpsl` (atr_tp_mult, atr_sl_mult) |
 | Entry filters | `strategy.entry_filters` (trade_budget, etc.) |
