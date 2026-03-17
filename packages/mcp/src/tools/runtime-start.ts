@@ -37,7 +37,7 @@ export function execute(
   args: z.infer<typeof inputSchema>,
   arenaRoot: string
 ): { pid: number | null; status: string; config: string; agent: string } {
-  const configPath = resolveConfigPath(arenaRoot, args.config, args.agent);
+  const configPath = findConfigPath(arenaRoot, args.config, args.agent);
   if (runtimeProcess && !runtimeProcess.killed) {
     return {
       pid: runtimeProcess.pid ?? null,
@@ -93,7 +93,7 @@ export function stop(): { status: string; pid: number | null } {
   return { status: "stopped", pid };
 }
 
-function resolveConfigPath(
+export function findConfigPath(
   arenaRoot: string,
   rawConfig: string | undefined,
   agent: string

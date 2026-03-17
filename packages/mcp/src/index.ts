@@ -18,6 +18,7 @@ import * as lastTransition from "./tools/last-transition.js";
 // Native tools
 import * as runtimeStart from "./tools/runtime-start.js";
 import * as runtimeStop from "./tools/runtime-stop.js";
+import * as runtimeConfig from "./tools/runtime-config.js";
 
 // Platform API tools
 import { all as marketDataTools } from "./tools/platform-market.js";
@@ -121,6 +122,56 @@ export function createServer(arenaRoot?: string): McpServer {
           { type: "text" as const, text: JSON.stringify(result, null, 2) },
         ],
       };
+    }
+  );
+
+  server.tool(
+    runtimeConfig.readName,
+    runtimeConfig.readDescription,
+    runtimeConfig.readInputSchema.shape,
+    async (args) => {
+      try {
+        const result = runtimeConfig.executeRead(
+          args as ReturnType<typeof runtimeConfig.readInputSchema.parse>,
+          root
+        );
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        return {
+          content: [{ type: "text" as const, text: `Error: ${msg}` }],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.tool(
+    runtimeConfig.updateName,
+    runtimeConfig.updateDescription,
+    runtimeConfig.updateInputSchema.shape,
+    async (args) => {
+      try {
+        const result = runtimeConfig.executeUpdate(
+          args as ReturnType<typeof runtimeConfig.updateInputSchema.parse>,
+          root
+        );
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        return {
+          content: [{ type: "text" as const, text: `Error: ${msg}` }],
+          isError: true,
+        };
+      }
     }
   );
 
