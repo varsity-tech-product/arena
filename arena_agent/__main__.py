@@ -54,6 +54,12 @@ def _run_runtime(argv: list[str]) -> None:
         help="Path to the runtime YAML config.",
     )
     parser.add_argument(
+        "--competition-id",
+        type=int,
+        default=None,
+        help="Override competition ID from config.",
+    )
+    parser.add_argument(
         "--iterations",
         type=int,
         default=None,
@@ -117,6 +123,8 @@ def _run_runtime(argv: list[str]) -> None:
     load_local_runtime_env(args.env_file)
     require_runtime_environment()
     config = load_runtime_config(args.config)
+    if args.competition_id is not None:
+        config = replace(config, competition_id=args.competition_id)
     if args.iterations is not None:
         config = replace(config, max_iterations=args.iterations)
     config = _apply_agent_override(config, args)

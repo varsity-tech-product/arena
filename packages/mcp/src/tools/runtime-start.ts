@@ -11,6 +11,10 @@ export const description =
   "Start the autonomous trading agent runtime in the background.";
 
 export const inputSchema = z.object({
+  competition_id: z
+    .number()
+    .optional()
+    .describe("Competition ID to trade in. Overrides the YAML config value."),
   config: z
     .string()
     .optional()
@@ -55,6 +59,8 @@ export function execute(
     "--config",
     configPath,
   ];
+  if (args.competition_id !== undefined)
+    cmdArgs.push("--competition-id", String(args.competition_id));
   if (args.model) cmdArgs.push("--model", args.model);
   if (args.iterations !== undefined)
     cmdArgs.push("--iterations", String(args.iterations));
