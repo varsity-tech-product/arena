@@ -345,14 +345,20 @@ async function initManagedHome(): Promise<void> {
     }
   }
 
+  // Register for a competition
+  const registeredCompetition = await initCompetitionRegistration(home, hasFlag("--non-interactive"), optionValue("--competition"));
+
   console.log("\nArena agent is ready.");
   console.log(`Home:          ${home}`);
   console.log(`API key file:  ${envFilePath(home)}`);
   console.log(`Config dir:    ${configDirPath(home)}`);
   console.log(`Artifacts dir: ${artifactsDirPath(home)}`);
+  if (registeredCompetition) {
+    console.log(`Competition:   #${registeredCompetition} (registered)`);
+  }
   console.log("\nNext steps:");
   console.log(`  arena-agent doctor --home ${home}`);
-  console.log(`  arena-agent up --home ${home}`);
+  console.log(`  arena-agent up --home ${home}${registeredCompetition ? "" : "  # register for a competition first"}`);
 }
 
 function runDoctor(): void {
@@ -748,6 +754,7 @@ function printUsage(invocation: string): void {
   console.log("Examples:");
   console.log("  arena-agent init");
   console.log("  arena-agent init --agent openclaw --mode dry-run");
+  console.log("  arena-agent init --competition 7              # register during init");
   console.log("  arena-agent up --agent gemini");
   console.log("  arena-agent up --no-monitor --daemon");
   console.log("  arena-agent upgrade");
@@ -865,6 +872,116 @@ async function confirmLiveTrading(
   ).trim();
   if (answer !== "LIVE") {
     throw new Error("Live trading confirmation was not provided.");
+  }
+}
+
+async function initCompetitionRegistration(
+  home: string,
+  nonInteractive: boolean,
+  explicitId?: string
+): Promise<number | null> {
+  const bridge = new PythonBridge(home);
+  try {
+    // If explicit --competition flag, register directly
+    if (explicitId) {
+      const id = Number(explicitId);
+      if (isNaN(id)) throw new Error(`Invalid competition ID: ${explicitId}`);
+      const result = (await bridge.callTool("varsity.register", {
+        competition_id: id,
+      })) as any;
+      if (result?.error || result?.code) {
+        console.log(`\nRegistration for competition #${id}: ${result?.message ?? result?.error ?? "failed"}`);
+        return null;
+      }
+      console.log(`\nRegistered for competition #${id}.`);
+      return id;
+    }
+
+    // Fetch open competitions
+    const comps = (await bridge.callTool("varsity.competitions", {
+      status: "registration_open",
+      page: 1,
+      size: 10,
+    })) as any;
+    const items: any[] = comps?.items ?? comps?.list ?? (Array.isArray(comps) ? comps : []);
+
+    // Also check live competitions (already joinable ones we might be registered for)
+    const live = (await bridge.callTool("varsity.competitions", {
+      status: "live",
+      page: 1,
+      size: 10,
+    })) as any;
+    const liveItems: any[] = live?.items ?? live?.list ?? (Array.isArray(live) ? live : []);
+
+    if (items.length === 0 && liveItems.length === 0) {
+      console.log("\nNo competitions available for registration right now.");
+      return null;
+    }
+
+    console.log("\nAvailable competitions:");
+    const allItems = [...items, ...liveItems];
+    for (const c of allItems) {
+      const id = c.id ?? c.competitionId ?? "?";
+      const name = c.name ?? c.title ?? "Unnamed";
+      const st = c.status ?? "unknown";
+      const apiWrite = c.allowApiWrite !== false ? "yes" : "no";
+      console.log(`  #${id}  ${name}  [${st}]  API write: ${apiWrite}`);
+    }
+
+    if (nonInteractive) {
+      // Auto-join the best open competition
+      if (items.length > 0) {
+        const best = items.find((c: any) => c.allowApiWrite !== false) ?? items[0];
+        const id = best.id ?? best.competitionId;
+        const result = (await bridge.callTool("varsity.register", {
+          competition_id: id,
+        })) as any;
+        if (result?.error || result?.code) {
+          console.log(`Auto-registration for #${id}: ${result?.message ?? result?.error ?? "failed"}`);
+          return null;
+        }
+        console.log(`Auto-registered for competition #${id}.`);
+        return id;
+      }
+      return null;
+    }
+
+    // Interactive: let user pick
+    if (items.length > 0) {
+      const rl = createInterface({ input, output });
+      try {
+        const answer = (
+          await rl.question(
+            `\nEnter competition ID to register (or press Enter to skip): `
+          )
+        ).trim();
+        if (!answer) return null;
+        const id = Number(answer);
+        if (isNaN(id)) {
+          console.log("Skipping registration.");
+          return null;
+        }
+        const result = (await bridge.callTool("varsity.register", {
+          competition_id: id,
+        })) as any;
+        if (result?.error || result?.code) {
+          console.log(`Registration failed: ${result?.message ?? result?.error}`);
+          return null;
+        }
+        console.log(`Registered for competition #${id}.`);
+        return id;
+      } finally {
+        rl.close();
+      }
+    }
+
+    return null;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.log(`\nCompetition registration skipped: ${msg}`);
+    return null;
+  } finally {
+    await bridge.disconnect();
   }
 }
 
