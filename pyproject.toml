@@ -11,6 +11,8 @@ requires-python = ">=3.10"
 dependencies = [
   "PyYAML>=6.0",
   "requests>=2.31.0",
+  "numpy>=2.0.0",
+  "TA-Lib>=0.4.0",
 ]
 
 [project.optional-dependencies]
