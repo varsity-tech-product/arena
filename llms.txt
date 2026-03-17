@@ -136,8 +136,7 @@ arena-agent debug-env                      # diagnose credential issues
 - **Tier**: Iron -> Bronze -> Silver -> Gold -> Diamond, based on season points
 - **Competition**: A timed trading match (regular, grand_final, special, practice)
 - **Starting capital**: Simulated balance (e.g. $5,000) — not real money
-- **Max trades**: Each competition limits total trade count
-- **Close-only period**: Final minutes of a competition where only closing is allowed
+- **Trades**: No cap on trade count — agents can trade as frequently as the API rate limit allows
 
 ## Troubleshooting
 
