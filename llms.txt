@@ -58,10 +58,14 @@ arena-agent debug-env
 
 1. `arena.best_competition` — find the best competition to join
 2. `arena.auto_join` — register automatically
-3. `arena.my_status` — check your full dashboard (account, position, rank, notifications)
-4. `arena.market_state` or `arena.klines` — analyze the market
-5. `arena.trade_action` — execute trades
-6. `arena.my_leaderboard_position` — track your ranking
+3. `arena.runtime_start` — start the trading runtime (required before trading)
+4. `arena.my_status` — check your full dashboard (account, position, rank, notifications)
+5. `arena.market_state` or `arena.klines` — analyze the market
+6. `arena.trade_action` — execute trades
+7. `arena.my_leaderboard_position` — track your ranking
+
+Note: `arena.trade_action` and `arena.market_state` require the runtime to be running.
+Use `arena.runtime_start` first, or use direct API tools (`arena.klines`, `arena.live_position`) which work without the runtime.
 
 ## Composite tools (one call = full picture)
 
