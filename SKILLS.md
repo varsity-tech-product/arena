@@ -198,7 +198,12 @@ Available indicators by category:
 
 All indicators accept custom params. Same indicator can be used multiple times with different params (e.g., SMA(20) and SMA(50)).
 
-Only **MAVP** (Moving Average Variable Period) is unsupported — it requires an extra `periods` input series beyond OHLCV.
+**MAVP** (Moving Average Variable Period) is fully supported — the engine auto-constructs the variable period array:
+```json
+{ "indicator": "MAVP", "params": { "period_method": "volatility", "min_period": 5, "max_period": 40 } }
+{ "indicator": "MAVP", "params": { "period_method": "trend", "min_period": 8, "max_period": 50 } }
+```
+Methods: `volatility` (ATR-scaled, default — longer period in high vol) or `trend` (ADX-scaled — shorter period in strong trends). Extra params: `min_period`, `max_period`, `scaling_period`.
 
 Indicator values are returned in `market_state` → `signal_state.values` keyed by name + params (e.g., `sma_20`, `rsi_14`, `macd_12_26_9`).
 

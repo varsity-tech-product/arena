@@ -137,6 +137,12 @@ class FeatureEngine:
         indicator = normalize_indicator_name(spec.indicator)
         params = normalize_params(spec.params)
         if self._talib is not None:
+            # MAVP: auto-construct the periods array if not supplied
+            if indicator == "MAVP" and "periods" not in params:
+                params = {**params}
+                params["periods"] = _build_mavp_periods(
+                    series, params, self._talib
+                )
             ok, unsupported = indicator_requires_supported_inputs(indicator, params)
             if not ok:
                 raise ValueError(
@@ -273,7 +279,64 @@ def _build_talib_inputs(input_names: dict[str, Any], series: dict[str, list[floa
     return inputs
 
 
-def _sma(values: list[float], period: int) -> float | None:
+def _build_mavp_periods(
+    series: dict[str, list[float]],
+    params: dict[str, Any],
+    talib_abstract: Any,
+) -> list[float]:
+    """Auto-construct the variable-period array for MAVP.
+
+    Supported methods (via ``period_method`` param):
+      - ``"volatility"`` (default): scale period inversely with ATR normalised
+        by price.  High volatility → longer period (smoother); low → shorter.
+      - ``"trend"``: scale period inversely with ADX.  Strong trend → shorter
+        period (responsive); weak/ranging → longer (smoother).
+
+    Extra params:
+      - ``min_period`` (default 5): shortest allowed period.
+      - ``max_period`` (default 40): longest allowed period.
+      - ``scaling_period`` (default 14): lookback for the ATR / ADX computation.
+    """
+    import numpy as np
+
+    method = str(params.pop("period_method", "volatility")).lower()
+    min_p = int(params.pop("min_period", 5))
+    max_p = int(params.pop("max_period", 40))
+    scaling = int(params.pop("scaling_period", 14))
+
+    close = np.asarray(series["close"], dtype=float)
+    high = np.asarray(series["high"], dtype=float)
+    low = np.asarray(series["low"], dtype=float)
+    n = len(close)
+
+    if method == "trend":
+        import talib as _ta  # type: ignore
+
+        adx = _ta.ADX(high, low, close, timeperiod=scaling)
+        # ADX 0-100: high ADX → short period, low ADX → long period
+        norm = np.where(np.isnan(adx), 0.5, adx / 100.0)
+        periods = max_p - norm * (max_p - min_p)
+    else:
+        # volatility (default)
+        import talib as _ta  # type: ignore
+
+        atr = _ta.ATR(high, low, close, timeperiod=scaling)
+        natr = np.where(close > 0, atr / close, 0.0)
+        natr = np.where(np.isnan(natr), 0.0, natr)
+        # Normalise to 0-1 range within this window
+        mn, mx = np.nanmin(natr), np.nanmax(natr)
+        if mx > mn:
+            norm = (natr - mn) / (mx - mn)
+        else:
+            norm = np.full(n, 0.5)
+        # High volatility → longer period
+        periods = min_p + norm * (max_p - min_p)
+
+    periods = np.clip(np.round(periods), min_p, max_p).astype(float)
+    return periods.tolist()
+
+
+
     if len(values) < period:
         return None
     window = values[-period:]
