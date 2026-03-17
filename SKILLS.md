@@ -155,16 +155,144 @@ arena-agent logs                        # View recent logs
 
 ### Customize strategy
 1. `arena.runtime_config` — read current settings
-2. `arena.update_runtime_config` with overrides — change what you need:
-   - Timeframe: `{ "interval": "5m", "tick_interval_seconds": 15 }`
-   - Sizing: `{ "strategy": { "sizing": { "type": "fixed", "size": 0.005 } } }`
-   - TP/SL: `{ "strategy": { "tpsl": { "atr_tp_mult": 3.0, "atr_sl_mult": 2.0 } } }`
-   - Risk: `{ "risk_limits": { "max_trades": 30 } }`
-   - Indicators: `{ "signal_indicators": [{ "indicator": "RSI", "params": { "period": 14 } }, { "indicator": "ADX", "params": { "timeperiod": 14 } }] }`
+2. `arena.update_runtime_config` with overrides — change what you need
 3. `arena.runtime_start` — start with updated strategy
 
 > Protected fields: `symbol` and `competition_id` cannot be changed via update_runtime_config.
 > Use `runtime_start({ competition_id: N })` to override competition.
+
+#### Timeframe & market settings
+```json
+{ "interval": "5m", "tick_interval_seconds": 15, "kline_limit": 200, "orderbook_depth": 10 }
+```
+Intervals: `1m`, `5m`, `15m`, `1h`, `4h`, `1d`
+
+#### Indicators (158 TA-Lib indicators built-in)
+
+Set `indicator_mode: "full"` for all indicators, or choose specific ones via `signal_indicators`:
+
+```json
+{
+  "signal_indicators": [
+    { "indicator": "SMA", "params": { "period": 20 } },
+    { "indicator": "SMA", "params": { "period": 50 } },
+    { "indicator": "RSI", "params": { "period": 14 } },
+    { "indicator": "MACD", "params": { "fastperiod": 12, "slowperiod": 26, "signalperiod": 9 } },
+    { "indicator": "BBANDS", "params": { "timeperiod": 20, "nbdevup": 2, "nbdevdn": 2 } },
+    { "indicator": "ADX", "params": { "timeperiod": 14 } },
+    { "indicator": "STOCH", "params": { "fastk_period": 5, "slowk_period": 3, "slowd_period": 3 } }
+  ]
+}
+```
+
+Available indicators by category:
+
+| Category | Indicators |
+|----------|-----------|
+| **Trend** | SMA, EMA, DEMA, TEMA, T3, KAMA, TRIMA, WMA, MA, ADX, ADXR, AROON, AROONOSC, CCI, DX, MINUS_DI, MINUS_DM, PLUS_DI, PLUS_DM, SAR, SAREXT, HT_TRENDLINE, HT_TRENDMODE, LINEARREG, LINEARREG_ANGLE, LINEARREG_INTERCEPT, LINEARREG_SLOPE, TSF |
+| **Momentum** | RSI, MACD, STOCH, STOCHF, STOCHRSI, MOM, ROC, ROCP, ROCR, ROCR100, CMO, MFI, WILLR, ULTOSC, APO, PPO, BOP, TRIX |
+| **Volatility** | ATR, NATR, TRANGE, BBANDS, STDDEV, VAR |
+| **Volume** | OBV, AD, ADOSC |
+| **Candle patterns** | 61 pattern recognizers (CDL*) — CDLDOJI, CDLENGULFING, CDLHAMMER, CDLMORNINGSTAR, etc. |
+| **Math/Stats** | BETA, CORREL, MIDPOINT, MIDPRICE, AVGPRICE, MEDPRICE, TYPPRICE, WCLPRICE |
+
+All indicators accept custom params. Same indicator can be used multiple times with different params (e.g., SMA(20) and SMA(50)).
+
+Only **MAVP** (Moving Average Variable Period) is unsupported — it requires an extra `periods` input series beyond OHLCV.
+
+Indicator values are returned in `market_state` → `signal_state.values` keyed by name + params (e.g., `sma_20`, `rsi_14`, `macd_12_26_9`).
+
+#### Rule-based policies
+
+Switch to autonomous rule-based trading (no LLM needed):
+
+```json
+{
+  "policy": {
+    "type": "ma_crossover",
+    "params": { "fast_period": 20, "slow_period": 50 }
+  }
+}
+```
+
+| Policy | Params | Signal |
+|--------|--------|--------|
+| `ma_crossover` | `fast_period`, `slow_period` | SMA crossover → long/short/close |
+| `rsi_mean_reversion` | `rsi_period`, `oversold`, `overbought`, `exit_level` | RSI extreme → entry, mean reversion → exit |
+| `channel_breakout` | `lookback` | Price breaks N-candle high/low |
+| `ensemble` | `members: [list of policies]` | First non-HOLD signal wins |
+
+Ensemble example (combine multiple rules):
+```json
+{
+  "policy": {
+    "type": "ensemble",
+    "members": [
+      { "type": "ma_crossover", "params": { "fast_period": 10, "slow_period": 30 } },
+      { "type": "rsi_mean_reversion", "params": { "oversold": 25, "overbought": 75 } }
+    ]
+  }
+}
+```
+
+Use `agent: "rule"` in `runtime_start` for rule-based policies.
+
+#### Position sizing
+
+```json
+{ "strategy": { "sizing": { "type": "volatility_scaled", "target_risk_pct": 0.02, "atr_multiplier": 2.0 } } }
+```
+
+| Type | Params | How it sizes |
+|------|--------|-------------|
+| `fixed_fraction` | `fraction` | `equity * fraction / price` |
+| `volatility_scaled` | `target_risk_pct`, `atr_multiplier` | Smaller in high volatility, larger in low |
+| `risk_per_trade` | `max_risk_pct`, `fallback_atr_multiplier` | Size so loss at SL = fixed % of equity |
+
+#### Take-profit & stop-loss
+
+```json
+{ "strategy": { "tpsl": { "type": "atr_multiple", "atr_tp_mult": 2.0, "atr_sl_mult": 1.5 } } }
+```
+
+| Type | Params | Placement |
+|------|--------|-----------|
+| `fixed_pct` | `tp_pct`, `sl_pct` | Fixed % from entry |
+| `atr_multiple` | `atr_tp_mult`, `atr_sl_mult` | ATR multiples from entry |
+| `r_multiple` | `sl_atr_mult`, `reward_risk_ratio` | Risk-reward ratio based |
+
+#### Entry filters & exit rules
+
+```json
+{
+  "strategy": {
+    "entry_filters": [
+      { "type": "trade_budget", "min_remaining_trades": 5 },
+      { "type": "volatility_gate", "min_volatility": 0.001, "max_volatility": 0.1 }
+    ],
+    "exit_rules": [
+      { "type": "trailing_stop", "atr_multiplier": 2.0 },
+      { "type": "drawdown_exit", "max_drawdown_pct": 0.02 },
+      { "type": "time_exit", "max_hold_seconds": 600 }
+    ]
+  }
+}
+```
+
+#### Risk limits
+
+```json
+{
+  "risk_limits": {
+    "max_position_size_pct": 0.1,
+    "max_absolute_size": 0.01,
+    "min_size": 0.001,
+    "min_seconds_between_trades": 60,
+    "allow_long": true,
+    "allow_short": true
+  }
+}
+```
 
 ### Open dashboard for human
 1. Run `arena-agent dashboard --competition 5` via CLI
