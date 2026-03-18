@@ -1,6 +1,6 @@
 # Arena Trading Agent Runtime
 
-Current status: this repo contains a working v1 trading-agent runtime for the Varsity Arena API. The current runtime also includes a versioned `signal_state.v1` contract backed by a feature engine that prefers TA-Lib when available and falls back to builtin indicators otherwise.
+Current status: this repo contains a working v1 trading-agent runtime for the Varsity Arena API. The runtime includes a versioned `signal_state.v1` contract backed by a TA-Lib feature engine, and an autonomous **setup → control → runtime** loop where an LLM-powered setup agent continuously tunes strategy for a runtime trading agent.
 
 ## Quick Start
 
@@ -11,6 +11,14 @@ npm install -g @varsity-arena/agent
 arena-agent init
 arena-agent doctor
 arena-agent up --agent gemini
+```
+
+For autonomous trading with setup agent control:
+
+```bash
+arena-agent up --auto --competition 9 --agent claude
+# or directly:
+arena-agent-runtime auto --competition-id 9 --agent claude --setup-interval 300
 ```
 
 Useful follow-ups:
@@ -69,13 +77,48 @@ Notes:
   - `arena_agent/agents/prompt_template.md`
   - `arena_agent/agents/action_schema.json`
   - `arena_agent/config/codex_agent_config.yaml`
+- LLM-powered setup agent:
+  - calls MCP tools for live data, decides config overrides for the runtime agent
+  - `arena_agent/agents/setup_agent.py`
+  - `arena_agent/agents/setup_prompt_template.md`
+  - `arena_agent/setup/context_builder.py` (account, PnL, leaderboard, market)
+  - `arena_agent/setup/memory.py` (cross-competition learning)
+- Auto mode (`arena-agent-runtime auto`):
+  - continuous loop: setup agent → deep-merge overrides → runtime agent for N iterations → repeat
+  - setup agent controls strategy, risk limits, extra instructions, interval, tick rate
+  - runtime agent handles per-tick trade decisions and execution
 - Terminal monitor:
   - `arena_agent/tui/`
   - `.venv/bin/python -m arena_agent monitor`
 
 ## Current architecture
 
-The runtime is intentionally small:
+The system runs as a two-level agent loop:
+
+```
+┌────────────────────────────────────────────────┐
+│              Auto Loop (__main__.py)            │
+│                                                │
+│  ┌──────────┐  overrides   ┌──────────────┐   │
+│  │  Setup   │─────────────→│ Config Dict  │   │
+│  │  Agent   │  deep-merge  │  (mutable)   │   │
+│  │ (claude) │              └──────┬───────┘   │
+│  │ +MCP     │                     │            │
+│  └──────────┘           RuntimeConfig          │
+│       ↑                        │               │
+│       │ next_check_seconds     ▼               │
+│       │                ┌──────────────┐        │
+│       └────────────────│   Runtime    │        │
+│                        │   Agent     │        │
+│                        │ (N iters)   │        │
+│                        │  → trade    │        │
+│                        └──────────────┘        │
+└────────────────────────────────────────────────┘
+```
+
+**Setup agent** (outer loop): calls MCP tools for live data (orderbook, klines, leaderboard, positions), analyzes performance, and produces config overrides — strategy params, risk limits, extra instructions for the runtime agent.
+
+**Runtime agent** (inner loop, per tick):
 
 1. Build `AgentState` from Arena data.
 2. Ask a policy for an `Action`.
@@ -83,15 +126,16 @@ The runtime is intentionally small:
 4. Build the next state.
 5. Persist a neutral `TransitionEvent`.
 
+Both agents receive full account state (balance, equity, unrealized/realized PnL, trade count) and position data each cycle.
+
 The runtime does not own reward logic. If an agent wants a scalar objective, it can derive one from transitions in `arena_agent/agents/reward_models.py`.
 
-The runtime now also owns a versioned `signal_state` contract. Agents can request indicator bundles, and the framework computes them centrally through the feature engine.
+The runtime owns a versioned `signal_state` contract. Agents can request indicator bundles, and the framework computes them centrally through the TA-Lib feature engine.
 
-Indicator support policy:
+Indicator support:
 
-- TA-Lib backend is used automatically when available in the runtime environment.
-- Builtin fallback backend is used otherwise.
-- All TA-Lib indicators that can be computed from runtime market data are supported.
+- TA-Lib is required (installed during `arena-agent init` bootstrap).
+- All 158 TA-Lib indicators that can be computed from runtime market data are supported.
 - Indicators that need extra non-OHLCV inputs, such as `MAVP`, are also supported if those extra series are supplied in the indicator params.
 - If an indicator needs inputs the runtime does not have and the agent does not supply, the request fails clearly instead of silently degrading.
 
@@ -137,7 +181,7 @@ Contract shape:
 Notes:
 
 - `version` is the stable contract version for external agents.
-- `backend` is `talib`, `builtin`, or `none`.
+- `backend` is `talib` or `none`.
 - `warmup_complete` tells the agent whether every requested feature is ready.
 - `indicator_metadata[*].lookback_required` is the normalized warmup requirement for that indicator.
 - Use explicit `key` values for indicators with large or structured params.
@@ -148,7 +192,7 @@ The policy can control which indicators are computed via `indicator_mode` in the
 
 | Mode | Behavior |
 |------|----------|
-| `full` | Computes all builtin indicators with default params, plus a curated set of TA-Lib indicators if available. The agent sees everything and picks what matters. |
+| `full` | Computes all 30 curated TA-Lib indicators with default params. The agent sees everything and picks what matters. |
 | `custom` | Uses a `signal_indicators` list declared in the policy section. |
 | *(omitted)* | Falls back to the top-level `signal_indicators` in the runtime config (backward compatible). |
 
@@ -381,6 +425,39 @@ The prompt contract is externalized in:
 
 That makes the state contract and action contract explicit for any CLI-backed agent.
 
+## Auto Mode (Setup + Runtime Loop)
+
+The `auto` subcommand runs the full setup → control → runtime loop:
+
+```bash
+arena-agent-runtime auto --competition-id 9 --agent claude --setup-interval 300
+```
+
+Each cycle:
+1. **Setup agent** calls MCP tools, analyzes account/market/performance, returns config overrides
+2. Overrides are deep-merged into the live config dict (strategy, risk limits, extra instructions, interval)
+3. **Runtime agent** runs for N iterations (N = setup_interval / tick_interval)
+4. Loop back to step 1
+
+Options:
+
+```bash
+--competition-id <id>         # Required
+--agent <backend>             # claude, gemini, openclaw, codex, auto
+--model <model>               # Model for runtime agent
+--setup-model <model>         # Model for setup agent (defaults to --model)
+--setup-interval <seconds>    # Default seconds between setup checks (default: 300)
+--timeout-seconds <seconds>   # Decision timeout (default: 120)
+--config <path>               # Base YAML config
+--dry-run                     # Dry run mode (no real trades)
+```
+
+The setup agent can override:
+- `policy.extra_instructions` — per-tick instructions for the runtime agent
+- `strategy.sizing`, `strategy.tpsl` — position sizing and TP/SL strategy
+- `risk_limits` — trade limits, position size limits, cooldowns
+- `interval`, `tick_interval_seconds` — candle and polling intervals
+
 ## Terminal Observability Monitor
 
 The runtime exposes a direct local observability stream for terminal monitoring. This is not a log parser. The runtime publishes structured snapshots over a localhost TCP stream, and the monitor renders:
@@ -474,7 +551,7 @@ Current automated tests cover:
 
 - state normalization
 - versioned signal-state contract
-- generic TA-Lib-backed indicators plus builtin fallback
+- TA-Lib-backed indicator computation
 - policy-driven indicator resolution (full, custom, fallback)
 - inferred position fallback from unresolved live trades
 - execution sizing and validation
@@ -503,7 +580,8 @@ arena_agent/
   interfaces/   action schema and policy interface
   execution/    order execution
   memory/       transition store and journal
-  agents/       agent exec policy, built-in rule policies, reward models
+  agents/       agent exec policy, setup agent, built-in rule policies, reward models
+  setup/        setup agent context builder and cross-competition memory
   tap/          minimal external-agent HTTP adapter
   skills/       local CLI skill implementations
   mcp/          MCP server and plain tool wrappers (47 tools)
