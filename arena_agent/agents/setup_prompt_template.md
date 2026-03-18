@@ -42,9 +42,17 @@ Available override paths:
 - policy.extra_instructions: string — instructions the runtime agent sees each tick
 - policy.indicator_mode: "full" | "custom" — indicator computation mode
 - policy.timeout_seconds: number — decision timeout
-- strategy.sizing: { type, ... } — types: "fixed_fraction", "risk_per_trade", "volatility_scaled"
-- strategy.tpsl: { type, ... } — types: "fixed_pct", "atr_multiple", "r_multiple"
-- strategy.entry_filters: [ { type, ... }, ... ] — types: "volatility_gate", "trade_budget"
+- strategy.sizing: { type, ... } — use ONLY these exact types and params:
+    "fixed_fraction": { fraction: 0.05 }
+    "volatility_scaled": { target_risk_pct: 0.02, atr_multiplier: 2.0 }
+    "risk_per_trade": { max_risk_pct: 0.01, fallback_atr_multiplier: 1.5 }
+- strategy.tpsl: { type, ... } — use ONLY these exact types and params:
+    "fixed_pct": { tp_pct: 0.005, sl_pct: 0.003 }
+    "atr_multiple": { atr_tp_mult: 2.0, atr_sl_mult: 1.5 }
+    "r_multiple": { sl_atr_mult: 1.5, reward_risk_ratio: 2.0 }
+- strategy.entry_filters: [ { type, ... }, ... ] — use ONLY these exact types and params:
+    "volatility_gate": { min_volatility: 0.0, max_volatility: 1.0 }
+    "trade_budget": { min_remaining_trades: 5 }
 - strategy.exit_rules: [ { type, ... }, ... ]
 - risk_limits: { max_position_size_pct, max_trades, min_seconds_between_trades, ... }
 - signal_indicators: [ { indicator, params }, ... ] — ONLY when indicator_mode is "custom"
