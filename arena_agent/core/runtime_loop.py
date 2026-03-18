@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import signal
 import time
 
 from arena_agent.agents.rule_agent import build_policy
@@ -109,8 +110,35 @@ class MarketRuntime:
         last_state = None
         previous_live_state = None
         stop_reason = "stopped"
+        self._stop_requested = False
 
+        def _on_sigterm(signum, frame):
+            self._stop_requested = True
+
+        prev_handler = signal.getsignal(signal.SIGTERM)
+        signal.signal(signal.SIGTERM, _on_sigterm)
+
+        try:
+            return self._run_loop(
+                start_timestamp, iterations, decisions, executed_actions,
+                total_realized_pnl, total_fees, last_state, previous_live_state,
+                stop_reason,
+            )
+        finally:
+            signal.signal(signal.SIGTERM, prev_handler)
+
+    def _run_loop(
+        self, start_timestamp, iterations, decisions, executed_actions,
+        total_realized_pnl, total_fees, last_state, previous_live_state,
+        stop_reason,
+    ) -> RuntimeReport:
         while True:
+            # Check for graceful shutdown request (SIGTERM)
+            if self._stop_requested:
+                self.logger.info("SIGTERM received — shutting down gracefully.")
+                self._close_position_on_exit()
+                stop_reason = "sigterm"
+                break
             if self.config.max_iterations is not None and iterations >= self.config.max_iterations:
                 stop_reason = "max_iterations_reached"
                 break
@@ -259,7 +287,16 @@ class MarketRuntime:
                 self.logger.error("Supervisor stopping runtime after health error.")
                 stop_reason = "supervisor_health_error"
                 break
-            time.sleep(self.config.tick_interval_seconds)
+            # Sleep in small increments so SIGTERM is responsive
+            sleep_remaining = self.config.tick_interval_seconds
+            while sleep_remaining > 0 and not self._stop_requested:
+                nap = min(sleep_remaining, 2.0)
+                time.sleep(nap)
+                sleep_remaining -= nap
+
+        # Close position on any exit (competition end, max iterations, etc.)
+        if stop_reason in ("competition_inactive", "competition_exhausted", "sigterm"):
+            self._close_position_on_exit()
 
         end_timestamp = time.time()
         final_equity = None if last_state is None else last_state.account.equity
@@ -279,6 +316,20 @@ class MarketRuntime:
         self.monitor.stop(report=report, final_state=last_state, reason=stop_reason)
         return report
 
+
+    def _close_position_on_exit(self) -> None:
+        """Attempt to close any open position before shutdown."""
+        try:
+            position = self.executor.adapter.get_live_position(self.config.competition_id)
+            if position and isinstance(position, dict) and position.get("direction"):
+                self.logger.info(
+                    "Closing open %s position (size=%s) before exit...",
+                    position.get("direction"), position.get("size"),
+                )
+                self.executor.adapter.trade_close(self.config.competition_id)
+                self.logger.info("Position closed successfully.")
+        except Exception as exc:
+            self.logger.warning("Failed to close position on exit: %s", exc)
 
     def _build_transition(self, state, action, execution_result, next_state) -> TransitionEvent:
         return build_transition_event(state, action, execution_result, next_state)

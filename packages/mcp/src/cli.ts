@@ -197,6 +197,11 @@ async function main(): Promise<void> {
     process.exit(code);
   }
 
+  if (command === "auto") {
+    const code = await runAutoTrade();
+    process.exit(code);
+  }
+
   if (command === "upgrade") {
     await runUpgrade();
     return;
@@ -617,6 +622,225 @@ async function runMonitorOnly(): Promise<number> {
   return waitForExit(child);
 }
 
+async function runAutoTrade(): Promise<number> {
+  const home = resolveConfiguredHome(optionValue("--home"));
+  const state = readArenaHomeState(home);
+  if (!state) {
+    throw new Error(`Arena home is not initialized at ${home}. Run \`arena-agent init\` first.`);
+  }
+
+  const agent = (optionValue("--agent") ?? state.defaultAgent) as ManagedAgent;
+  const model = optionValue("--model") ?? state.defaultModel ?? undefined;
+  const pollMinutes = Number(optionValue("--poll") ?? "5");
+  const python = findPython(home);
+  const env = buildChildEnv(home);
+
+  console.log("Arena auto-trade daemon starting.");
+  console.log(`Agent: ${agent} | Mode: ${state.liveTrading ? "LIVE" : "dry-run"} | Poll: ${pollMinutes}m`);
+
+  // Catch SIGTERM/SIGINT for graceful shutdown
+  let shutdownRequested = false;
+  const onShutdown = () => { shutdownRequested = true; };
+  process.once("SIGINT", onShutdown);
+  process.once("SIGTERM", onShutdown);
+
+  const bridge = new PythonBridge(home);
+
+  try {
+    while (!shutdownRequested) {
+      // 1. Find a competition to trade in
+      const competition = await autoFindCompetition(bridge);
+      if (!competition) {
+        console.log("No competition available. Retrying in 5 minutes...");
+        await interruptableSleep(300_000, () => shutdownRequested);
+        continue;
+      }
+
+      console.log(`\nTrading competition #${competition.id}: ${competition.title} [${competition.status}]`);
+
+      // 2. Register if needed
+      if (competition.status === "registration_open") {
+        try {
+          await bridge.callTool("varsity.register", { competition_id: competition.id });
+          console.log(`Registered for #${competition.id}.`);
+        } catch {
+          console.log(`Registration failed for #${competition.id}, may already be registered.`);
+        }
+      }
+
+      // 3. Wait for competition to go live
+      while (!shutdownRequested && competition.status !== "live") {
+        const detail = (await bridge.callTool("varsity.competition_detail", {
+          identifier: String(competition.id),
+        })) as any;
+        competition.status = detail?.status ?? competition.status;
+        if (competition.status === "live") break;
+        if (competition.status === "cancelled" || competition.status === "completed") {
+          console.log(`Competition #${competition.id} is ${competition.status}. Moving on.`);
+          break;
+        }
+        console.log(`Competition #${competition.id} status: ${competition.status}. Waiting...`);
+        await interruptableSleep(30_000, () => shutdownRequested);
+      }
+      if (shutdownRequested || competition.status !== "live") continue;
+
+      // 4. Start runtime
+      const configPath = resolveUserConfigPath(home, state, optionValue("--config"), agent);
+      const runtimeArgs = [
+        "-m", "arena_agent", "run",
+        "--agent", agent,
+        "--config", configPath,
+        "--competition-id", String(competition.id),
+      ];
+      if (model) runtimeArgs.push("--model", model);
+
+      const logPath = resolve(logsDirPath(home), `auto-${competition.id}-${Date.now()}.log`);
+      const logFd = openSync(logPath, "a");
+      const runtimeChild = spawn(python, runtimeArgs, { cwd: home, env, stdio: ["ignore", logFd, logFd] });
+      closeSync(logFd);
+
+      if (runtimeChild.pid) {
+        writeRuntimeState(home, {
+          pid: runtimeChild.pid,
+          agent,
+          configPath,
+          logPath,
+          startedAt: new Date().toISOString(),
+          monitorPort: state.monitorPort,
+        });
+      }
+      console.log(`Runtime started (pid ${runtimeChild.pid}). Logs: ${logPath}`);
+
+      // 5. Monitor loop — poll until competition ends or shutdown
+      let runtimeExited = false;
+      runtimeChild.once("exit", () => { runtimeExited = true; });
+
+      while (!shutdownRequested && !runtimeExited) {
+        await interruptableSleep(pollMinutes * 60_000, () => shutdownRequested || runtimeExited);
+        if (shutdownRequested || runtimeExited) break;
+
+        try {
+          const status = (await bridge.callTool("varsity.competition_detail", {
+            identifier: String(competition.id),
+          })) as any;
+          const isLive = status?.status === "live";
+          if (!isLive) {
+            console.log(`Competition #${competition.id} ended (${status?.status}).`);
+            break;
+          }
+
+          // Check performance
+          const account = (await bridge.callTool("varsity.live_account", {
+            competition_id: competition.id,
+          })) as any;
+          if (account?.capital) {
+            const pnl = (account.capital - (account.initialBalance ?? 5000)).toFixed(2);
+            console.log(
+              `  #${competition.id} | equity: $${account.capital.toFixed(2)} | PnL: $${pnl} | trades: ${account.tradesCount ?? "?"}`,
+            );
+          }
+        } catch (err) {
+          // Non-fatal — keep going
+        }
+      }
+
+      // 6. Cleanup: close position, stop runtime
+      console.log(`Stopping runtime for #${competition.id}...`);
+      try {
+        const pos = (await bridge.callTool("varsity.live_position", {
+          competition_id: competition.id,
+        })) as any;
+        if (pos && pos.direction) {
+          console.log(`Closing open ${pos.direction} position (size=${pos.size})...`);
+          await bridge.callTool("varsity.trade_close", {
+            competition_id: competition.id,
+          });
+          console.log("Position closed.");
+        }
+      } catch {
+        // Best effort
+      }
+
+      if (!runtimeChild.killed && !runtimeExited) {
+        runtimeChild.kill("SIGTERM");
+        await Promise.race([waitForExit(runtimeChild), sleep(5000)]);
+        if (!runtimeChild.killed) runtimeChild.kill("SIGKILL");
+      }
+      clearRuntimeState(home);
+
+      // 7. Log results
+      try {
+        const result = (await bridge.callTool("varsity.live_account", {
+          competition_id: competition.id,
+        })) as any;
+        if (result?.capital) {
+          const pnl = (result.capital - (result.initialBalance ?? 5000)).toFixed(2);
+          console.log(`Competition #${competition.id} final: equity=$${result.capital.toFixed(2)}, PnL=$${pnl}`);
+        }
+      } catch {}
+
+      if (shutdownRequested) break;
+      console.log("Looking for next competition...");
+    }
+  } finally {
+    await bridge.disconnect();
+  }
+
+  console.log("Auto-trade daemon stopped.");
+  return 0;
+}
+
+async function autoFindCompetition(
+  bridge: PythonBridge
+): Promise<{ id: number; title: string; status: string } | null> {
+  // Check if already registered for a live or upcoming competition
+  try {
+    const regs = (await bridge.callTool("varsity.my_registrations", {})) as any;
+    const items = Array.isArray(regs) ? regs : regs?.items ?? regs?.list ?? [];
+    for (const reg of items) {
+      if (reg.competitionStatus === "live" || reg.competitionStatus === "registration_closed") {
+        return { id: reg.competitionId, title: reg.competitionTitle, status: reg.competitionStatus };
+      }
+    }
+  } catch {}
+
+  // Find open competitions
+  try {
+    const comps = (await bridge.callTool("varsity.competitions", {
+      status: "registration_open", page: 1, size: 5,
+    })) as any;
+    const items = comps?.items ?? comps?.list ?? (Array.isArray(comps) ? comps : []);
+    const best = items.find((c: any) => c.allowApiWrite !== false) ?? items[0];
+    if (best) {
+      return { id: best.id, title: best.title ?? best.name, status: best.status };
+    }
+  } catch {}
+
+  // Check live competitions we might be in
+  try {
+    const live = (await bridge.callTool("varsity.competitions", {
+      status: "live", page: 1, size: 5,
+    })) as any;
+    const items = live?.items ?? live?.list ?? (Array.isArray(live) ? live : []);
+    for (const c of items) {
+      if (c.allowApiWrite !== false) {
+        return { id: c.id, title: c.title ?? c.name, status: c.status };
+      }
+    }
+  } catch {}
+
+  return null;
+}
+
+async function interruptableSleep(ms: number, shouldStop: () => boolean): Promise<void> {
+  const interval = 2000;
+  let remaining = ms;
+  while (remaining > 0 && !shouldStop()) {
+    await sleep(Math.min(remaining, interval));
+    remaining -= interval;
+  }
+}
+
 function resolveConfiguredHome(explicitHome?: string): string {
   if (explicitHome) {
     return resolveArenaHome(explicitHome);
@@ -740,6 +964,7 @@ function printUsage(invocation: string): void {
   console.log("  init                     Bootstrap a managed Arena home");
   console.log("  doctor                   Check managed home, Python, deps, and backend CLI");
   console.log("  up                       Start trading runtime and open the TUI monitor");
+  console.log("  auto                     Autonomous daemon: find, join, trade, repeat");
   console.log("  monitor                  Attach to the TUI monitor only");
   console.log("  upgrade                  Reinstall or refresh the managed Python runtime");
   console.log("  status                   Show runtime pid, config, and monitor port");
