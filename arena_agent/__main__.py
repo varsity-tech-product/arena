@@ -3,13 +3,19 @@
 from __future__ import annotations
 
 import argparse
+import copy
 from dataclasses import replace
 import logging
 from pathlib import Path
+import signal
 import sys
+import time
 from typing import Any
 
+import yaml
+
 from arena_agent.config_loader import load_runtime_config
+from arena_agent.core.models import RuntimeConfig
 from arena_agent.core.runtime_loop import MarketRuntime
 from arena_agent.runtime_env import default_runtime_config_path, load_local_runtime_env, require_runtime_environment
 
@@ -29,6 +35,9 @@ def main(argv: list[str] | None = None) -> None:
         from arena_agent.tui.__main__ import main as monitor_main
 
         monitor_main(argv[1:])
+        return
+    if argv and argv[0] == "auto":
+        _run_auto(argv[1:])
         return
     if argv and argv[0] == "run":
         _run_runtime(argv[1:])
@@ -193,6 +202,164 @@ def _apply_agent_override(config, args: Any):
             policy.setdefault("openclaw_agent_id", "arena-trader")
         return replace(config, policy=policy)
     return config
+
+
+def _deep_merge(base: dict, overrides: dict) -> dict:
+    """Recursively merge *overrides* into *base* (mutates base)."""
+    for key, value in overrides.items():
+        if key in base and isinstance(base[key], dict) and isinstance(value, dict):
+            _deep_merge(base[key], value)
+        else:
+            base[key] = value
+    return base
+
+
+def _run_auto(argv: list[str]) -> None:
+    """Setup → control → runtime loop.
+
+    Each cycle:
+      1. Run setup agent to get config overrides.
+      2. Deep-merge overrides into the live config dict.
+      3. Build RuntimeConfig and run the runtime for N iterations.
+      4. Repeat until competition ends or SIGTERM.
+    """
+    parser = argparse.ArgumentParser(description="Autonomous setup + runtime loop.")
+    parser.add_argument("--config", default=str(default_runtime_config_path("agent_config.yaml")))
+    parser.add_argument("--competition-id", type=int, required=True)
+    parser.add_argument("--agent", choices=list(_AGENT_EXEC_BACKENDS), default="claude")
+    parser.add_argument("--model", default=None)
+    parser.add_argument("--setup-model", default=None, help="Model for setup agent (defaults to --model).")
+    parser.add_argument("--setup-interval", type=int, default=300, help="Default seconds between setup checks.")
+    parser.add_argument("--log-level", default="INFO")
+    parser.add_argument("--env-file", default=None)
+    parser.add_argument("--timeout-seconds", type=float, default=120.0)
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args(argv)
+
+    logging.basicConfig(
+        level=getattr(logging, args.log_level.upper(), logging.INFO),
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    )
+    log = logging.getLogger("arena_agent.auto")
+
+    load_local_runtime_env(args.env_file)
+    require_runtime_environment()
+
+    # Mutable config dict that persists across cycles
+    config_path = Path(args.config)
+    config_dict: dict[str, Any] = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    config_dict["competition_id"] = args.competition_id
+    config_dict["dry_run"] = args.dry_run
+    config_dict.setdefault("symbol", "BTCUSDT")
+
+    # Ensure policy is set up for agent_exec
+    policy = config_dict.setdefault("policy", {})
+    policy["type"] = "agent_exec"
+    policy["backend"] = _AGENT_EXEC_BACKENDS[args.agent]
+    policy["cwd"] = str(Path.cwd())
+    policy.setdefault("indicator_mode", "full")
+    policy.setdefault("fail_open_to_hold", True)
+    policy.setdefault("timeout_seconds", args.timeout_seconds)
+    if args.model:
+        policy["model"] = args.model
+
+    stop_requested = False
+
+    def _on_sigterm(signum, frame):
+        nonlocal stop_requested
+        stop_requested = True
+
+    signal.signal(signal.SIGTERM, _on_sigterm)
+    signal.signal(signal.SIGINT, _on_sigterm)
+
+    from arena_agent.agents.setup_agent import SetupAgent
+    from arena_agent.setup.context_builder import build_setup_context
+    from arena_agent.setup.memory import SetupMemory
+
+    arena_home = Path.cwd()
+    memory = SetupMemory(arena_home / "setup_memory.json")
+    setup_agent = SetupAgent(
+        backend=policy["backend"],
+        model=args.setup_model or args.model,
+        timeout=args.timeout_seconds * 2,
+    )
+
+    cycle = 0
+    while not stop_requested:
+        cycle += 1
+        log.info("=== Auto cycle %d ===", cycle)
+
+        # --- Setup phase ---
+        try:
+            context = build_setup_context(args.competition_id, config_dict, memory.recent(5))
+            memory_text = memory.format_for_prompt(5)
+            decision = setup_agent.decide(context, memory_text)
+            log.info(
+                "Setup decision: action=%s reason=%s restart=%s next_check=%s",
+                decision.action, decision.reason, decision.restart_runtime, decision.next_check_seconds,
+            )
+            if decision.action == "update" and decision.overrides:
+                log.info("Applying overrides: %s", list(decision.overrides.keys()))
+                _deep_merge(config_dict, decision.overrides)
+            if decision.chat_message:
+                try:
+                    import varsity_tools
+                    varsity_tools.send_chat(args.competition_id, decision.chat_message)
+                    log.info("Chat sent: %s", decision.chat_message[:100])
+                except Exception as exc:
+                    log.warning("Failed to send chat: %s", exc)
+            next_check = decision.next_check_seconds or args.setup_interval
+        except Exception as exc:
+            log.warning("Setup agent failed: %s — using defaults", exc)
+            next_check = args.setup_interval
+
+        if stop_requested:
+            break
+
+        # --- Runtime phase ---
+        tick = float(config_dict.get("tick_interval_seconds", 30))
+        iterations = max(1, int(next_check / tick))
+        config_dict["max_iterations"] = iterations
+        log.info("Starting runtime: %d iterations (%.0fs tick, next setup in ~%ds)", iterations, tick, next_check)
+
+        try:
+            runtime_config = RuntimeConfig.from_mapping(config_dict)
+            runtime = MarketRuntime(runtime_config)
+            report = runtime.run()
+            log.info(
+                "Runtime cycle %d done | iters=%s executed=%s pnl=%.4f equity=%s",
+                cycle, report.iterations, report.executed_actions,
+                report.total_realized_pnl, report.final_equity,
+            )
+        except (ValueError, TypeError) as exc:
+            # Bad override from setup agent (e.g. invalid strategy type) — drop it and retry
+            log.warning("Runtime config error: %s — dropping strategy overrides", exc)
+            config_dict.pop("strategy", None)
+            try:
+                runtime_config = RuntimeConfig.from_mapping(config_dict)
+                runtime = MarketRuntime(runtime_config)
+                report = runtime.run()
+                log.info(
+                    "Runtime cycle %d done (fallback) | iters=%s executed=%s pnl=%.4f equity=%s",
+                    cycle, report.iterations, report.executed_actions,
+                    report.total_realized_pnl, report.final_equity,
+                )
+            except Exception as inner_exc:
+                log.error("Runtime crashed even after fallback: %s", inner_exc, exc_info=True)
+                time.sleep(10)
+                continue
+        except Exception as exc:
+            log.error("Runtime crashed: %s", exc, exc_info=True)
+            time.sleep(10)
+            continue
+
+        if stop_requested:
+            break
+
+        # Brief pause before next setup cycle
+        time.sleep(2)
+
+    log.info("Auto loop stopped after %d cycles.", cycle)
 
 
 if __name__ == "__main__":

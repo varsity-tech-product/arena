@@ -42,14 +42,16 @@ Available override paths:
 - policy.extra_instructions: string — instructions the runtime agent sees each tick
 - policy.indicator_mode: "full" | "custom" — indicator computation mode
 - policy.timeout_seconds: number — decision timeout
-- strategy.sizing: { type, target_risk_pct, atr_multiplier, ... }
-- strategy.tpsl: { type, atr_tp_mult, atr_sl_mult, ... }
-- strategy.entry_filters: [ { type, ... }, ... ]
+- strategy.sizing: { type, ... } — types: "fixed_fraction", "risk_per_trade", "volatility_scaled"
+- strategy.tpsl: { type, ... } — types: "fixed_pct", "atr_multiple", "r_multiple"
+- strategy.entry_filters: [ { type, ... }, ... ] — types: "volatility_gate", "trade_budget"
 - strategy.exit_rules: [ { type, ... }, ... ]
 - risk_limits: { max_position_size_pct, max_trades, min_seconds_between_trades, ... }
 - signal_indicators: [ { indicator, params }, ... ] — ONLY when indicator_mode is "custom"
 - interval: "1m" | "5m" | "15m" — candle interval
 - tick_interval_seconds: number — how often the runtime polls
+
+Do NOT invent strategy component type names. Use ONLY the types listed above.
 
 Available TA-Lib indicators (use ONLY these names if switching to custom indicator_mode):
   Momentum (31): ADX, ADXR, APO, AROON, AROONOSC, BOP, CCI, CMO, DX, IMI, MACD, MACDEXT, MACDFIX, MFI, MINUS_DI, MINUS_DM, MOM, PLUS_DI, PLUS_DM, PPO, ROC, ROCP, ROCR, ROCR100, RSI, STOCH, STOCHF, STOCHRSI, TRIX, ULTOSC, WILLR
