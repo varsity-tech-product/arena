@@ -188,6 +188,8 @@ class RuntimeMonitor:
                     "updated_at": time.time(),
                 }
             )
+            # Expose runtime config for the policy panel
+            self._snapshot["runtime_config"] = _safe_config_dict(runtime_config)
             health["no_transition_threshold_seconds"] = float(
                 self.config.get(
                     "no_transition_threshold_seconds",
@@ -571,3 +573,14 @@ def _optional_float(value: Any) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _safe_config_dict(runtime_config: Any) -> dict[str, Any]:
+    """Convert a RuntimeConfig dataclass to a plain dict for the snapshot."""
+    import dataclasses
+
+    if dataclasses.is_dataclass(runtime_config):
+        return dataclasses.asdict(runtime_config)
+    if hasattr(runtime_config, "__dict__"):
+        return dict(runtime_config.__dict__)
+    return {}

@@ -120,6 +120,24 @@ class ArenaMonitorController:
         logs = list(self._snapshot.get("logs", []))
         return list(reversed(logs[-limit:]))
 
+    def policy_info(self) -> dict[str, Any]:
+        runtime = self._snapshot.get("runtime", {})
+        config = self._snapshot.get("runtime_config", {})
+        policy = config.get("policy", {}) if isinstance(config.get("policy"), dict) else {}
+        strategy = config.get("strategy", {}) if isinstance(config.get("strategy"), dict) else {}
+        return {
+            "policy_name": runtime.get("policy_name") or policy.get("type", "unknown"),
+            "backend": policy.get("backend", "-"),
+            "indicator_mode": policy.get("indicator_mode", "-"),
+            "timeout_seconds": policy.get("timeout_seconds", "-"),
+            "tick_interval_seconds": config.get("tick_interval_seconds", "-"),
+            "strategy_context": policy.get("strategy_context", "-"),
+            "sizing_type": strategy.get("sizing", {}).get("type", "-") if isinstance(strategy.get("sizing"), dict) else "-",
+            "tpsl_type": strategy.get("tpsl", {}).get("type", "-") if isinstance(strategy.get("tpsl"), dict) else "-",
+            "competition_id": config.get("competition_id") or runtime.get("competition_id", "-"),
+            "dry_run": config.get("dry_run", "-"),
+        }
+
     def _decision_state(self) -> dict[str, Any]:
         return dict(self._snapshot.get("decision_state") or self._snapshot.get("current_state") or {})
 

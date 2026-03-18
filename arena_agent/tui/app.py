@@ -14,6 +14,8 @@ from arena_agent.tui.panels.features_panel import FeaturesPanel
 from arena_agent.tui.panels.health_panel import HealthPanel
 from arena_agent.tui.panels.logs_panel import LogsPanel
 from arena_agent.tui.panels.market_panel import MarketPanel
+from arena_agent.tui.panels.policy_panel import PolicyPanel
+from arena_agent.tui.panels.setup_panel import SetupPanel
 from arena_agent.tui.panels.transition_panel import TransitionPanel
 
 
@@ -69,8 +71,10 @@ class ArenaMonitorApp(App):
                 yield MarketPanel(id="market-panel")
                 yield AccountPanel(id="account-panel")
                 yield HealthPanel(id="health-panel")
+            yield PolicyPanel(id="policy-panel", classes="full-row")
             yield FeaturesPanel(id="features-panel", classes="full-row")
             yield DecisionPanel(id="decision-panel", classes="full-row")
+            yield SetupPanel(id="setup-panel", classes="full-row")
             yield TransitionPanel(id="transition-panel", classes="full-row")
             yield LogsPanel(id="logs-panel", classes="full-row")
         yield Footer()
@@ -92,7 +96,9 @@ class ArenaMonitorApp(App):
         self.query_one(MarketPanel).refresh_view(self.controller)
         self.query_one(AccountPanel).refresh_view(self.controller)
         self.query_one(HealthPanel).refresh_view(self.controller)
+        self.query_one(PolicyPanel).refresh_view(self.controller)
         self.query_one(FeaturesPanel).refresh_view(self.controller)
         self.query_one(DecisionPanel).refresh_view(self.controller)
+        self.query_one(SetupPanel).refresh_view(self.controller)
         self.query_one(TransitionPanel).refresh_view(self.controller)
         self.query_one(LogsPanel).refresh_view(self.controller)
