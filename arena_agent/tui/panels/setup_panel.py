@@ -77,17 +77,30 @@ def _find_auto_log(controller) -> str | None:
     host = connection.get("host", "127.0.0.1")
     port = connection.get("port", 8767)
     # Try common arena home locations
-    for home in [
+    # Try to find arena home from connection info or common paths
+    homes = [
         os.path.expanduser("~/.arena-agent"),
         os.path.expanduser("~/.arena-trader-6cff"),
-    ]:
+    ]
+    # Also check ARENA_HOME env
+    env_home = os.environ.get("ARENA_HOME") or os.environ.get("ARENA_ROOT")
+    if env_home and env_home not in homes:
+        homes.insert(0, env_home)
+
+    for home in homes:
         logs_dir = os.path.join(home, "logs")
         if os.path.isdir(logs_dir):
+            # Match any auto daemon log pattern
             candidates = sorted(
-                Path(logs_dir).glob("auto-daemon*.log"),
+                list(Path(logs_dir).glob("auto-daemon*.log")) +
+                list(Path(logs_dir).glob("auto-*.log")),
                 key=lambda p: p.stat().st_mtime,
                 reverse=True,
             )
+            # Prefer daemon logs over runtime logs
+            for c in candidates:
+                if "daemon" in c.name:
+                    return str(c)
             if candidates:
                 return str(candidates[0])
     return None

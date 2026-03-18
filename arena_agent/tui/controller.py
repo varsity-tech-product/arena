@@ -128,7 +128,7 @@ class ArenaMonitorController:
         return {
             "policy_name": runtime.get("policy_name") or policy.get("type", "unknown"),
             "backend": policy.get("backend", "-"),
-            "indicator_mode": policy.get("indicator_mode", "-"),
+            "indicator_mode": policy.get("indicator_mode") or ("full" if config.get("signal_indicators") == [] else "-"),
             "timeout_seconds": policy.get("timeout_seconds", "-"),
             "tick_interval_seconds": config.get("tick_interval_seconds", "-"),
             "strategy_context": policy.get("strategy_context", "-"),
