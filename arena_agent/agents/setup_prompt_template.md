@@ -42,10 +42,10 @@ Available override paths:
 - policy.extra_instructions: string — instructions the runtime agent sees each tick
 - policy.indicator_mode: "full" | "custom" — indicator computation mode
 - policy.timeout_seconds: number — decision timeout
-- strategy.sizing: { type, ... } — use ONLY these exact types and params:
-    "fixed_fraction": { fraction: 0.05 }
-    "volatility_scaled": { target_risk_pct: 0.02, atr_multiplier: 2.0 }
-    "risk_per_trade": { max_risk_pct: 0.01, fallback_atr_multiplier: 1.5 }
+- strategy.sizing: { type, ... } — use ONLY these exact types and params (RESPECT BOUNDS):
+    "fixed_fraction": { fraction: 0.05 }          — fraction MUST be in [0.01, 0.20]
+    "volatility_scaled": { target_risk_pct: 0.02, atr_multiplier: 2.0 }  — target_risk_pct MUST be in [0.005, 0.05]
+    "risk_per_trade": { max_risk_pct: 0.01, fallback_atr_multiplier: 1.5 }  — max_risk_pct MUST be in [0.005, 0.03]
 - strategy.tpsl: { type, ... } — use ONLY these exact types and params:
     "fixed_pct": { tp_pct: 0.005, sl_pct: 0.003 }
     "atr_multiple": { atr_tp_mult: 2.0, atr_sl_mult: 1.5 }

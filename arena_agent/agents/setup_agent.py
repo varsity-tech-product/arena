@@ -294,11 +294,47 @@ class SetupAgent:
         chat_msg = payload.get("chat_message")
         if chat_msg is not None:
             chat_msg = str(chat_msg).strip() or None
+        overrides = payload.get("overrides") if action == "update" else None
+        if overrides:
+            overrides = _clamp_sizing_params(overrides)
         return SetupDecision(
             action=action,
-            overrides=payload.get("overrides") if action == "update" else None,
+            overrides=overrides,
             reason=str(payload.get("reason", "no reason")),
             restart_runtime=bool(payload.get("restart_runtime", False)),
             next_check_seconds=next_check,
             chat_message=chat_msg,
         )
+
+
+# Hard bounds on sizing params the setup agent can set.
+_SIZING_BOUNDS: dict[str, tuple[float, float]] = {
+    "fraction": (0.01, 0.20),
+    "target_risk_pct": (0.005, 0.05),
+    "max_risk_pct": (0.005, 0.03),
+    "atr_multiplier": (0.5, 5.0),
+    "fallback_atr_multiplier": (0.5, 5.0),
+}
+
+
+def _clamp_sizing_params(overrides: dict[str, Any]) -> dict[str, Any]:
+    """Clamp strategy sizing params to safe bounds."""
+    sizing = overrides.get("strategy", {}).get("sizing")
+    if not isinstance(sizing, dict):
+        return overrides
+    changed = False
+    for param, (lo, hi) in _SIZING_BOUNDS.items():
+        if param in sizing:
+            try:
+                val = float(sizing[param])
+                clamped = max(lo, min(hi, val))
+                if clamped != val:
+                    logger.warning(
+                        "Setup agent clamped sizing.%s: %.4f → %.4f (bounds [%.4f, %.4f])",
+                        param, val, clamped, lo, hi,
+                    )
+                    sizing[param] = clamped
+                    changed = True
+            except (TypeError, ValueError):
+                pass
+    return overrides
