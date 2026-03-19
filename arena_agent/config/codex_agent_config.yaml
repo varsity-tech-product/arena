@@ -82,6 +82,6 @@ observability:
   max_logs: 50
   no_transition_threshold_seconds: 90
   no_transition_error_threshold_seconds: 180
-  max_decision_latency_seconds: 20
+  max_decision_latency_seconds: 30
   max_consecutive_runtime_errors: 3
   supervisor_stop_on_error: true

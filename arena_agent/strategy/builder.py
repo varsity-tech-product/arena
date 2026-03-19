@@ -114,12 +114,26 @@ def _build_component(registry: dict[str, type], config: dict[str, Any] | str | N
             f"Available: {', '.join(sorted(registry.keys()))}"
         )
     params = _normalize_params({k: v for k, v in config.items() if k != "type"})
+
+    # Strip params that don't belong to this class (cross-type contamination).
+    import dataclasses
+
+    if dataclasses.is_dataclass(cls):
+        valid_names = {f.name for f in dataclasses.fields(cls) if f.name != "name"}
+        unknown = {k: v for k, v in params.items() if k not in valid_names}
+        if unknown:
+            kept = {k: v for k, v in params.items() if k in valid_names}
+            _log.warning(
+                "Strategy component %s: stripping unknown params %s "
+                "(valid: %s). Keeping: %s.",
+                type_name, unknown, sorted(valid_names), kept,
+            )
+            params = kept
+
     try:
         return cls(**params)
     except TypeError as exc:
-        # Agent hallucinated wrong param names — log and build with defaults
-        import dataclasses
-
+        # Remaining init failures — fall back to defaults
         valid = [f.name for f in dataclasses.fields(cls) if f.name != "name"] if dataclasses.is_dataclass(cls) else []
         _log.warning(
             "Strategy component %s(%s) failed: %s. Valid params: %s. Using defaults.",
