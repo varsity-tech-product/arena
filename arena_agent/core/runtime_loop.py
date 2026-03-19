@@ -197,7 +197,12 @@ class MarketRuntime:
                     action = self.policy.decide(state)
                     decision_latency = time.time() - decision_started_at
                 if self.strategy is not None:
-                    action = self.strategy.refine(action, state)
+                    try:
+                        action = self.strategy.refine(action, state)
+                    except (TypeError, ValueError) as strat_exc:
+                        self.logger.warning(
+                            "Strategy refine failed (using raw action): %s", strat_exc
+                        )
                 decisions += 1
                 self.monitor.record_decision(
                     iteration=iterations,

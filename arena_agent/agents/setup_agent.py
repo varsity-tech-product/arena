@@ -102,6 +102,12 @@ class SetupAgent:
         self.model = model
         self.timeout = timeout
         self.mcp_config_path = mcp_config_path or _find_mcp_config()
+        if not self.mcp_config_path:
+            logger.warning(
+                "No .mcp.json config found — setup agent will not have access to "
+                "arena MCP tools (arena_klines, arena_leaderboard, etc). "
+                "Set ARENA_ROOT or ARENA_HOME env var, or pass mcp_config_path explicitly."
+            )
         self._resolved_backend = resolve_backend(backend, None)
         self._prompt_template = Template(
             _PROMPT_TEMPLATE_PATH.read_text(encoding="utf-8")

@@ -262,20 +262,45 @@ class AgentExecPolicy(Policy):
 
         self._logger.debug("runtime_agent cmd: %s", " ".join(command))
         decision_cwd = self.cwd or tempfile.gettempdir()
-        result = self.subprocess_runner(
-            command,
-            input=prompt,
-            capture_output=True,
-            text=True,
-            cwd=decision_cwd,
-            timeout=self.timeout_seconds,
-            check=False,
-        )
-        stderr_text = (result.stderr or "").strip()
-        if stderr_text:
-            self._logger.info("runtime_agent stderr:\n%s", stderr_text[:2000])
-        if result.returncode != 0:
-            raise RuntimeError(f"claude failed with code={result.returncode}: {(stderr_text or result.stdout or '')[:500]}")
+
+        # Retry once on API 500 errors or timeouts
+        last_exc: Exception | None = None
+        for attempt in range(2):
+            try:
+                result = self.subprocess_runner(
+                    command,
+                    input=prompt,
+                    capture_output=True,
+                    text=True,
+                    cwd=decision_cwd,
+                    timeout=self.timeout_seconds,
+                    check=False,
+                )
+            except subprocess.TimeoutExpired:
+                if attempt == 0:
+                    self._logger.warning("Claude CLI timed out (attempt 1/2), retrying after 5s...")
+                    import time as _time
+                    _time.sleep(5)
+                    last_exc = subprocess.TimeoutExpired(command, self.timeout_seconds)
+                    continue
+                raise
+            stderr_text = (result.stderr or "").strip()
+            if stderr_text:
+                self._logger.info("runtime_agent stderr:\n%s", stderr_text[:2000])
+            if result.returncode != 0:
+                output_text = stderr_text or result.stdout or ""
+                # Retry on API 500 errors (server-side, transient)
+                if attempt == 0 and "API Error: 500" in output_text:
+                    self._logger.warning("Anthropic API 500 error (attempt 1/2), retrying after 5s...")
+                    import time as _time
+                    _time.sleep(5)
+                    last_exc = RuntimeError(f"claude failed with code={result.returncode}: {output_text[:500]}")
+                    continue
+                raise RuntimeError(f"claude failed with code={result.returncode}: {output_text[:500]}")
+            break
+        else:
+            raise last_exc or RuntimeError("claude failed after retries")
+
         raw_output = (result.stdout or "").strip()
         if not raw_output:
             raise RuntimeError("claude returned empty output")
@@ -494,6 +519,18 @@ def _build_agent_summary(state: AgentState, recent_transitions: Sequence[dict[st
             continue
         break
 
+    # Find time since last real (non-HOLD) action from transitions
+    seconds_since_last_trade = None
+    for transition in reversed(recent_transitions):
+        if transition.get("action") not in ("HOLD", None):
+            ts = transition.get("timestamp")
+            if ts is not None and state.timestamp:
+                try:
+                    seconds_since_last_trade = round(state.timestamp - float(ts), 1)
+                except (TypeError, ValueError):
+                    pass
+            break
+
     position_age_seconds = None
     if state.position is not None:
         open_time = state.position.metadata.get("openTime") if state.position.metadata else None
@@ -511,6 +548,7 @@ def _build_agent_summary(state: AgentState, recent_transitions: Sequence[dict[st
         "last_action": None if last_transition is None else last_transition.get("action"),
         "last_action_reason": None if last_transition is None else last_transition.get("reason"),
         "consecutive_holds": consecutive_holds,
+        "seconds_since_last_trade": seconds_since_last_trade,
         "signal_backend": state.signal_state.backend,
         "warmup_complete": state.signal_state.warmup_complete,
     }

@@ -61,6 +61,7 @@ _EXITS: dict[str, type] = {
 
 # Common param aliases that agents use (maps wrong name → correct name).
 _PARAM_ALIASES: dict[str, str] = {
+    # ATRBasedTPSL aliases
     "tp_multiple": "atr_tp_mult",
     "sl_multiple": "atr_sl_mult",
     "tp_mult": "atr_tp_mult",
@@ -71,12 +72,30 @@ _PARAM_ALIASES: dict[str, str] = {
     "atr_multiplier_sl": "atr_sl_mult",
     "take_profit_multiple": "atr_tp_mult",
     "stop_loss_multiple": "atr_sl_mult",
+    "tp_multiplier": "atr_tp_mult",
+    "sl_multiplier": "atr_sl_mult",
+    "atr_tp_multiple": "atr_tp_mult",
+    "atr_sl_multiple": "atr_sl_mult",
+    # TrailingStop aliases
+    "activation_r": "atr_multiplier",
+    "trail_multiplier": "atr_multiplier",
+    "trailing_multiplier": "atr_multiplier",
+    "trailing_atr_multiplier": "atr_multiplier",
+    "trail_atr": "atr_multiplier",
+    # RMultipleTPSL aliases (prevent cross-type confusion)
+    "reward_risk": "reward_risk_ratio",
+    "rr_ratio": "reward_risk_ratio",
+    "risk_reward_ratio": "reward_risk_ratio",
+    "sl_mult": "sl_atr_mult",
 }
 
 
 def _normalize_params(params: dict[str, Any]) -> dict[str, Any]:
     """Apply alias normalization so agents don't need exact param names."""
     return {_PARAM_ALIASES.get(k, k): v for k, v in params.items()}
+
+
+_log = __import__("logging").getLogger(__name__)
 
 
 def _build_component(registry: dict[str, type], config: dict[str, Any] | str | None) -> Any:
@@ -95,7 +114,18 @@ def _build_component(registry: dict[str, type], config: dict[str, Any] | str | N
             f"Available: {', '.join(sorted(registry.keys()))}"
         )
     params = _normalize_params({k: v for k, v in config.items() if k != "type"})
-    return cls(**params)
+    try:
+        return cls(**params)
+    except TypeError as exc:
+        # Agent hallucinated wrong param names — log and build with defaults
+        import dataclasses
+
+        valid = [f.name for f in dataclasses.fields(cls) if f.name != "name"] if dataclasses.is_dataclass(cls) else []
+        _log.warning(
+            "Strategy component %s(%s) failed: %s. Valid params: %s. Using defaults.",
+            type_name, params, exc, valid,
+        )
+        return cls()
 
 
 def build_sizer(config: dict[str, Any] | None) -> PositionSizer | None:

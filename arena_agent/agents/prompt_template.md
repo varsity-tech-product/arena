@@ -8,6 +8,8 @@ Use `null` when a numeric field is not applicable.
 Prefer `HOLD` when the signal is weak, the context is ambiguous, or warmup is incomplete.
 `OPEN_LONG` and `OPEN_SHORT` are only valid when there is no active position.
 `CLOSE_POSITION` and `UPDATE_TPSL` are only valid when there is an active position.
+For `CLOSE_POSITION`, set `size`, `take_profit`, and `stop_loss` to `null` — the exchange closes the full position.
+If you are flat (no position) and `consecutive_holds` is high, you are wasting competition time. Actively look for entry opportunities rather than holding indefinitely.
 The features section contains pre-computed technical indicators and an indicator_catalog listing their names.
 Use whichever indicators are relevant to the current market regime. You are not required to use all of them.
 A strategy layer refines your action after you return it. It handles position sizing and TP/SL placement by default.

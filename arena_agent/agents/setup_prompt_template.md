@@ -53,7 +53,10 @@ Available override paths:
 - strategy.entry_filters: [ { type, ... }, ... ] — use ONLY these exact types and params:
     "volatility_gate": { min_volatility: 0.0, max_volatility: 1.0 }
     "trade_budget": { min_remaining_trades: 5 }
-- strategy.exit_rules: [ { type, ... }, ... ]
+- strategy.exit_rules: [ { type, ... }, ... ] — use ONLY these exact types and params:
+    "trailing_stop": { atr_multiplier: 2.0, atr_period: 14 }
+    "time_exit": { max_hold_seconds: 600 }
+    "drawdown_exit": { max_drawdown_pct: 0.02 }
 - risk_limits: { max_position_size_pct, max_trades, min_seconds_between_trades, ... }
 - signal_indicators: [ { indicator, params }, ... ] — ONLY when indicator_mode is "custom"
 - interval: "1m" | "5m" | "15m" — candle interval
