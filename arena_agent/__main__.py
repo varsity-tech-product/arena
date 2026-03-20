@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import copy
 from dataclasses import replace
+import json
 import logging
 from pathlib import Path
 import signal
@@ -317,6 +318,8 @@ def _run_auto(argv: list[str]) -> None:
             # Propagate symbol from competition detail (asset-agnostic)
             comp = context.get("competition", {})
             if isinstance(comp, dict) and comp.get("symbol"):
+                if config_dict.get("symbol") != comp["symbol"]:
+                    log.info("Symbol updated from competition: %s -> %s", config_dict.get("symbol"), comp["symbol"])
                 config_dict["symbol"] = comp["symbol"]
             memory_text = memory.format_for_prompt(5)
             decision = setup_agent.decide(context, memory_text)
@@ -325,11 +328,16 @@ def _run_auto(argv: list[str]) -> None:
                 decision.action, decision.reason, decision.restart_runtime, decision.next_check_seconds,
             )
             if decision.action == "update" and decision.overrides:
-                log.info("Applying overrides: %s", list(decision.overrides.keys()))
+                log.info("Applying overrides: %s", json.dumps(decision.overrides, default=str)[:2000])
                 _deep_merge(config_dict, decision.overrides)
                 # Log the effective policy type after merge
-                eff_policy = config_dict.get("policy", {}).get("type", "unknown")
-                log.info("Effective policy after merge: %s", eff_policy)
+                eff_policy = config_dict.get("policy", {})
+                log.info(
+                    "Effective config after merge | policy.type=%s policy.params=%s strategy=%s",
+                    eff_policy.get("type", "unknown"),
+                    eff_policy.get("params", {}),
+                    json.dumps(config_dict.get("strategy", {}), default=str)[:500],
+                )
             if decision.chat_message:
                 try:
                     import varsity_tools

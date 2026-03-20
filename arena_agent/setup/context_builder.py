@@ -159,6 +159,23 @@ def build_setup_context(
     # Memory from past competitions
     context["memory"] = [r.to_dict() for r in memory]
 
+    # Audit log: summarize what the setup agent will see
+    acct = context.get("account_state", {})
+    perf = context.get("performance", {})
+    mkt = context.get("market_summary", {})
+    logger.info(
+        "setup_context built | symbol=%s price=%s equity=%s pnl=%s trades=%s/%s win_rate=%s fees=%s trend=%s",
+        symbol,
+        mkt.get("current_price"),
+        acct.get("equity") if isinstance(acct, dict) else "?",
+        acct.get("realized_pnl") if isinstance(acct, dict) else "?",
+        acct.get("trade_count") if isinstance(acct, dict) else "?",
+        context.get("competition", {}).get("max_trades"),
+        perf.get("win_rate") if isinstance(perf, dict) else "?",
+        perf.get("total_fees") if isinstance(perf, dict) else "?",
+        mkt.get("trend"),
+    )
+
     return context
 
 

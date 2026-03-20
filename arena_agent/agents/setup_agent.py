@@ -221,6 +221,15 @@ def _translate_flat_decision(payload: dict[str, Any]) -> dict[str, Any]:
     if "policy" in overrides:
         pass  # restart_runtime handled by caller
 
+    logger.info(
+        "flat_decision translated | policy=%s tp_pct=%s sl_pct=%s sizing=%s bias=%s indicators=%d",
+        payload.get("policy"),
+        payload.get("tp_pct"),
+        payload.get("sl_pct"),
+        payload.get("sizing_fraction"),
+        payload.get("direction_bias"),
+        len(overrides.get("signal_indicators", [])),
+    )
     return overrides
 
 
@@ -369,6 +378,10 @@ class SetupAgent:
         acct = context.get("account_state", {})
         if isinstance(acct, dict):
             self._equity_at_last_change = acct.get("equity")
+        logger.info(
+            "Strategy change accepted | new_key=%s equity_snapshot=%s trade_count=%d",
+            new_key, self._equity_at_last_change, current_trade_count,
+        )
         return decision
 
     def _try_fallback(self) -> None:
@@ -585,10 +598,12 @@ class SetupAgent:
         uses_legacy = isinstance(payload.get("overrides"), dict)
 
         if action == "update" and uses_flat:
+            logger.info("_parse_decision: using FLAT schema path (policy=%s)", payload.get("policy"))
             overrides = _translate_flat_decision(payload)
             # Flat path always restarts when policy changes
             restart = "policy" in overrides
         elif action == "update" and uses_legacy:
+            logger.info("_parse_decision: using LEGACY overrides path (keys=%s)", list(payload["overrides"].keys()))
             overrides = payload["overrides"]
             overrides = _clamp_sizing_params(overrides)
             restart = bool(payload.get("restart_runtime", False))
