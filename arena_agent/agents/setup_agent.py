@@ -659,8 +659,12 @@ class SetupAgent:
 
         try:
             wrapper = json.loads(raw)
-        except json.JSONDecodeError as exc:
-            raise ValueError(f"{backend_name} returned invalid JSON: {raw[:500]}") from exc
+        except json.JSONDecodeError:
+            # Gemini and other CLIs may prefix output with warnings
+            # (e.g. "MCP issues detected..."). Extract the first JSON object.
+            wrapper = _extract_json_object(raw)
+            if wrapper is None:
+                raise ValueError(f"{backend_name} returned invalid JSON: {raw[:500]}")
 
         # Log tool use from the wrapper if present
         if isinstance(wrapper, dict):
