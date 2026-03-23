@@ -448,7 +448,9 @@ class SetupAgent:
     def _run_openclaw(self, prompt: str) -> dict[str, Any]:
         # Use whichever openclaw agent the user configured.
         # Defaults to "main" — override via openclaw_agent_id in config.
+        from arena_agent.agents.agent_exec_policy import _clear_openclaw_sessions
         agent_id = self.openclaw_agent_id or "main"
+        _clear_openclaw_sessions(agent_id)
         command = [
             "openclaw",
             "agent",

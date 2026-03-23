@@ -82,6 +82,28 @@ def _strip_markdown_fences(text: str) -> str:
     return match.group(1).strip() if match else text.strip()
 
 
+def _clear_openclaw_sessions(agent_id: str) -> None:
+    """Remove session transcript files for an openclaw agent.
+
+    OpenClaw appends every ``--agent`` call to a persistent session.  Over
+    many ticks the transcript grows to hundreds-of-thousands of tokens,
+    fills the model's context window, and causes truncated responses.
+
+    Clearing the ``.jsonl`` transcripts before each call keeps every
+    invocation stateless while preserving the agent's config, model, and
+    auth settings.
+    """
+    from pathlib import Path
+    sessions_dir = Path.home() / ".openclaw" / "agents" / agent_id / "sessions"
+    if not sessions_dir.is_dir():
+        return
+    for transcript in sessions_dir.glob("*.jsonl"):
+        try:
+            transcript.unlink()
+        except OSError:
+            pass
+
+
 def _find_fallback_backend(current: str) -> str | None:
     """Find an alternative CLI backend available in PATH."""
     # Preference order for fallback.
@@ -504,6 +526,11 @@ class AgentExecPolicy(Policy):
         # Use whichever openclaw agent the user configured.
         # Defaults to "main" — override via openclaw_agent_id in config YAML.
         agent_id = self.openclaw_agent_id or "main"
+        # Clear session transcripts before each call. OpenClaw appends every
+        # message to a persistent session; without clearing, the context
+        # accumulates (300K+ tokens) and truncates model responses.
+        # The --agent flag overrides --session-id, so clearing is the only fix.
+        _clear_openclaw_sessions(agent_id)
         command = [
             self.command,
             "agent",
