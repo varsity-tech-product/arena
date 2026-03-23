@@ -14,29 +14,31 @@ interface McpServerEntry {
   env?: Record<string, string>;
 }
 
-function mergeConfig(
-  path: string,
-  serverName: string,
-  entry: McpServerEntry
-): void {
-  let existing: Record<string, unknown> = {};
-  if (existsSync(path)) {
-    try {
-      existing = JSON.parse(readFileSync(path, "utf-8"));
-    } catch {
-      // Overwrite invalid JSON
-    }
-  }
-  const servers =
-    (existing.mcpServers as Record<string, unknown>) ?? {};
-  servers[serverName] = entry;
-  existing.mcpServers = servers;
+// ── Shared MCP server snippet ────────────────────────────────────────
 
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, JSON.stringify(existing, null, 2) + "\n");
+function arenaServerJson(arenaRoot: string, includeType = false): string {
+  const entry: Record<string, unknown> = {
+    command: "arena-mcp",
+    args: ["serve"],
+    env: { ARENA_ROOT: arenaRoot },
+  };
+  if (includeType) entry.type = "stdio";
+  return JSON.stringify(entry, null, 4);
 }
 
-// ── Claude Code (project-local .mcp.json) ──────────────────────────
+function arenaServerToml(arenaRoot: string): string {
+  const escaped = arenaRoot.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  return [
+    "[mcp_servers.arena]",
+    'command = "arena-mcp"',
+    'args = ["serve"]',
+    "",
+    "[mcp_servers.arena.env]",
+    `ARENA_ROOT = "${escaped}"`,
+  ].join("\n");
+}
+
+// ── Project-local .mcp.json (safe — inside the arena project dir) ────
 
 export function setupClaudeCode(arenaRoot: string): string {
   const configPath = resolve(arenaRoot, ".mcp.json");
@@ -49,90 +51,98 @@ export function setupClaudeCode(arenaRoot: string): string {
   return configPath;
 }
 
-// ── Claude Code (user-scope ~/.claude.json) ─────────────────────────
+// ── Instructions generators (never modify user config) ───────────────
+
+function claudeCodeInstructions(arenaRoot: string): string {
+  return [
+    "",
+    "To add Arena MCP tools to Claude Code, add to ~/.claude.json:",
+    "",
+    '  "mcpServers": {',
+    `    "arena": ${arenaServerJson(arenaRoot, true).split("\n").join("\n    ")}`,
+    "  }",
+    "",
+    "Or run: claude mcp add arena -- arena-mcp serve",
+  ].join("\n");
+}
+
+function claudeDesktopInstructions(arenaRoot: string): string {
+  const platform = process.platform;
+  const configPath =
+    platform === "darwin"
+      ? "~/Library/Application Support/Claude/claude_desktop_config.json"
+      : "~/.config/Claude/claude_desktop_config.json";
+  return [
+    "",
+    `To add Arena MCP tools to Claude Desktop, add to ${configPath}:`,
+    "",
+    '  "mcpServers": {',
+    `    "arena": ${arenaServerJson(arenaRoot).split("\n").join("\n    ")}`,
+    "  }",
+  ].join("\n");
+}
+
+function geminiInstructions(arenaRoot: string): string {
+  return [
+    "",
+    "To add Arena MCP tools to Gemini CLI, add to ~/.gemini/settings.json:",
+    "",
+    '  "mcpServers": {',
+    `    "arena": ${arenaServerJson(arenaRoot).split("\n").join("\n    ")}`,
+    "  }",
+  ].join("\n");
+}
+
+function codexInstructions(arenaRoot: string): string {
+  return [
+    "",
+    "To add Arena MCP tools to Codex CLI, add to ~/.codex/config.toml:",
+    "",
+    arenaServerToml(arenaRoot),
+  ].join("\n");
+}
+
+function cursorInstructions(arenaRoot: string): string {
+  return [
+    "",
+    `To add Arena MCP tools to Cursor, add to ${arenaRoot}/.cursor/mcp.json:`,
+    "",
+    '  "mcpServers": {',
+    `    "arena": ${arenaServerJson(arenaRoot).split("\n").join("\n    ")}`,
+    "  }",
+  ].join("\n");
+}
+
+// ── Setup functions (print instructions, never auto-modify) ──────────
 
 export function setupClaudeCodeUser(arenaRoot: string): string {
-  const configPath = resolve(homedir(), ".claude.json");
-  mergeConfig(configPath, "arena", {
-    type: "stdio",
-    command: "arena-mcp",
-    args: ["serve"],
-    env: { ARENA_ROOT: arenaRoot },
-  });
-  return configPath;
+  console.log(claudeCodeInstructions(arenaRoot));
+  return "(see instructions above)";
 }
-
-// ── Claude Desktop ──────────────────────────────────────────────────
 
 export function setupClaudeDesktop(arenaRoot: string): string {
-  const platform = process.platform;
-  let configDir: string;
-  if (platform === "darwin") {
-    configDir = resolve(
-      homedir(),
-      "Library",
-      "Application Support",
-      "Claude"
-    );
-  } else {
-    configDir = resolve(homedir(), ".config", "Claude");
-  }
-  const configPath = resolve(configDir, "claude_desktop_config.json");
-  mergeConfig(configPath, "arena", {
-    command: "arena-mcp",
-    args: ["serve"],
-    env: { ARENA_ROOT: arenaRoot },
-  });
-  return configPath;
+  console.log(claudeDesktopInstructions(arenaRoot));
+  return "(see instructions above)";
 }
-
-// ── Cursor ──────────────────────────────────────────────────────────
 
 export function setupCursor(arenaRoot: string): string {
-  const configPath = resolve(arenaRoot, ".cursor", "mcp.json");
-  mergeConfig(configPath, "arena", {
-    command: "arena-mcp",
-    args: ["serve"],
-    env: { ARENA_ROOT: arenaRoot },
-  });
-  return configPath;
+  console.log(cursorInstructions(arenaRoot));
+  return "(see instructions above)";
 }
-
-// ── Gemini CLI (~/.gemini/settings.json) ────────────────────────────
 
 export function setupGemini(arenaRoot: string): string {
-  const configPath = resolve(homedir(), ".gemini", "settings.json");
-  mergeConfig(configPath, "arena", {
-    command: "arena-mcp",
-    args: ["serve"],
-    env: { ARENA_ROOT: arenaRoot },
-  });
-  return configPath;
+  console.log(geminiInstructions(arenaRoot));
+  return "(see instructions above)";
 }
 
-// ── Codex CLI (~/.codex/config.toml) ────────────────────────────────
-
 export function setupCodex(arenaRoot: string): string {
-  const configPath = resolve(homedir(), ".codex", "config.toml");
-  mkdirSync(dirname(configPath), { recursive: true });
-
-  let content = "";
-  if (existsSync(configPath)) {
-    try {
-      content = readFileSync(configPath, "utf-8");
-    } catch {
-      // Overwrite if unreadable
-    }
-  }
-
-  writeFileSync(configPath, mergeCodexToml(content, arenaRoot), "utf-8");
-  return configPath;
+  console.log(codexInstructions(arenaRoot));
+  return "(see instructions above)";
 }
 
 /**
  * Pure function: merge arena MCP server into Codex config.toml content.
- * Removes any existing [mcp_servers.arena] and [mcp_servers.arena.*]
- * sections, then appends the correct block.
+ * Kept for tests and manual `arena-agent setup --apply` future use.
  */
 export function mergeCodexToml(content: string, arenaRoot: string): string {
   const lines = content.split("\n");
@@ -218,7 +228,7 @@ export function autoWireMcpForAgent(
       const configPath = fn();
       wired.push({ backend: label, configPath });
     } catch {
-      // Don't fail init if MCP wiring fails
+      // Don't fail init if setup fails
     }
   };
 
@@ -233,13 +243,11 @@ export function autoWireMcpForAgent(
       wireOne("Codex CLI", () => setupCodex(home));
       break;
     case "openclaw":
-      // Never modify user's OpenClaw config — just print MCP setup instructions
       wireOne("OpenClaw", () => setupOpenClaw(home));
       break;
     case "auto":
-      // Wire all detected backends except OpenClaw MCP (requires explicit opt-in)
+      // Print instructions for all detected backends
       for (const b of detectedBackends) {
-        if (b === "openclaw") continue;
         wired.push(...autoWireMcpForAgent(home, b, []));
       }
       break;
@@ -247,4 +255,28 @@ export function autoWireMcpForAgent(
   }
 
   return wired;
+}
+
+// ── Internal helper (kept for project-local .mcp.json only) ──────────
+
+function mergeConfig(
+  path: string,
+  serverName: string,
+  entry: McpServerEntry
+): void {
+  let existing: Record<string, unknown> = {};
+  if (existsSync(path)) {
+    try {
+      existing = JSON.parse(readFileSync(path, "utf-8"));
+    } catch {
+      // Overwrite invalid JSON
+    }
+  }
+  const servers =
+    (existing.mcpServers as Record<string, unknown>) ?? {};
+  servers[serverName] = entry;
+  existing.mcpServers = servers;
+
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, JSON.stringify(existing, null, 2) + "\n");
 }
