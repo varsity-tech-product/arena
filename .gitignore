@@ -6,6 +6,7 @@ __pycache__/
 *.egg-info/
 build/
 artifacts/
+openclaw/
 bot_output.log
 packages/mcp/dist/
 packages/mcp/node_modules/
