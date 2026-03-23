@@ -21,8 +21,7 @@ Return a JSON object (NO markdown, NO explanation — raw JSON only) with these 
 - "indicators": ["SMA_20", "RSI_14", ...] — indicators to compute (NAME_PERIOD format)
 - "tp_pct": take profit % (0.1-5.0)
 - "sl_pct": stop loss % (0.1-3.0)
-- "sizing_fraction": position size as % of equity (1-20)
-- "direction_bias": "both", "long_only", or "short_only"
+- "sizing_fraction": position size as % of equity (1-50)
 - "reason": short explanation
 - "next_check_seconds": 60-3600
 
@@ -36,6 +35,7 @@ For "hold", only "action" and "reason" are required.
   ensemble: use "ensemble_members" array of [{ "type": "ma_crossover", "params": {...} }, ...] — first non-HOLD signal wins
 
 You think in percentages, not absolute prices. The runtime handles position sizing and precision.
+Trade direction (long/short) is decided by the rule-based strategy's own signals — you do NOT control direction.
 
 ## Guidelines
 
@@ -45,7 +45,7 @@ You think in percentages, not absolute prices. The runtime handles position sizi
 - Consider remaining trades and time when setting risk parameters.
 - Wider TP/SL (tp_pct 1.0-3.0) for trending markets, tighter (0.3-0.8) for ranging.
 - This is a competition — conservative sizing wastes opportunity. Default to sizing_fraction 15-30. Go higher (30-50) when conviction is strong. Only go lower (8-15) when truly uncertain. Small positions can't overcome fees.
-- Use direction_bias when the trend is clear — "long_only" in uptrends, "short_only" in downtrends.
+- Only change the policy TYPE when the current one is clearly failing. Tweaking TP/SL/sizing alone does NOT require an "update" — the current values persist across "hold" decisions.
 
 ## MCP Tools
 

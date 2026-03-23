@@ -94,6 +94,21 @@ def detect_position_drift(previous_state: AgentState | None, current_state: Agen
     if previous_position == current_position and previous_trade_count == current_trade_count:
         return None
 
+    # Detect TP/SL fills: position was open, now flat, trade count increased
+    if previous_state.position is not None and current_state.position is None:
+        direction = getattr(previous_state.position, "direction", "?")
+        entry = getattr(previous_state.position, "entry_price", None)
+        size = getattr(previous_state.position, "size", None)
+        prev_equity = previous_state.account.equity
+        curr_equity = current_state.account.equity
+        pnl_estimate = curr_equity - prev_equity
+        close_type = "TP hit" if pnl_estimate > 0 else "SL hit" if pnl_estimate < 0 else "closed"
+        return (
+            f"exchange {close_type}: {direction} {size} @ {entry} closed by exchange "
+            f"(equity {prev_equity:.2f} -> {curr_equity:.2f}, est PnL {pnl_estimate:+.2f}), "
+            f"trade_count {previous_trade_count} -> {current_trade_count}"
+        )
+
     return (
         "exchange state drift detected: "
         f"position {previous_position} -> {current_position}, "

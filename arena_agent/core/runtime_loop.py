@@ -261,13 +261,15 @@ class MarketRuntime:
                     },
                 )
 
+                fee = transition.metrics.fee
                 self.logger.info(
-                    "Iteration %s | action=%s accepted=%s executed=%s pnl_delta=%.4f equity_delta=%.4f equity=%.2f",
+                    "Iteration %s | action=%s accepted=%s executed=%s pnl_delta=%.4f fee=%.4f equity_delta=%.4f equity=%.2f",
                     iterations,
                     action.type.value,
                     execution_result.accepted,
                     execution_result.executed,
                     transition.metrics.realized_pnl_delta,
+                    fee,
                     transition.metrics.equity_delta,
                     next_state.account.equity,
                 )

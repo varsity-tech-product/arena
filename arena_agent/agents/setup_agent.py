@@ -232,19 +232,16 @@ def _translate_flat_decision(payload: dict[str, Any]) -> dict[str, Any]:
     # --- Sizing (percentage-based -> fixed_fraction) ---
     sizing_fraction = payload.get("sizing_fraction")
     if sizing_fraction is not None:
-        sizing_fraction = max(1, min(20, float(sizing_fraction)))
+        sizing_fraction = max(1, min(50, float(sizing_fraction)))
         overrides.setdefault("strategy", {})["sizing"] = {
             "type": "fixed_fraction",
             "fraction": sizing_fraction / 100.0,
         }
 
     # --- Direction bias ---
-    direction_bias = payload.get("direction_bias")
-    if direction_bias in ("both", "long_only", "short_only"):
-        overrides["risk_limits"] = {
-            "allow_long": direction_bias != "short_only",
-            "allow_short": direction_bias != "long_only",
-        }
+    # Ignored: direction bias is NOT applied to risk_limits.
+    # Rule-based strategies decide trade direction based on their own signals.
+    # The setup agent should not override allow_long/allow_short.
 
     # --- Indicators (NAME_PERIOD -> signal_indicators FeatureSpec list) ---
     indicators = payload.get("indicators")
@@ -739,8 +736,9 @@ class SetupAgent:
         if action == "update" and uses_flat:
             logger.info("_parse_decision: using FLAT schema path (policy=%s)", payload.get("policy"))
             overrides = _translate_flat_decision(payload)
-            # Flat path always restarts when policy changes
-            restart = "policy" in overrides
+            # Only flag restart when the policy TYPE is present in overrides.
+            # TP/SL/sizing tweaks are applied via deep_merge without restarting.
+            restart = isinstance(overrides.get("policy"), dict) and "type" in overrides.get("policy", {})
         elif action == "update" and uses_legacy:
             logger.info("_parse_decision: using LEGACY overrides path (keys=%s)", list(payload["overrides"].keys()))
             overrides = payload["overrides"]
@@ -762,7 +760,7 @@ class SetupAgent:
 
 # Hard bounds on sizing params the setup agent can set.
 _SIZING_BOUNDS: dict[str, tuple[float, float]] = {
-    "fraction": (0.01, 0.20),
+    "fraction": (0.01, 0.50),
     "target_risk_pct": (0.005, 0.05),
     "max_risk_pct": (0.005, 0.03),
     "atr_multiplier": (0.5, 5.0),
