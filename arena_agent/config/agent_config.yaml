@@ -26,6 +26,8 @@ signal_indicators:
     params: {}
 
 policy:
+  # Which openclaw agent to use (defaults to "main" if unset)
+  openclaw_agent_id: arena-trader
   type: ensemble
   members:
     - type: ma_crossover

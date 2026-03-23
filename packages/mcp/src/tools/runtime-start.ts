@@ -24,7 +24,14 @@ export const inputSchema = z.object({
     .optional()
     .default("auto")
     .describe("Agent type."),
+  mode: z
+    .enum(["run", "auto"])
+    .optional()
+    .default("run")
+    .describe("Runtime mode. 'run' = per-tick agent decisions. 'auto' = LLM setup agent configures rule-based strategy, rule policy executes per tick."),
   model: z.string().optional().describe("Model override (e.g. sonnet)."),
+  setup_model: z.string().optional().describe("Model override for setup agent in auto mode (defaults to model)."),
+  setup_interval: z.number().optional().default(300).describe("Seconds between setup agent checks in auto mode."),
   iterations: z
     .number()
     .optional()
@@ -50,10 +57,11 @@ export function execute(
   const python = findPython(arenaRoot);
   const env = buildChildEnv(arenaRoot);
 
+  const subcommand = args.mode === "auto" ? "auto" : "run";
   const cmdArgs = [
     "-m",
     "arena_agent",
-    "run",
+    subcommand,
     "--agent",
     args.agent,
     "--config",
@@ -64,6 +72,10 @@ export function execute(
   if (args.model) cmdArgs.push("--model", args.model);
   if (args.iterations !== undefined)
     cmdArgs.push("--iterations", String(args.iterations));
+  if (subcommand === "auto") {
+    if (args.setup_model) cmdArgs.push("--setup-model", args.setup_model);
+    if (args.setup_interval) cmdArgs.push("--setup-interval", String(args.setup_interval));
+  }
 
   runtimeProcess = spawn(python, cmdArgs, {
     cwd: arenaRoot,

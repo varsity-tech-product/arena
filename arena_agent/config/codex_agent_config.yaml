@@ -12,8 +12,8 @@ adapter_retry_attempts: 3
 adapter_retry_backoff_seconds: 0.5
 adapter_min_call_spacing_seconds: 0
 policy:
-  type: agent_exec
-  backend: auto
+  type: rule
+  backend: openclaw
   indicator_mode: custom
   signal_indicators:
     - indicator: SMA
@@ -51,6 +51,9 @@ policy:
     (volatility-scaled) and TP/SL placement (ATR-based with min 0.5% distance)
     automatically. Focus on direction and timing — the strategy refines your
     size and TP/SL. A trailing stop and drawdown exit also run automatically.'
+  # openclaw_agent_id: your openclaw agent id (defaults to "main" if unset)
+  # Set this to the agent you've configured for trading, e.g.:
+  # openclaw_agent_id: my-trading-agent
 strategy:
   sizing:
     type: volatility_scaled

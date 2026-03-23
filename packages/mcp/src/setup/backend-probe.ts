@@ -1,7 +1,4 @@
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { homedir } from "node:os";
-import { resolve } from "node:path";
 import { commandAvailable } from "./bootstrap-python.js";
 import type { ManagedAgent } from "../util/home.js";
 
@@ -195,20 +192,15 @@ function probeOpenClaw(): BackendProbe {
   });
   const output = `${helpResult.stdout ?? ""}${helpResult.stderr ?? ""}`.trim();
   if (helpResult.status === 0) {
-    const agentDir = resolve(homedir(), ".openclaw", "agents", "arena-trader");
-    const agentRegistered = existsSync(agentDir);
-    const confidence = agentRegistered ? "medium" : "low";
-    const agentNote = agentRegistered
-      ? ""
-      : ". Agent 'arena-trader' not registered — run: arena-agent setup --client openclaw";
+    // We don't check for specific arena agents — the user's own default
+    // openclaw agent is used as-is. Just verify the CLI works.
     return {
       backend: "openclaw",
       available: true,
       ready: true,
-      confidence,
-      summary: `ready (openclaw agent help succeeded${agentNote})`,
-      details: (output || "openclaw agent --help exited successfully.") +
-        (agentRegistered ? "" : `\nAgent directory missing: ${agentDir}`),
+      confidence: "medium",
+      summary: "ready (openclaw CLI available)",
+      details: output || "openclaw agent --help exited successfully.",
     };
   }
 

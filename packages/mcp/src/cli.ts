@@ -156,14 +156,11 @@ async function main(): Promise<void> {
     console.log(`Arena home: ${root}`);
 
     if (clientName === "openclaw") {
-      if (mode === "mcp") {
-        console.log("\nOpenClaw ACP/acpx plugin configured with arena MCP server.");
-        console.log("The arena.* tools are now available in OpenClaw sessions.");
-      } else {
-        console.log("\nOpenClaw workspace and agent registered.");
-        console.log("Use: openclaw agent --local --agent arena-trader");
-        console.log("To also wire arena MCP tools into OpenClaw, re-run with --mode mcp.");
-      }
+      console.log("\nOpenClaw CLI detected. Your existing agent will be used as-is.");
+      console.log("The arena runtime sends complete prompts — no custom agent config needed.");
+      console.log("\nTo optionally give your agent access to arena MCP tools,");
+      console.log("add the arena server to your OpenClaw config manually.");
+      console.log("Run: arena-agent setup --client openclaw for instructions.");
     } else {
       console.log("\nTools available (29 total):");
       console.log("  Runtime:       market_state, competition_info, trade_action, last_transition");
@@ -340,7 +337,7 @@ async function initManagedHome(): Promise<void> {
     installMcp: true,
   });
   if (agent === "openclaw") {
-    console.log("Provisioning dedicated OpenClaw trading agent...");
+    // Just verify openclaw is available — never modify user's agent config
     ensureOpenClawTradingAgent(home);
   }
 

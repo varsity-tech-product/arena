@@ -142,7 +142,7 @@ class AgentExecPolicy(Policy):
     transition_path: str | None = None
     bootstrap_from_transition_log: bool = True
     risk_limits: RiskLimits | None = None
-    openclaw_agent_id: str = "arena-trader"
+    openclaw_agent_id: str | None = None
     name: str = "agent_exec"
     subprocess_runner: Any | None = None
     max_consecutive_cli_failures: int = 3
@@ -501,12 +501,15 @@ class AgentExecPolicy(Policy):
         return payload
 
     def _run_openclaw(self, prompt: str) -> dict[str, Any]:
+        # Use whichever openclaw agent the user configured.
+        # Defaults to "main" — override via openclaw_agent_id in config YAML.
+        agent_id = self.openclaw_agent_id or "main"
         command = [
             self.command,
             "agent",
             "--local",
             "--json",
-            "--agent", self.openclaw_agent_id,
+            "--agent", agent_id,
             "--message", prompt,
         ]
         if self.model:

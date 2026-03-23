@@ -243,10 +243,12 @@ class SetupAgent:
         timeout: float = 300.0,
         mcp_config_path: str | None = None,
         max_consecutive_failures: int = 2,
+        openclaw_agent_id: str | None = None,
     ):
         self.backend = backend
         self.model = model
         self.timeout = timeout
+        self.openclaw_agent_id = openclaw_agent_id
         self.mcp_config_path = mcp_config_path or _find_mcp_config()
         if not self.mcp_config_path:
             logger.warning(
@@ -444,12 +446,15 @@ class SetupAgent:
         return self._exec_subprocess(command, prompt, "gemini", response_key="response")
 
     def _run_openclaw(self, prompt: str) -> dict[str, Any]:
+        # Use whichever openclaw agent the user configured.
+        # Defaults to "main" — override via openclaw_agent_id in config.
+        agent_id = self.openclaw_agent_id or "main"
         command = [
             "openclaw",
             "agent",
             "--local",
             "--json",
-            "--agent", "arena-trader",
+            "--agent", agent_id,
             "--message", prompt,
         ]
         result = subprocess.run(
@@ -497,7 +502,13 @@ class SetupAgent:
         else:
             result_text = "\n".join(json_lines)
         result_text = _strip_markdown_fences(result_text)
-        return json.loads(result_text)
+        try:
+            return json.loads(result_text)
+        except json.JSONDecodeError:
+            payload = _extract_json_object(result_text)
+            if payload is None:
+                raise ValueError(f"openclaw result is not valid JSON: {result_text[:500]}")
+            return payload
 
     def _exec_subprocess(
         self,

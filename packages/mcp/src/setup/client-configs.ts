@@ -1,13 +1,10 @@
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { homedir } from "node:os";
-import { ensureOpenClawTradingAgent } from "./openclaw-agent.js";
 import {
-  mergeArenaMcpServer,
-  readOpenClawGlobalConfig,
-  writeOpenClawGlobalConfig,
-  openclawGlobalConfigPath,
-} from "./openclaw-config.js";
+  ensureOpenClawTradingAgent,
+  openclawMcpInstructions,
+} from "./openclaw-agent.js";
 import type { ManagedAgent } from "../util/home.js";
 
 interface McpServerEntry {
@@ -177,20 +174,15 @@ export function mergeCodexToml(content: string, arenaRoot: string): string {
 
 export function setupOpenClaw(
   arenaRoot: string,
-  options?: { mode?: string }
+  _options?: { mode?: string }
 ): string {
-  const mode = options?.mode ?? "cli";
-
+  // Verify openclaw is available — never modify user's global config or agents
   ensureOpenClawTradingAgent(arenaRoot);
 
-  if (mode === "mcp") {
-    const existing = readOpenClawGlobalConfig();
-    const merged = mergeArenaMcpServer(existing, arenaRoot);
-    writeOpenClawGlobalConfig(merged);
-    return openclawGlobalConfigPath();
-  }
+  // Print instructions for optional MCP tools setup (user applies manually)
+  console.log(openclawMcpInstructions(arenaRoot));
 
-  return resolve(arenaRoot, "openclaw", "arena-trader");
+  return "(no config modified — see instructions above)";
 }
 
 // ── Client setup registry ───────────────────────────────────────────
@@ -241,14 +233,8 @@ export function autoWireMcpForAgent(
       wireOne("Codex CLI", () => setupCodex(home));
       break;
     case "openclaw":
-      // Workspace already handled by ensureOpenClawTradingAgent in init.
-      // Also wire MCP so arena.* tools are available inside OpenClaw.
-      wireOne("OpenClaw", () => {
-        const existing = readOpenClawGlobalConfig();
-        const merged = mergeArenaMcpServer(existing, home);
-        writeOpenClawGlobalConfig(merged);
-        return openclawGlobalConfigPath();
-      });
+      // Never modify user's OpenClaw config — just print MCP setup instructions
+      wireOne("OpenClaw", () => setupOpenClaw(home));
       break;
     case "auto":
       // Wire all detected backends except OpenClaw MCP (requires explicit opt-in)

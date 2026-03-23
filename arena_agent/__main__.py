@@ -199,8 +199,9 @@ def _apply_agent_override(config, args: Any):
         policy.setdefault("fail_open_to_hold", True)
         policy.setdefault("sandbox_mode", "read-only")
         policy.setdefault("bootstrap_from_transition_log", True)
-        if backend == "openclaw":
-            policy.setdefault("openclaw_agent_id", "arena-trader")
+        # openclaw_agent_id is intentionally not set by default — the runtime
+        # uses the user's own default openclaw agent. Users can override via
+        # config YAML if they want a specific agent.
         return replace(config, policy=policy)
     return config
 
@@ -287,11 +288,14 @@ def _run_auto(argv: list[str]) -> None:
     # The setup agent always uses an LLM backend, even when the runtime
     # policy is rule-based. Use the agent backend or default to "auto".
     setup_backend = _AGENT_EXEC_BACKENDS.get(args.agent, "auto")
+    # Let the user specify which openclaw agent to use via config YAML
+    openclaw_agent_id = config_dict.get("policy", {}).get("openclaw_agent_id")
     setup_agent = SetupAgent(
         backend=setup_backend,
         model=args.setup_model or args.model,
         timeout=args.timeout_seconds * 2,
         mcp_config_path=mcp_config,
+        openclaw_agent_id=openclaw_agent_id,
     )
 
     cycle = 0

@@ -174,9 +174,8 @@ def build_policy(config: dict, *, runtime_config=None) -> Policy:
         bootstrap_from_transition_log = bool(
             config.get("bootstrap_from_transition_log", params.pop("bootstrap_from_transition_log", True))
         )
-        openclaw_agent_id = str(
-            config.get("openclaw_agent_id", params.pop("openclaw_agent_id", "arena-trader"))
-        )
+        openclaw_agent_id = config.get("openclaw_agent_id", params.pop("openclaw_agent_id", None))
+        openclaw_agent_id = str(openclaw_agent_id) if openclaw_agent_id else None
         transition_path = None if runtime_config is None else runtime_config.storage.transition_path
         risk_limits = None if runtime_config is None else runtime_config.risk_limits
         return AgentExecPolicy(

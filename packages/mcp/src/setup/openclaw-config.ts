@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
+import { commandAvailable } from "./bootstrap-python.js";
 import type { ArenaHomeState } from "../util/home.js";
 
 export type OpenClawMode = "cli" | "mcp";
@@ -57,6 +58,11 @@ export function writeOpenClawGlobalConfig(config: OpenClawGlobalConfig): void {
 /**
  * Pure function: merges arena MCP server entry into an OpenClaw global config.
  * Never includes VARSITY_API_KEY — only ARENA_ROOT.
+ *
+ * Additive only — never overwrites existing user settings:
+ * - acp.backend is only set when absent (user may prefer a different backend)
+ * - acpx plugin is enabled only when absent
+ * - Only the "arena" MCP server entry is touched; other servers are preserved
  */
 export function mergeArenaMcpServer(
   existing: OpenClawGlobalConfig | null,
@@ -64,20 +70,25 @@ export function mergeArenaMcpServer(
 ): OpenClawGlobalConfig {
   const config: OpenClawGlobalConfig = existing ? structuredClone(existing) : {};
 
-  // Ensure acp.backend = "acpx"
+  // Set acp.backend only if not already configured
   if (!config.acp) config.acp = {};
-  config.acp.backend = "acpx";
+  if (!config.acp.backend) {
+    config.acp.backend = "acpx";
+  }
 
-  // Ensure plugins.entries.acpx is enabled with mcpServers path
+  // Ensure plugins.entries.acpx exists but don't force-enable if user disabled it
   if (!config.plugins) config.plugins = {};
   if (!config.plugins.entries) config.plugins.entries = {};
-  if (!config.plugins.entries.acpx) config.plugins.entries.acpx = {};
-  (config.plugins.entries.acpx as Record<string, unknown>).enabled = true;
+  if (!config.plugins.entries.acpx) {
+    config.plugins.entries.acpx = {};
+    (config.plugins.entries.acpx as Record<string, unknown>).enabled = true;
+  }
   if (!config.plugins.entries.acpx.config) config.plugins.entries.acpx.config = {};
   if (!config.plugins.entries.acpx.config.mcpServers) {
     config.plugins.entries.acpx.config.mcpServers = {};
   }
 
+  // Only add/update the "arena" server entry — leave other MCP servers untouched
   config.plugins.entries.acpx.config.mcpServers.arena = {
     command: "arena-mcp",
     args: ["serve"],
@@ -133,25 +144,13 @@ export function diagnoseOpenClaw(
   const display: string[] = [];
   const errors: string[] = [];
 
-  // Workspace check
-  const ws = openclawWorkspaceValid(home);
-  if (ws.valid) {
-    display.push(`OpenClaw workspace: ok`);
+  // Just check that the openclaw CLI is available — we don't create or
+  // manage agents in the user's OpenClaw config.
+  if (commandAvailable("openclaw")) {
+    display.push(`OpenClaw CLI:      available`);
   } else {
-    display.push(`OpenClaw workspace: incomplete`);
-    for (const issue of ws.issues) {
-      errors.push(`${issue}. Run: arena-agent setup --client openclaw`);
-    }
-  }
-
-  // Agent registration check
-  if (openclawAgentRegistered()) {
-    display.push(`OpenClaw agent:    registered`);
-  } else {
-    display.push(`OpenClaw agent:    not registered`);
-    errors.push(
-      `OpenClaw agent '${OPENCLAW_AGENT_ID}' not registered. Run: arena-agent setup --client openclaw`
-    );
+    display.push(`OpenClaw CLI:      not found`);
+    errors.push("openclaw is not installed or not in PATH.");
   }
 
   // MCP mode checks (only when openclawMode is "mcp")
