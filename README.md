@@ -73,12 +73,9 @@ Notes:
 - SDK:
   - `arena_agent/sdk/`
   - `examples/sdk_quickstart.py`
-- Agent exec policy (CLI-backed, supports Claude Code and Codex):
-  - current backends: Claude Code, Gemini, OpenClaw, Codex
-  - `arena_agent/agents/agent_exec_policy.py`
-  - `arena_agent/agents/prompt_template.md`
-  - `arena_agent/agents/action_schema.json`
-  - `arena_agent/config/codex_agent_config.yaml`
+- CLI backend utilities (shared by setup agent):
+  - `arena_agent/agents/cli_backends.py` (resolve_backend, extract_usage, session management)
+  - Supported backends: Claude Code, Gemini, OpenClaw, Codex
 - LLM-powered setup agent (strategy manager):
   - analyzes market + performance context, picks rule policy + params via flat schema
   - strategy change cooldown (20 min / 5 trades) prevents thrashing
@@ -160,9 +157,9 @@ The system uses a **setup agent → rule policy** architecture. The LLM (setup a
 - The LLM never places trades directly — it configures a rule engine
 - Per-strategy performance is tracked separately from overall stats
 - Direction bias (long_only/short_only/both) is enforced at the risk limits level
-- `--agent claude/codex/gemini` selects the setup agent backend; the runtime always uses rule policies
-- `--agent auto` in auto mode defaults to rule policy; the setup agent picks which one
-- Backward compatible: `--agent claude` in `run` mode still uses `agent_exec` with per-tick LLM calls
+- `--agent claude/codex/gemini/openclaw` selects the setup agent backend in auto mode
+- The `run` command only supports rule-based policies (`--agent config/rule/tap`)
+- For LLM-backed trading, use `auto` mode — the LLM configures strategy, rules execute
 
 Indicator support:
 

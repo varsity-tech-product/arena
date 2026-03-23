@@ -14,7 +14,7 @@ import tempfile
 import time
 from typing import Any
 
-from arena_agent.agents.agent_exec_policy import (
+from arena_agent.agents.cli_backends import (
     _extract_usage,
     _strip_markdown_fences,
     resolve_backend,
@@ -447,7 +447,7 @@ class SetupAgent:
 
     def _try_fallback(self) -> None:
         """Switch to an alternative backend after consecutive failures."""
-        from arena_agent.agents.agent_exec_policy import _find_fallback_backend
+        from arena_agent.agents.cli_backends import _find_fallback_backend
         fallback = _find_fallback_backend(self._resolved_backend)
         if fallback is None:
             return
@@ -566,7 +566,7 @@ class SetupAgent:
     def _run_openclaw(self, prompt: str) -> dict[str, Any]:
         # Use whichever openclaw agent the user configured.
         # Defaults to "main" — override via openclaw_agent_id in config.
-        from arena_agent.agents.agent_exec_policy import _clear_openclaw_sessions
+        from arena_agent.agents.cli_backends import _clear_openclaw_sessions
         agent_id = self.openclaw_agent_id or "main"
         _clear_openclaw_sessions(agent_id)
         command = [

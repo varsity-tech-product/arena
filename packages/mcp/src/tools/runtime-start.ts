@@ -23,12 +23,12 @@ export const inputSchema = z.object({
     .enum(["config", "rule", "claude", "gemini", "openclaw", "codex", "auto", "tap"])
     .optional()
     .default("auto")
-    .describe("Agent type."),
+    .describe("Agent backend for auto mode (claude/gemini/openclaw/codex/auto). For run mode use config/rule/tap."),
   mode: z
     .enum(["run", "auto"])
     .optional()
-    .default("run")
-    .describe("Runtime mode. 'run' = per-tick agent decisions. 'auto' = LLM setup agent configures rule-based strategy, rule policy executes per tick."),
+    .default("auto")
+    .describe("Runtime mode. 'run' = rule-based policy from YAML config. 'auto' = LLM setup agent configures rule-based strategy."),
   model: z.string().optional().describe("Model override (e.g. sonnet)."),
   setup_model: z.string().optional().describe("Model override for setup agent in auto mode (defaults to model)."),
   setup_interval: z.number().optional().default(300).describe("Seconds between setup agent checks in auto mode."),
@@ -119,20 +119,11 @@ export function findConfigPath(
     candidates.push(resolve(arenaRoot, "arena_agent", "config", rawConfig));
   } else if (isManagedArenaHome(arenaRoot)) {
     const state = readArenaHomeState(arenaRoot);
-    if (agent === "rule" || agent === "config") {
-      candidates.push(
-        state?.profiles.rule ?? resolve(arenaRoot, "config", "rule.yaml")
-      );
-    } else {
-      candidates.push(
-        state?.profiles.agentExec ??
-          resolve(arenaRoot, "config", "agent_exec.yaml")
-      );
-    }
-  } else if (agent === "rule" || agent === "config") {
-    candidates.push(resolve(arenaRoot, "arena_agent", "config", "agent_config.yaml"));
+    candidates.push(
+      state?.profiles.rule ?? resolve(arenaRoot, "config", "rule.yaml")
+    );
   } else {
-    candidates.push(resolve(arenaRoot, "arena_agent", "config", "codex_agent_config.yaml"));
+    candidates.push(resolve(arenaRoot, "arena_agent", "config", "agent_config.yaml"));
   }
 
   for (const candidate of candidates) {

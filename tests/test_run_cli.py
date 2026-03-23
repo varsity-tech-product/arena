@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import unittest
-from unittest.mock import patch
 
 from arena_agent.__main__ import _apply_agent_override
 from arena_agent.core.models import RuntimeConfig
 
 
 class RunCLITest(unittest.TestCase):
-    def test_agent_claude_sets_agent_exec_with_claude_backend(self) -> None:
+    def test_agent_config_preserves_yaml_policy(self) -> None:
         config = RuntimeConfig.from_mapping(
             {
                 "competition_id": 4,
@@ -16,28 +15,23 @@ class RunCLITest(unittest.TestCase):
                 "policy": {"type": "ensemble"},
             }
         )
-        args = type(
-            "Args",
-            (),
-            {
-                "agent": "claude",
-                "model": "sonnet",
-                "timeout_seconds": 60.0,
-                "recent_transitions": 5,
-                "extra_instructions": "Stay conservative.",
-                "strategy_context": "momentum",
-            },
-        )()
-
+        args = type("Args", (), {"agent": "config"})()
         updated = _apply_agent_override(config, args)
+        self.assertEqual(updated.policy["type"], "ensemble")
 
-        self.assertEqual(updated.policy["type"], "agent_exec")
-        self.assertEqual(updated.policy["backend"], "claude")
-        self.assertEqual(updated.policy["model"], "sonnet")
-        self.assertEqual(updated.policy["timeout_seconds"], 60.0)
-        self.assertEqual(updated.policy["strategy_context"], "momentum")
+    def test_agent_rule_preserves_yaml_policy(self) -> None:
+        config = RuntimeConfig.from_mapping(
+            {
+                "competition_id": 4,
+                "symbol": "BTCUSDT",
+                "policy": {"type": "ma_crossover", "params": {"fast_period": 10}},
+            }
+        )
+        args = type("Args", (), {"agent": "rule"})()
+        updated = _apply_agent_override(config, args)
+        self.assertEqual(updated.policy["type"], "ma_crossover")
 
-    def test_agent_codex_sets_codex_backend(self) -> None:
+    def test_agent_tap_sets_tap_policy(self) -> None:
         config = RuntimeConfig.from_mapping(
             {
                 "competition_id": 4,
@@ -48,100 +42,14 @@ class RunCLITest(unittest.TestCase):
             "Args",
             (),
             {
-                "agent": "codex",
-                "model": "gpt-5",
-                "timeout_seconds": 45.0,
-                "recent_transitions": 5,
-                "extra_instructions": "",
-                "strategy_context": "",
+                "agent": "tap",
+                "tap_endpoint": "http://localhost:9090/decision",
+                "tap_timeout_seconds": 30.0,
             },
         )()
-
         updated = _apply_agent_override(config, args)
-        self.assertEqual(updated.policy["type"], "agent_exec")
-        self.assertEqual(updated.policy["backend"], "codex")
-
-    def test_agent_openclaw_sets_openclaw_backend(self) -> None:
-        config = RuntimeConfig.from_mapping(
-            {
-                "competition_id": 4,
-                "symbol": "BTCUSDT",
-            }
-        )
-        args = type(
-            "Args",
-            (),
-            {
-                "agent": "openclaw",
-                "model": None,
-                "timeout_seconds": 45.0,
-                "recent_transitions": 5,
-                "extra_instructions": "",
-                "strategy_context": "",
-            },
-        )()
-
-        updated = _apply_agent_override(config, args)
-        self.assertEqual(updated.policy["type"], "agent_exec")
-        self.assertEqual(updated.policy["backend"], "openclaw")
-
-    def test_agent_auto_sets_auto_backend(self) -> None:
-        config = RuntimeConfig.from_mapping(
-            {
-                "competition_id": 4,
-                "symbol": "BTCUSDT",
-            }
-        )
-        args = type(
-            "Args",
-            (),
-            {
-                "agent": "auto",
-                "model": None,
-                "timeout_seconds": 45.0,
-                "recent_transitions": 5,
-                "extra_instructions": "",
-                "strategy_context": "",
-            },
-        )()
-
-        updated = _apply_agent_override(config, args)
-        self.assertEqual(updated.policy["type"], "agent_exec")
-        self.assertEqual(updated.policy["backend"], "auto")
-
-    def test_run_subcommand_invokes_runtime(self) -> None:
-        config = RuntimeConfig.from_mapping({"competition_id": 4, "symbol": "BTCUSDT"})
-        runtime_instance = type(
-            "RuntimeStub",
-            (),
-            {
-                "run": lambda self: type(
-                    "Report",
-                    (),
-                    {
-                        "iterations": 1,
-                        "executed_actions": 0,
-                        "transitions_recorded": 0,
-                        "total_realized_pnl": 0.0,
-                        "total_fees": 0.0,
-                        "final_equity": 1000.0,
-                    },
-                )()
-            },
-        )()
-
-        with patch("arena_agent.__main__.load_runtime_config", return_value=config), patch(
-            "arena_agent.__main__.load_local_runtime_env"
-        ), patch("arena_agent.__main__.require_runtime_environment"), patch(
-            "arena_agent.__main__.MarketRuntime",
-            return_value=runtime_instance,
-        ) as runtime_cls:
-            from arena_agent.__main__ import main
-
-            main(["run", "--agent", "claude", "--config", "arena_agent/config/agent_config.yaml"])
-
-        self.assertEqual(runtime_cls.call_args.args[0].policy["type"], "agent_exec")
-        self.assertEqual(runtime_cls.call_args.args[0].policy["backend"], "claude")
+        self.assertEqual(updated.policy["type"], "tap_http")
+        self.assertEqual(updated.policy["endpoint"], "http://localhost:9090/decision")
 
 
 if __name__ == "__main__":

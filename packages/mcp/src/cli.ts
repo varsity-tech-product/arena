@@ -386,11 +386,7 @@ function runDoctor(): void {
     console.log(`Default model: ${state.defaultModel ?? "default"}`);
     console.log(`Mode:          ${state.liveTrading ? "live" : "dry-run"}`);
     console.log(`Monitor port:  ${state.monitorPort}`);
-    console.log(`Agent config:  ${state.profiles.agentExec}`);
     console.log(`Rule config:   ${state.profiles.rule}`);
-    if (!existsSync(state.profiles.agentExec)) {
-      errors.push(`Missing managed config: ${state.profiles.agentExec}`);
-    }
     if (!existsSync(state.profiles.rule)) {
       errors.push(`Missing managed config: ${state.profiles.rule}`);
     }
@@ -988,15 +984,9 @@ function resolveUserConfigPath(
     candidates.push(resolve(home, rawConfig));
     candidates.push(resolve(home, "arena_agent", "config", rawConfig));
   } else if (isManagedArenaHome(home) && state) {
-    if (agent === "rule") {
-      candidates.push(state.profiles.rule);
-    } else {
-      candidates.push(state.profiles.agentExec);
-    }
-  } else if (agent === "rule") {
-    candidates.push(resolve(home, "arena_agent", "config", "agent_config.yaml"));
+    candidates.push(state.profiles.rule);
   } else {
-    candidates.push(resolve(home, "arena_agent", "config", "codex_agent_config.yaml"));
+    candidates.push(resolve(home, "arena_agent", "config", "agent_config.yaml"));
   }
 
   for (const candidate of candidates) {

@@ -51,12 +51,11 @@ def _run_runtime(argv: list[str]) -> None:
     parser = argparse.ArgumentParser(description="Run an Arena trading agent runtime.")
     parser.add_argument(
         "--agent",
-        choices=["config", "rule", "tap", "claude", "gemini", "openclaw", "codex", "auto"],
+        choices=["config", "rule", "tap"],
         default="config",
-        help="Policy to run. 'claude' uses Claude Code, 'gemini' uses Gemini CLI, "
-        "'openclaw' uses OpenClaw, 'codex' uses Codex CLI, "
-        "'auto' detects which is available. 'tap' uses an external HTTP endpoint. "
-        "'config' keeps the YAML policy unchanged.",
+        help="Policy to run. 'config' keeps the YAML policy unchanged. "
+        "'rule' uses the built-in rule policy. 'tap' uses an external HTTP endpoint. "
+        "For LLM-backed trading, use 'arena_agent auto' instead.",
     )
     parser.add_argument(
         "--config",
@@ -84,33 +83,6 @@ def _run_runtime(argv: list[str]) -> None:
         "--log-level",
         default="INFO",
         help="Python logging level.",
-    )
-    parser.add_argument(
-        "--model",
-        default=None,
-        help="Model override (e.g. sonnet, opus, gpt-5).",
-    )
-    parser.add_argument(
-        "--timeout-seconds",
-        type=float,
-        default=None,
-        help="Decision timeout for the CLI agent. Defaults to config value or 120s.",
-    )
-    parser.add_argument(
-        "--recent-transitions",
-        type=int,
-        default=5,
-        help="How many recent transitions to include in decision memory.",
-    )
-    parser.add_argument(
-        "--extra-instructions",
-        default="",
-        help="Optional extra prompt instructions for the policy.",
-    )
-    parser.add_argument(
-        "--strategy-context",
-        default="",
-        help="Optional fixed strategy context for agent decisions.",
     )
     parser.add_argument(
         "--tap-endpoint",
@@ -166,42 +138,6 @@ def _apply_agent_override(config, args: Any):
                 "headers": dict(policy.get("headers", {"Content-Type": "application/json"})),
             }
         )
-        return replace(config, policy=policy)
-    if agent in _AGENT_EXEC_BACKENDS:
-        backend = _AGENT_EXEC_BACKENDS[agent]
-        yaml_policy = config.policy if isinstance(config.policy, dict) else {}
-        # Start from the full YAML policy, then override specific fields.
-        # This preserves indicator_mode, extra_instructions, strategy_context,
-        # and any other policy fields the user set in the YAML config.
-        policy = dict(yaml_policy)
-        policy["type"] = "agent_exec"
-        policy["backend"] = backend
-        policy["cwd"] = str(Path.cwd())
-        # CLI flag > YAML config > default for fields with CLI overrides
-        if args.model is not None:
-            policy["model"] = args.model
-        elif "model" not in policy:
-            policy["model"] = None
-        policy["timeout_seconds"] = (
-            args.timeout_seconds or yaml_policy.get("timeout_seconds") or 120.0
-        )
-        policy["recent_transition_limit"] = args.recent_transitions
-        if args.extra_instructions:
-            policy["extra_instructions"] = args.extra_instructions
-        elif "extra_instructions" not in policy:
-            policy["extra_instructions"] = ""
-        if args.strategy_context:
-            policy["strategy_context"] = args.strategy_context
-        elif "strategy_context" not in policy:
-            policy["strategy_context"] = ""
-        # Defaults for fields that must exist
-        policy.setdefault("indicator_mode", "full")
-        policy.setdefault("fail_open_to_hold", True)
-        policy.setdefault("sandbox_mode", "read-only")
-        policy.setdefault("bootstrap_from_transition_log", True)
-        # openclaw_agent_id is intentionally not set by default — the runtime
-        # uses the user's own default openclaw agent. Users can override via
-        # config YAML if they want a specific agent.
         return replace(config, policy=policy)
     return config
 

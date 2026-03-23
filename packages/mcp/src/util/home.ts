@@ -27,7 +27,6 @@ export interface ArenaHomeState {
   pythonInstallSource: string;
   openclawMode?: "cli" | "mcp";
   profiles: {
-    agentExec: string;
     rule: string;
   };
 }
@@ -79,7 +78,7 @@ export function logsDirPath(home: string): string {
 
 export function profilePath(
   home: string,
-  profile: "agent_exec" | "rule"
+  profile: "rule"
 ): string {
   return resolve(configDirPath(home), `${profile}.yaml`);
 }
@@ -136,7 +135,6 @@ export function createArenaHomeState(
     pythonInstallSource:
       options.pythonInstallSource ?? DEFAULT_PYTHON_INSTALL_SOURCE,
     profiles: {
-      agentExec: profilePath(home, "agent_exec"),
       rule: profilePath(home, "rule"),
     },
   };
@@ -195,7 +193,6 @@ export function writeManagedConfigs(
   ensureArenaHomeDirectories(home);
   const overwrite = options.overwrite ?? true;
   const configs: Array<[string, string]> = [
-    [state.profiles.agentExec, renderAgentExecConfig(state)],
     [state.profiles.rule, renderRuleConfig(state)],
   ];
 
@@ -209,109 +206,6 @@ export function writeManagedConfigs(
 
 function boolText(value: boolean): string {
   return value ? "true" : "false";
-}
-
-function renderAgentExecConfig(state: ArenaHomeState): string {
-  return `# Managed by arena-agent init
-competition_id: 4
-symbol: BTCUSDT
-interval: 1m
-tick_interval_seconds: 60
-kline_limit: 120
-orderbook_depth: 20
-max_iterations: null
-stop_when_competition_inactive: true
-error_backoff_seconds: 5
-dry_run: ${boolText(!state.liveTrading)}
-adapter_retry_attempts: 3
-adapter_retry_backoff_seconds: 0.5
-adapter_min_call_spacing_seconds: 0.0
-
-policy:
-  type: agent_exec
-  backend: auto
-  indicator_mode: custom
-  signal_indicators:
-    - indicator: SMA
-      params: { timeperiod: 20 }
-    - indicator: SMA
-      params: { timeperiod: 50 }
-    - indicator: RSI
-      params: { timeperiod: 14 }
-    - indicator: ATR
-      params: { timeperiod: 14 }
-    - indicator: MACD
-    - indicator: BBANDS
-      params: { timeperiod: 20 }
-    - indicator: ADX
-      params: { timeperiod: 14 }
-    - indicator: OBV
-  timeout_seconds: 120
-  recent_transition_limit: 5
-  fail_open_to_hold: true
-  sandbox_mode: read-only
-  bootstrap_from_transition_log: true
-  strategy_context: active_momentum
-  extra_instructions: >-
-    A core set of indicators (SMA 20/50, RSI 14, ATR 14, MACD, BBANDS, ADX, OBV)
-    is pre-computed in the features section. If you need additional indicators,
-    include an "indicators" field in your action metadata with a list of
-    {"indicator": "NAME", "params": {...}} objects — they will appear next tick.
-    Be decisive — prefer HOLD only when the signal is genuinely ambiguous.
-    Do not HOLD for extended periods when flat with trades remaining.
-    If flat for 5+ consecutive iterations, actively look for an entry.
-    Consider short positions equally — do not default to long bias.
-    CLOSE_POSITION takes NO size parameter — always set size to null.
-    TP/SL params are exactly: atr_tp_mult and atr_sl_mult (check strategy_catalog for all param names).
-    Indicator params must be numeric (e.g. period: 14, not period: "MACD_signal").
-
-strategy:
-  sizing:
-    type: volatility_scaled
-    target_risk_pct: 0.02
-    atr_multiplier: 2.0
-  tpsl:
-    type: atr_multiple
-    atr_tp_mult: 2.0
-    atr_sl_mult: 2.0
-    min_sl_pct: 0.005
-  entry_filters:
-    - type: trade_budget
-      min_remaining_trades: 5
-  exit_rules:
-    - type: trailing_stop
-      atr_multiplier: 2.0
-    - type: drawdown_exit
-      max_drawdown_pct: 0.02
-
-risk_limits:
-  max_position_size_pct: 0.1
-  # max_absolute_size removed — computed from sizing_fraction + equity + price.
-  min_size: 0.001
-  quantity_precision: 3
-  price_precision: 2
-  max_trades: 40
-  min_seconds_between_trades: 60
-  allow_long: true
-  allow_short: true
-
-storage:
-  transition_path: ./artifacts/transitions_agent_exec.jsonl
-  journal_path: ./artifacts/journal_agent_exec.jsonl
-  max_in_memory_transitions: 1000
-
-observability:
-  enabled: true
-  host: 127.0.0.1
-  port: ${state.monitorPort}
-  max_transitions: 20
-  max_logs: 50
-  no_transition_threshold_seconds: 90
-  no_transition_error_threshold_seconds: 180
-  max_decision_latency_seconds: 120
-  max_consecutive_runtime_errors: 10
-  supervisor_stop_on_error: false
-`;
 }
 
 function renderRuleConfig(state: ArenaHomeState): string {
