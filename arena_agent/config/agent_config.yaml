@@ -28,21 +28,12 @@ signal_indicators:
 policy:
   # Which openclaw agent to use (defaults to "main" if unset)
   openclaw_agent_id: arena-trader
-  type: ensemble
-  members:
-    - type: ma_crossover
-      params:
-        fast_period: 20
-        slow_period: 50
-    - type: rsi_mean_reversion
-      params:
-        rsi_period: 14
-        oversold: 30
-        overbought: 70
-        exit_level: 50
-    - type: channel_breakout
-      params:
-        lookback: 20
+  # Default expression policy — setup agent will override with its own expressions
+  type: expression
+  params:
+    entry_long: "rsi_14 < 35 and close > sma_20"
+    entry_short: "rsi_14 > 65 and close < sma_20"
+    exit: "rsi_14 > 55 or rsi_14 < 45"
 
 risk_limits:
   max_position_size_pct: 1.0

@@ -54,12 +54,11 @@ Notes:
   - State builder for market, account, position, and competition snapshots.
   - Risk-aware execution layer for open, close, TP/SL update, and hold.
   - Neutral transition store and journal output.
-  - Built-in rule policies:
-    - moving-average crossover
-    - RSI mean reversion
-    - channel breakout
-    - ensemble composition
-    - **expression** — agent-defined signal logic using any TA-Lib indicators
+  - Expression-based policy engine:
+    - Agent defines entry/exit signals as expressions (e.g., `rsi_14 < 30 and close > sma_50`)
+    - Subscribes to any of 158 TA-Lib indicators
+    - Ensemble support (multiple expression sets, first non-HOLD wins)
+    - Safe evaluation via AST validation (no code execution)
   - Minimal TAP support for external agents through a single HTTP decision endpoint.
 - `run_agent.py`
   - Convenience entrypoint for `python3 -m arena_agent`.
@@ -141,12 +140,13 @@ The system uses a **setup agent → rule policy** architecture. The LLM (setup a
 - Backends: Claude, Codex, Gemini, OpenClaw
 - Tool access: Claude uses native MCP; others use the tool proxy (JSON `tool_calls` protocol, executed locally via `varsity_tools.dispatch()`)
 
-**Rule policy** (inner loop, per tick, deterministic):
-- `ma_crossover(fast_period, slow_period)` — trades SMA crossovers
-- `rsi_mean_reversion(rsi_period, oversold, overbought, exit_level)` — trades RSI extremes
-- `channel_breakout(lookback)` — trades price channel breakouts
-- `expression(entry_long, entry_short, exit)` — agent-defined signal expressions using any subscribed TA-Lib indicators (e.g., `entry_long="rsi_14 < 30 and close > sma_50"`)
-- `ensemble([policies...])` — first non-HOLD signal wins
+**Expression policy** (inner loop, per tick, deterministic):
+- Agent defines signal logic as expressions evaluated against indicator values
+- `entry_long="rsi_14 < 30 and close > sma_50 and macd_hist > 0"` → OPEN_LONG when True
+- `entry_short="rsi_14 > 70 and close < sma_50"` → OPEN_SHORT when True
+- `exit="rsi_14 > 55 or atr_14 / close > 0.02"` → CLOSE_POSITION when True
+- Variables: any subscribed TA-Lib indicator (`rsi_14`, `sma_50`, `macd_hist`, `bbands_upper`, etc.) + market data (`close`, `high`, `low`, `open`, `volume`)
+- `ensemble([expressions...])` — multiple expression sets, first non-HOLD signal wins
 
 **Strategy layer** (applied to every trade action):
 - Sizing: `fixed_fraction` of equity (setup agent controls the percentage)

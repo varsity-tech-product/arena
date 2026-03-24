@@ -195,7 +195,7 @@ def _run_auto(argv: list[str]) -> None:
     # (or from setup agent overrides). The setup agent picks the strategy.
     policy = config_dict.setdefault("policy", {})
     # Ensure a valid default policy type if YAML doesn't specify one
-    policy.setdefault("type", "ma_crossover")
+    policy.setdefault("type", "expression")
     policy.setdefault("params", {})
 
     stop_requested = False
@@ -251,10 +251,23 @@ def _run_auto(argv: list[str]) -> None:
         "policy": {
             "type": "ensemble",
             "members": [
-                {"type": "ma_crossover", "params": {"fast_period": 10, "slow_period": 30}},
-                {"type": "rsi_mean_reversion", "params": {"rsi_period": 14, "oversold": 30, "overbought": 70}},
+                {"type": "expression", "params": {
+                    "entry_long": "rsi_14 < 35 and close > sma_20",
+                    "entry_short": "rsi_14 > 65 and close < sma_20",
+                    "exit": "rsi_14 > 55 and rsi_14 < 45",
+                }},
+                {"type": "expression", "params": {
+                    "entry_long": "close > sma_50 and close > sma_20",
+                    "entry_short": "close < sma_50 and close < sma_20",
+                    "exit": "close < sma_20 or close > sma_20",
+                }},
             ],
         },
+        "signal_indicators": [
+            {"indicator": "RSI", "params": {"timeperiod": 14}},
+            {"indicator": "SMA", "params": {"timeperiod": 20}},
+            {"indicator": "SMA", "params": {"timeperiod": 50}},
+        ],
         "strategy": {
             "sizing": {"type": "fixed_fraction", "fraction": 0.15},
             "tpsl": {"type": "fixed_pct", "tp_pct": 0.01, "sl_pct": 0.005},
@@ -356,6 +369,7 @@ def _run_auto(argv: list[str]) -> None:
                 )
                 config_dict["policy"] = dict(_FALLBACK_STRATEGY["policy"])
                 config_dict["strategy"] = dict(_FALLBACK_STRATEGY["strategy"])
+                config_dict["signal_indicators"] = list(_FALLBACK_STRATEGY.get("signal_indicators", []))
                 config_dict["_strategy_start_time"] = time.time()
                 consecutive_setup_failures = 0
                 inactive_cycles = 0

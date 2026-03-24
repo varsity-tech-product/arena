@@ -186,42 +186,27 @@ def _translate_flat_decision(payload: dict[str, Any]) -> dict[str, Any]:
     if policy_type:
         policy_params = payload.get("policy_params", {})
 
-        # Expression policy: params are string expressions, not numeric
-        if policy_type == "expression":
-            expr_params = {}
-            if isinstance(policy_params, dict):
-                for k in ("entry_long", "entry_short", "exit"):
-                    if k in policy_params and isinstance(policy_params[k], str):
-                        expr_params[k] = policy_params[k]
-            overrides["policy"] = {"type": "expression", "params": expr_params}
-        elif policy_type == "ensemble":
+        if policy_type == "ensemble":
             members_raw = payload.get("ensemble_members", [])
             members = []
             for m in members_raw:
-                if isinstance(m, dict) and "type" in m:
-                    member = {"type": m["type"]}
+                if isinstance(m, dict):
+                    member = {"type": m.get("type", "expression")}
                     if "params" in m and isinstance(m["params"], dict):
                         member["params"] = m["params"]
                     members.append(member)
             overrides["policy"] = {
                 "type": "ensemble",
-                "members": members or [{"type": "ma_crossover"}],
+                "members": members or [{"type": "expression", "params": {}}],
             }
         else:
-            # Numeric policies (ma_crossover, rsi_mean_reversion, channel_breakout)
-            clean_params = {}
+            # Expression policy (default) — params are string expressions
+            expr_params = {}
             if isinstance(policy_params, dict):
-                for k, v in policy_params.items():
-                    try:
-                        clean_params[k] = float(v) if isinstance(v, (int, float)) else float(v)
-                        if isinstance(v, int) or (isinstance(v, float) and v == int(v)):
-                            clean_params[k] = int(clean_params[k])
-                    except (TypeError, ValueError):
-                        logger.warning("Ignoring non-numeric policy_param %s=%r", k, v)
-            overrides["policy"] = {
-                "type": policy_type,
-                "params": clean_params,
-            }
+                for k in ("entry_long", "entry_short", "exit"):
+                    if k in policy_params:
+                        expr_params[k] = str(policy_params[k])
+            overrides["policy"] = {"type": "expression", "params": expr_params}
 
     # --- TP/SL (percentage-based -> fixed_pct) ---
     tp_pct = payload.get("tp_pct")

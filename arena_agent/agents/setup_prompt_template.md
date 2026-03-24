@@ -30,17 +30,44 @@ Return a JSON object (NO markdown, NO explanation — raw JSON only) with these 
 
 For "hold", only "action" and "reason" are required.
 
-## Available Policies
+## Strategy Definition
 
-  ma_crossover: fast_period (int), slow_period (int) — trades SMA crossovers
-  rsi_mean_reversion: rsi_period (int), oversold (float), overbought (float), exit_level (float) — trades RSI extremes
-  channel_breakout: lookback (int) — trades price channel breakouts
-  ensemble: use "ensemble_members" array of [{ "type": "ma_crossover", "params": {...} }, ...] — first non-HOLD signal wins
-  expression: entry_long (str), entry_short (str), exit (str) — custom signal expressions using any subscribed indicators. Variables: all indicator keys (rsi_14, sma_20, macd_hist, bbands_upper, etc.) plus close, high, low, open, volume. Operators: <, >, <=, >=, ==, !=, and, or, not, +, -, *, /. Example: entry_long="rsi_14 < 30 and close > sma_50", exit="rsi_14 > 50". Subscribe the indicators you need via "indicators" field.
+You define trading signals using **expressions** — Python-like conditions evaluated against indicator values each tick.
+
+policy_params must contain:
+- "entry_long": expression string — when True and no position, opens long
+- "entry_short": expression string — when True and no position, opens short
+- "exit": expression string — when True and position open, closes it
+
+Available variables in expressions:
+- Any subscribed indicator: `rsi_14`, `sma_20`, `sma_50`, `macd_hist`, `macd_signal`, `bbands_upper`, `bbands_lower`, `atr_14`, `cci_20`, `obv`, `adx_14`, etc.
+- Market data: `close`, `high`, `low`, `open`, `volume`
+- Operators: `<`, `>`, `<=`, `>=`, `==`, `!=`, `and`, `or`, `not`, `+`, `-`, `*`, `/`
+
+Subscribe the indicators your expressions need via the "indicators" field (e.g., `["RSI_14", "SMA_20", "SMA_50", "MACD"]`).
+
+Example:
+```json
+{
+  "action": "update",
+  "policy": "expression",
+  "policy_params": {
+    "entry_long": "rsi_14 < 30 and close > sma_50 and macd_hist > 0",
+    "entry_short": "rsi_14 > 70 and close < sma_50 and macd_hist < 0",
+    "exit": "rsi_14 > 55 or rsi_14 < 45"
+  },
+  "indicators": ["RSI_14", "SMA_50", "MACD"],
+  "tp_pct": 1.5,
+  "sl_pct": 0.8,
+  "sizing_fraction": 25,
+  "reason": "RSI + trend + momentum multi-indicator strategy"
+}
+```
+
+For ensemble (multiple signal sets, first non-HOLD wins), use `"policy": "ensemble"` with `"ensemble_members"` array of expression configs.
 
 You think in percentages, not absolute prices. The runtime handles position sizing and precision.
-Trade direction (long/short) is decided by the rule-based strategy's own signals — you do NOT control direction.
-When using expression policy, subscribe all indicators your expressions reference via the "indicators" field.
+Trade direction (long/short) is decided by your expressions — design entry_long and entry_short conditions for the market regime.
 
 ## Guidelines
 
