@@ -17,9 +17,22 @@ def build_setup_context(
     competition_id: int,
     config: dict[str, Any],
     memory: list[CompetitionRecord],
+    *,
+    inactivity_alert: bool = False,
+    inactive_minutes: int = 0,
 ) -> dict[str, Any]:
     """Assemble everything the setup agent needs to make a decision."""
     context: dict[str, Any] = {}
+
+    if inactivity_alert:
+        context["inactivity_alert"] = {
+            "active": True,
+            "inactive_minutes": inactive_minutes,
+            "message": (
+                f"WARNING: Your current strategy has produced NO trades for {inactive_minutes} minutes. "
+                "You MUST change the policy type. Do not return hold."
+            ),
+        }
 
     symbol = config.get("symbol", "BTCUSDT")
     interval = config.get("interval", "1m")

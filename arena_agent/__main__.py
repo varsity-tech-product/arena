@@ -237,6 +237,29 @@ def _run_auto(argv: list[str]) -> None:
         tool_proxy_enabled=tool_proxy_enabled,
     )
 
+    # --- Liveness state ---
+    inactive_cycles = 0          # consecutive cycles with 0 executed trades
+    max_inactive_cycles = 6      # ~30 min at 5-min intervals → force strategy rotation
+    consecutive_setup_failures = 0
+    max_setup_failures = 5       # apply fallback strategy after this many
+    error_backoff = 5            # seconds, grows exponentially on crash
+    max_error_backoff = 60
+
+    # Fallback strategy used when ALL LLM backends are unavailable.
+    _FALLBACK_STRATEGY: dict[str, Any] = {
+        "policy": {
+            "type": "ensemble",
+            "members": [
+                {"type": "ma_crossover", "params": {"fast_period": 10, "slow_period": 30}},
+                {"type": "rsi_mean_reversion", "params": {"rsi_period": 14, "oversold": 30, "overbought": 70}},
+            ],
+        },
+        "strategy": {
+            "sizing": {"type": "fixed_fraction", "fraction": 0.15},
+            "tpsl": {"type": "fixed_pct", "tp_pct": 0.01, "sl_pct": 0.005},
+        },
+    }
+
     cycle = 0
     while not stop_requested:
         cycle += 1
@@ -253,102 +276,145 @@ def _run_auto(argv: list[str]) -> None:
         except Exception as exc:
             log.warning("Competition status check failed: %s — continuing", exc)
 
-        # --- Setup phase ---
         try:
-            context = build_setup_context(args.competition_id, config_dict, memory.recent(5))
-            # Propagate symbol from competition detail (asset-agnostic)
-            comp = context.get("competition", {})
-            if isinstance(comp, dict) and comp.get("symbol"):
-                if config_dict.get("symbol") != comp["symbol"]:
-                    log.info("Symbol updated from competition: %s -> %s", config_dict.get("symbol"), comp["symbol"])
-                config_dict["symbol"] = comp["symbol"]
-            memory_text = memory.format_for_prompt(5)
-            decision = setup_agent.decide(context, memory_text)
-            log.info(
-                "Setup decision: action=%s reason=%s restart=%s next_check=%s",
-                decision.action, decision.reason, decision.restart_runtime, decision.next_check_seconds,
-            )
-            if decision.action == "update" and decision.overrides:
-                log.info("Applying overrides: %s", json.dumps(decision.overrides, default=str)[:2000])
-                # When policy type changes, replace the entire policy dict
-                # to avoid stale params from the old policy contaminating the new one.
-                new_policy = decision.overrides.get("policy", {})
-                old_policy_type = config_dict.get("policy", {}).get("type")
-                new_policy_type = new_policy.get("type") if isinstance(new_policy, dict) else None
-                if new_policy_type and new_policy_type != old_policy_type:
-                    log.info("Policy type changed: %s -> %s — replacing policy dict", old_policy_type, new_policy_type)
-                    config_dict["policy"] = decision.overrides.pop("policy")
-                    # Track strategy change for per-strategy performance
-                    acct = context.get("account_state", {})
-                    config_dict["_strategy_start_trade_count"] = acct.get("trade_count", 0) if isinstance(acct, dict) else 0
-                    config_dict["_strategy_start_time"] = time.time()
-                _deep_merge(config_dict, decision.overrides)
-                # Log the effective policy type after merge
-                eff_policy = config_dict.get("policy", {})
-                log.info(
-                    "Effective config after merge | policy.type=%s policy.params=%s strategy=%s",
-                    eff_policy.get("type", "unknown"),
-                    eff_policy.get("params", {}),
-                    json.dumps(config_dict.get("strategy", {}), default=str)[:500],
+            # --- Setup phase ---
+            setup_failed = False
+            try:
+                context = build_setup_context(
+                    args.competition_id, config_dict, memory.recent(5),
+                    inactivity_alert=inactive_cycles >= max_inactive_cycles,
+                    inactive_minutes=round(inactive_cycles * args.setup_interval / 60),
                 )
-            if decision.chat_message:
-                try:
-                    import varsity_tools
-                    varsity_tools.send_chat(args.competition_id, decision.chat_message)
-                    log.info("Chat sent: %s", decision.chat_message[:100])
-                except Exception as exc:
-                    log.warning("Failed to send chat: %s", exc)
-            next_check = decision.next_check_seconds or args.setup_interval
-            config_dict["_last_next_check_seconds"] = next_check
-        except Exception as exc:
-            log.warning("Setup agent failed: %s — using defaults", exc)
-            next_check = args.setup_interval
+                # Propagate symbol from competition detail (asset-agnostic)
+                comp = context.get("competition", {})
+                if isinstance(comp, dict) and comp.get("symbol"):
+                    if config_dict.get("symbol") != comp["symbol"]:
+                        log.info("Symbol updated from competition: %s -> %s", config_dict.get("symbol"), comp["symbol"])
+                    config_dict["symbol"] = comp["symbol"]
+                memory_text = memory.format_for_prompt(5)
+                decision = setup_agent.decide(context, memory_text)
+                log.info(
+                    "Setup decision: action=%s reason=%s restart=%s next_check=%s",
+                    decision.action, decision.reason, decision.restart_runtime, decision.next_check_seconds,
+                )
 
-        if stop_requested:
-            break
+                # Track setup failures for fallback logic
+                if decision.reason and decision.reason.startswith("setup_error"):
+                    consecutive_setup_failures += 1
+                    setup_failed = True
+                    log.warning("Setup failure %d/%d", consecutive_setup_failures, max_setup_failures)
+                else:
+                    consecutive_setup_failures = 0
 
-        # --- Runtime phase ---
-        tick = float(config_dict.get("tick_interval_seconds", 30))
-        iterations = max(1, int(next_check / tick))
-        config_dict["max_iterations"] = iterations
-        log.info("Starting runtime: %d iterations (%.0fs tick, next setup in ~%ds)", iterations, tick, next_check)
+                if decision.action == "update" and decision.overrides:
+                    log.info("Applying overrides: %s", json.dumps(decision.overrides, default=str)[:2000])
+                    new_policy = decision.overrides.get("policy", {})
+                    old_policy_type = config_dict.get("policy", {}).get("type")
+                    new_policy_type = new_policy.get("type") if isinstance(new_policy, dict) else None
+                    if new_policy_type and new_policy_type != old_policy_type:
+                        log.info("Policy type changed: %s -> %s — replacing policy dict", old_policy_type, new_policy_type)
+                        config_dict["policy"] = decision.overrides.pop("policy")
+                        acct = context.get("account_state", {})
+                        config_dict["_strategy_start_trade_count"] = acct.get("trade_count", 0) if isinstance(acct, dict) else 0
+                        config_dict["_strategy_start_time"] = time.time()
+                    _deep_merge(config_dict, decision.overrides)
+                    eff_policy = config_dict.get("policy", {})
+                    log.info(
+                        "Effective config after merge | policy.type=%s policy.params=%s strategy=%s",
+                        eff_policy.get("type", "unknown"),
+                        eff_policy.get("params", {}),
+                        json.dumps(config_dict.get("strategy", {}), default=str)[:500],
+                    )
+                if decision.chat_message:
+                    try:
+                        varsity_tools.send_chat(args.competition_id, decision.chat_message)
+                        log.info("Chat sent: %s", decision.chat_message[:100])
+                    except Exception as exc:
+                        log.warning("Failed to send chat: %s", exc)
+                next_check = decision.next_check_seconds or args.setup_interval
+                config_dict["_last_next_check_seconds"] = next_check
+            except Exception as exc:
+                log.warning("Setup agent failed: %s — using defaults", exc)
+                consecutive_setup_failures += 1
+                setup_failed = True
+                next_check = args.setup_interval
 
-        try:
-            runtime_config = RuntimeConfig.from_mapping(config_dict)
-            runtime = MarketRuntime(runtime_config)
-            report = runtime.run()
-            log.info(
-                "Runtime cycle %d done | iters=%s executed=%s pnl=%.4f equity=%s",
-                cycle, report.iterations, report.executed_actions,
-                report.total_realized_pnl, report.final_equity,
-            )
-        except (ValueError, TypeError) as exc:
-            # Bad override from setup agent (e.g. invalid strategy type) — drop it and retry
-            log.warning("Runtime config error: %s — dropping strategy overrides", exc)
-            config_dict.pop("strategy", None)
+            # --- Fallback strategy: apply if LLM is consistently unavailable ---
+            if consecutive_setup_failures >= max_setup_failures:
+                log.warning(
+                    "LLM setup agent failed %d consecutive times — applying fallback strategy (ensemble)",
+                    consecutive_setup_failures,
+                )
+                config_dict["policy"] = dict(_FALLBACK_STRATEGY["policy"])
+                config_dict["strategy"] = dict(_FALLBACK_STRATEGY["strategy"])
+                config_dict["_strategy_start_time"] = time.time()
+                consecutive_setup_failures = 0  # reset after applying fallback
+
+            if stop_requested:
+                break
+
+            # --- Runtime phase ---
+            tick = float(config_dict.get("tick_interval_seconds", 30))
+            iterations = max(1, int(next_check / tick))
+            config_dict["max_iterations"] = iterations
+            log.info("Starting runtime: %d iterations (%.0fs tick, next setup in ~%ds)", iterations, tick, next_check)
+
             try:
                 runtime_config = RuntimeConfig.from_mapping(config_dict)
                 runtime = MarketRuntime(runtime_config)
                 report = runtime.run()
                 log.info(
-                    "Runtime cycle %d done (fallback) | iters=%s executed=%s pnl=%.4f equity=%s",
+                    "Runtime cycle %d done | iters=%s executed=%s pnl=%.4f equity=%s",
                     cycle, report.iterations, report.executed_actions,
                     report.total_realized_pnl, report.final_equity,
                 )
-            except Exception as inner_exc:
-                log.error("Runtime crashed even after fallback: %s", inner_exc, exc_info=True)
-                time.sleep(10)
-                continue
+            except (ValueError, TypeError) as exc:
+                log.warning("Runtime config error: %s — dropping strategy overrides", exc)
+                config_dict.pop("strategy", None)
+                try:
+                    runtime_config = RuntimeConfig.from_mapping(config_dict)
+                    runtime = MarketRuntime(runtime_config)
+                    report = runtime.run()
+                    log.info(
+                        "Runtime cycle %d done (fallback) | iters=%s executed=%s pnl=%.4f equity=%s",
+                        cycle, report.iterations, report.executed_actions,
+                        report.total_realized_pnl, report.final_equity,
+                    )
+                except Exception as inner_exc:
+                    log.error("Runtime crashed even after fallback: %s", inner_exc, exc_info=True)
+                    report = None
+            except Exception as exc:
+                log.error("Runtime crashed: %s", exc, exc_info=True)
+                report = None
+
+            # --- Inactivity watchdog ---
+            if report is not None and report.executed_actions == 0:
+                inactive_cycles += 1
+            elif report is not None:
+                inactive_cycles = 0
+
+            if inactive_cycles >= max_inactive_cycles:
+                log.warning(
+                    "Inactivity watchdog: %d cycles (~%d min) with no trades — forcing strategy rotation next cycle",
+                    inactive_cycles,
+                    round(inactive_cycles * args.setup_interval / 60),
+                )
+                # Don't reset here — reset happens after the next setup cycle
+                # successfully produces an "update" decision
+
+            if stop_requested:
+                break
+
+            # Reset error backoff on successful cycle
+            error_backoff = 5
+            time.sleep(2)
+
         except Exception as exc:
-            log.error("Runtime crashed: %s", exc, exc_info=True)
-            time.sleep(10)
+            # --- Self-healing: never exit during a live competition ---
+            log.error("Auto cycle %d crashed: %s — retrying in %ds", cycle, exc, error_backoff, exc_info=True)
+            time.sleep(error_backoff)
+            error_backoff = min(error_backoff * 2, max_error_backoff)
             continue
-
-        if stop_requested:
-            break
-
-        # Brief pause before next setup cycle
-        time.sleep(2)
 
     log.info("Auto loop stopped after %d cycles.", cycle)
 
