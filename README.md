@@ -59,6 +59,7 @@ Notes:
     - RSI mean reversion
     - channel breakout
     - ensemble composition
+    - **expression** — agent-defined signal logic using any TA-Lib indicators
   - Minimal TAP support for external agents through a single HTTP decision endpoint.
 - `run_agent.py`
   - Convenience entrypoint for `python3 -m arena_agent`.
@@ -105,7 +106,7 @@ The system uses a **setup agent → rule policy** architecture. The LLM (setup a
 │  ┌──────────┐  flat decision   ┌──────────────┐         │
 │  │  Setup   │─────────────────→│ Config Dict  │         │
 │  │  Agent   │  (policy,tp/sl,  │  (mutable)   │         │
-│  │ (LLM)   │   sizing,bias)   └──────┬───────┘         │
+│  │ (LLM)   │   sizing,exprs)  └──────┬───────┘         │
 │  │ +tools   │                        │                   │
 │  └──────────┘              RuntimeConfig                 │
 │       ↑                          │                       │
@@ -115,6 +116,7 @@ The system uses a **setup agent → rule policy** architecture. The LLM (setup a
 │       │                  │ (ma_crossover│ 30s ticks      │
 │       │                  │  rsi_revert  │ no LLM calls   │
 │       │                  │  ch_breakout │                 │
+│       │                  │  expression  │                 │
 │       │                  │  ensemble)   │                 │
 │       │                  └──────┬───────┘                │
 │       │                         │                        │
@@ -143,6 +145,7 @@ The system uses a **setup agent → rule policy** architecture. The LLM (setup a
 - `ma_crossover(fast_period, slow_period)` — trades SMA crossovers
 - `rsi_mean_reversion(rsi_period, oversold, overbought, exit_level)` — trades RSI extremes
 - `channel_breakout(lookback)` — trades price channel breakouts
+- `expression(entry_long, entry_short, exit)` — agent-defined signal expressions using any subscribed TA-Lib indicators (e.g., `entry_long="rsi_14 < 30 and close > sma_50"`)
 - `ensemble([policies...])` — first non-HOLD signal wins
 
 **Strategy layer** (applied to every trade action):
@@ -152,11 +155,19 @@ The system uses a **setup agent → rule policy** architecture. The LLM (setup a
 - Exit rules: trailing stop, drawdown exit
 - Safety: if strategy refine fails, action demoted to HOLD (no naked orders)
 
+**What the setup agent controls:**
+- Strategy type and parameters (including custom expressions)
+- Which TA-Lib indicators to compute (subscribed per strategy)
+- Position sizing (1-50% of equity)
+- TP/SL percentages
+- Cooldown period (adjustable 60-3600s)
+- Check interval
+
 **Key design decisions:**
 - The LLM never sees internal config nesting — it uses a flat schema with percentages
 - The LLM never places trades directly — it configures a rule engine
 - Per-strategy performance is tracked separately from overall stats
-- Direction bias (long_only/short_only/both) is enforced at the risk limits level
+- Trade direction is decided by the rule policy's signals, not by the setup agent
 - `--agent claude/codex/gemini/openclaw` selects the setup agent backend in auto mode
 - The `run` command only supports rule-based policies (`--agent config/rule/tap`)
 - For LLM-backed trading, use `auto` mode — the LLM configures strategy, rules execute
