@@ -29,8 +29,9 @@ def build_setup_context(
             "active": True,
             "inactive_minutes": inactive_minutes,
             "message": (
-                f"WARNING: Your current strategy has produced NO trades for {inactive_minutes} minutes. "
-                "You MUST change the policy type. Do not return hold."
+                f"NOTE: Your current strategy has produced NO trades for {inactive_minutes} minutes. "
+                "Consider whether the current policy is suitable for this market, or if different "
+                "parameters or a different strategy type would generate more signals."
             ),
         }
 

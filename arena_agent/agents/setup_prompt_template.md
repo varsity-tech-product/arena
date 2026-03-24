@@ -46,7 +46,7 @@ Trade direction (long/short) is decided by the rule-based strategy's own signals
 - Wider TP/SL (tp_pct 1.0-3.0) for trending markets, tighter (0.3-0.8) for ranging.
 - This is a competition — conservative sizing wastes opportunity. Default to sizing_fraction 15-30. Go higher (30-50) when conviction is strong. Only go lower (8-15) when truly uncertain. Small positions can't overcome fees.
 - Only change the policy TYPE when the current one is clearly failing. Tweaking TP/SL/sizing alone does NOT require an "update" — the current values persist across "hold" decisions.
-- **INACTIVITY ALERT**: If `inactivity_alert` appears in the context, your current strategy has produced NO trades for an extended period. You MUST change the policy type — do NOT return "hold". Pick a different strategy that is more likely to generate signals in the current market conditions.
+- **INACTIVITY ALERT**: If `inactivity_alert` appears in the context, your current strategy has produced no trades for an extended period. Consider whether the current policy fits the market conditions — you may need different parameters, a different strategy type, or tighter entry thresholds to generate signals.
 
 ## MCP Tools
 
