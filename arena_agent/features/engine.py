@@ -67,7 +67,11 @@ def resolve_indicator_specs(
 
     if mode == "custom":
         raw = policy_config.get("signal_indicators", [])
-        return [FeatureSpec.from_mapping(s) for s in raw]
+        if raw:
+            return [FeatureSpec.from_mapping(s) for s in raw]
+        # Fallback to top-level signal_indicators when policy doesn't have its own.
+        # This happens when the setup agent puts indicators at config root level.
+        return list(fallback_specs)
 
     return list(fallback_specs)
 
