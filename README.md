@@ -77,7 +77,7 @@ Notes:
   - `arena_agent/agents/cli_backends.py` (resolve_backend, extract_usage, session management)
   - Supported backends: Claude Code, Gemini, OpenClaw, Codex
 - LLM-powered setup agent (strategy manager):
-  - analyzes market + performance context, picks rule policy + params via flat schema
+  - analyzes market + performance context, defines expression-based signal logic
   - strategy change cooldown (20 min / 5 trades) prevents thrashing
   - per-strategy performance tracking (separate from overall stats)
   - `arena_agent/agents/setup_agent.py` (decision parsing, cooldown, flat→config translation)
@@ -86,9 +86,9 @@ Notes:
   - `arena_agent/setup/context_builder.py` (account, PnL, fees, hold times, multi-timeframe market)
   - `arena_agent/setup/memory.py` (cross-competition learning)
 - Auto mode (`arena-agent-runtime auto`):
-  - continuous loop: setup agent picks rule policy → deterministic runtime executes → repeat
+  - continuous loop: setup agent defines expression strategy → deterministic runtime executes → repeat
   - setup agent controls policy type, params, TP/SL%, sizing%, direction bias
-  - runtime uses rule policies (no per-tick LLM calls), strategy layer handles sizing/TP/SL/exits
+  - runtime evaluates expressions (no per-tick LLM calls), strategy layer handles sizing/TP/SL/exits
   - naked order protection: action demoted to HOLD if strategy refine fails
 - Terminal monitor:
   - `arena_agent/tui/`
@@ -96,7 +96,7 @@ Notes:
 
 ## Current architecture
 
-The system uses a **setup agent → rule policy** architecture. The LLM (setup agent) picks the strategy; a deterministic rule policy executes it. No per-tick LLM calls.
+The system uses a **setup agent → expression policy** architecture. The LLM (setup agent) defines signal logic as expressions; the runtime evaluates them deterministically each tick. No per-tick LLM calls.
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -112,11 +112,11 @@ The system uses a **setup agent → rule policy** architecture. The LLM (setup a
 │       │ every 5-20 min           ▼                       │
 │       │                  ┌──────────────┐                │
 │       │                  │ Rule Policy  │ deterministic  │
-│       │                  │ (ma_crossover│ 30s ticks      │
-│       │                  │  rsi_revert  │ no LLM calls   │
-│       │                  │  ch_breakout │                 │
-│       │                  │  expression  │                 │
-│       │                  │  ensemble)   │                 │
+│       │                  │ (expression  │ 30s ticks      │
+│       │                  │  policy —    │ no LLM calls   │
+│       │                  │  agent-      │                 │
+│       │                  │  defined     │                 │
+│       │                  │  signals)    │                 │
 │       │                  └──────┬───────┘                │
 │       │                         │                        │
 │       │                  ┌──────▼───────┐                │
@@ -167,7 +167,7 @@ The system uses a **setup agent → rule policy** architecture. The LLM (setup a
 - The LLM never sees internal config nesting — it uses a flat schema with percentages
 - The LLM never places trades directly — it configures a rule engine
 - Per-strategy performance is tracked separately from overall stats
-- Trade direction is decided by the rule policy's signals, not by the setup agent
+- Trade direction is decided by the expression policy's signals, not hardcoded
 - `--agent claude/codex/gemini/openclaw` selects the setup agent backend in auto mode
 - The `run` command only supports rule-based policies (`--agent config/rule/tap`)
 - For LLM-backed trading, use `auto` mode — the LLM configures strategy, rules execute
@@ -390,11 +390,11 @@ All backends log:
 Example audit trail (Codex/GPT-5.4):
 ```
 codex thread:        019d19ad-2381-...
-codex agent_message: {"action":"update","policy":"rsi_mean_reversion",...}
+codex agent_message: {"action":"update","policy":"expression",...}
 codex usage:         in=16355 cached=5504 out=586
-setup_agent decision: {"action":"update","policy":"rsi_mean_reversion",...}
-flat_decision:       policy=rsi_mean_reversion tp_pct=0.6 sl_pct=0.4 sizing=5 bias=long_only
-Strategy change:     new_key=rsi_mean_reversion:{...} equity_snapshot=4992.35 trade_count=15
+setup_agent decision: {"action":"update","policy":"expression",...}
+flat_decision:       policy=expression tp_pct=0.8 sl_pct=0.5 sizing=25 bias=None indicators=1
+Strategy change:     new_key=expression:{entry_long: "rsi_14 < 40", ...} equity=4994.81
 ```
 
 Codex uses `--json` mode for JSONL event streaming and `model_reasoning_summaries="verbose"` to capture chain-of-thought when the model supports it. GPT-5.4 does not emit reasoning events but future reasoning models (o1/o3) will.
@@ -533,32 +533,36 @@ That makes the state contract and action contract explicit for any CLI-backed ag
 
 ## Auto Mode (Setup + Runtime Loop)
 
-The `auto` subcommand runs the full setup → rule policy → runtime loop:
+The `auto` subcommand runs the full setup → expression policy → runtime loop:
 
 ```bash
 arena-agent-runtime auto --competition-id 9 --agent claude --setup-interval 300
 ```
 
 Each cycle:
-1. **Setup agent** (LLM) analyzes context and returns a flat decision: policy, params, TP/SL%, sizing%, direction bias
-2. Decision is translated to internal config and applied (policy dict replaced on type change, rest deep-merged)
-3. **Rule policy** runs for N deterministic iterations (N = next_check_seconds / tick_interval)
+1. **Setup agent** (LLM) analyzes context and defines expression-based signal logic
+2. Decision is translated to internal config and applied
+3. **Expression policy** evaluates signals for N deterministic iterations (N = next_check_seconds / tick_interval)
 4. Strategy layer applies sizing, TP/SL, entry filters, and exit rules to every trade
 5. Loop back to step 1
 
-The setup agent uses a flat, percentage-based schema — no nested config paths:
+The setup agent uses a flat schema:
 
 ```json
 {
   "action": "update",
-  "policy": "rsi_mean_reversion",
-  "policy_params": {"rsi_period": 14, "oversold": 30, "overbought": 70},
+  "policy": "expression",
+  "policy_params": {
+    "entry_long": "rsi_14 < 40 and close > sma_50",
+    "entry_short": "rsi_14 > 60 and close < sma_50",
+    "exit": "rsi_14 > 50"
+  },
+  "indicators": ["RSI_14", "SMA_50"],
   "tp_pct": 1.2,
   "sl_pct": 0.5,
-  "sizing_fraction": 8,
-  "direction_bias": "short_only",
-  "reason": "bearish trend, switching to RSI extremes",
-  "next_check_seconds": 1200
+  "sizing_fraction": 25,
+  "reason": "RSI mean reversion with trend filter",
+  "next_check_seconds": 300
 }
 ```
 
@@ -703,7 +707,7 @@ arena_agent/
   interfaces/   action schema and policy interface
   execution/    order execution
   memory/       transition store and journal
-  agents/       agent exec policy, setup agent, built-in rule policies, reward models
+  agents/       expression policy, setup agent, CLI backends, tool proxy
   setup/        setup agent context builder and cross-competition memory
   tap/          minimal external-agent HTTP adapter
   skills/       local CLI skill implementations
