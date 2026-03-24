@@ -115,6 +115,19 @@ def build_setup_context(
     strategy_start_trades = config.get("_strategy_start_trade_count", 0)
     strategy_age_seconds = round(time.time() - strategy_start_time) if strategy_start_time else None
 
+    # Cooldown status
+    cooldown_seconds = config.get("_cooldown_seconds", 1200)
+    cooldown_min_trades = config.get("_cooldown_min_trades", 5)
+    cooldown_remaining = max(0, cooldown_seconds - strategy_age_seconds) if strategy_age_seconds else 0
+    strategy_trades = 0
+    perf = context.get("performance", {})
+    if isinstance(perf, dict) and perf.get("current_strategy_performance"):
+        strategy_trades = perf["current_strategy_performance"].get("trade_count", 0)
+    elif isinstance(perf, dict):
+        strategy_trades = perf.get("trade_count", 0)
+    cooldown_trades_needed = max(0, cooldown_min_trades - strategy_trades)
+    cooldown_active = cooldown_remaining > 0 and cooldown_trades_needed > 0
+
     context["current_strategy"] = {
         "policy": policy_config.get("type", "unknown"),
         "params": policy_config.get("params", {}),
@@ -123,6 +136,13 @@ def build_setup_context(
         "last_check_interval": config.get("_last_next_check_seconds"),
         "consecutive_hold_cycles": consecutive_hold_cycles,
         "total_runtime_iterations_since_change": total_runtime_iterations,
+        "cooldown": {
+            "active": cooldown_active,
+            "seconds_remaining": cooldown_remaining,
+            "minutes_remaining": round(cooldown_remaining / 60, 1),
+            "trades_needed": cooldown_trades_needed,
+            "cooldown_period_seconds": cooldown_seconds,
+        },
     }
     context["current_config"] = {
         "strategy": config.get("strategy", {}),

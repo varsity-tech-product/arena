@@ -259,6 +259,15 @@ def _translate_flat_decision(payload: dict[str, Any]) -> dict[str, Any]:
     # --- Clear max_absolute_size so runtime computes from fraction + equity ---
     overrides.setdefault("risk_limits", {})["max_absolute_size"] = None
 
+    # --- Cooldown override (agent can adjust the cooldown period) ---
+    cooldown_seconds = payload.get("cooldown_seconds")
+    if cooldown_seconds is not None:
+        try:
+            cooldown_seconds = max(60, min(3600, int(cooldown_seconds)))
+            overrides["_cooldown_seconds"] = cooldown_seconds
+        except (TypeError, ValueError):
+            pass
+
     # --- Always restart when policy changes ---
     if "policy" in overrides:
         pass  # restart_runtime handled by caller
@@ -310,7 +319,8 @@ class SetupAgent:
         )
         self._schema_text = _SCHEMA_PATH.read_text(encoding="utf-8").strip()
 
-        # Strategy change cooldown state
+        # Strategy change cooldown state (agent can override via cooldown_seconds)
+        self._cooldown_seconds: float = _COOLDOWN_SECONDS
         self._last_strategy_change_time: float | None = None
         self._last_strategy_key: str | None = None  # "policy_type:params_hash"
         self._equity_at_last_change: float | None = None
@@ -381,7 +391,7 @@ class SetupAgent:
             elapsed = time.time() - self._last_strategy_change_time
             trades_since = current_trade_count - self._trades_since_last_change
 
-            time_ok = elapsed >= _COOLDOWN_SECONDS
+            time_ok = elapsed >= self._cooldown_seconds
             trades_ok = trades_since >= _COOLDOWN_MIN_TRADES
 
             if not time_ok and not trades_ok:

@@ -323,6 +323,10 @@ def _run_auto(argv: list[str]) -> None:
                         inactive_cycles = 0
                         total_runtime_iterations = 0
                     _deep_merge(config_dict, decision.overrides)
+                    # Apply agent-requested cooldown override
+                    if "_cooldown_seconds" in decision.overrides:
+                        setup_agent._cooldown_seconds = float(decision.overrides["_cooldown_seconds"])
+                        log.info("Agent adjusted cooldown period to %ds", setup_agent._cooldown_seconds)
                     eff_policy = config_dict.get("policy", {})
                     log.info(
                         "Effective config after merge | policy.type=%s policy.params=%s strategy=%s",
