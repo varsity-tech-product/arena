@@ -157,6 +157,13 @@ def build_policy(config: dict, *, runtime_config=None) -> Policy:
             fail_open_to_hold=fail_open_to_hold,
             **params,
         )
+    if policy_type == "expression":
+        from arena_agent.agents.expression_policy import ExpressionPolicy
+        return ExpressionPolicy(
+            entry_long=str(params.get("entry_long", "False")),
+            entry_short=str(params.get("entry_short", "False")),
+            exit_expr=str(params.get("exit", "False")),
+        )
     if policy_type == "ensemble":
         members = [build_policy(member, runtime_config=runtime_config) for member in config.get("members", [])]
         return EnsemblePolicy(members or [HoldPolicy()])

@@ -36,9 +36,11 @@ For "hold", only "action" and "reason" are required.
   rsi_mean_reversion: rsi_period (int), oversold (float), overbought (float), exit_level (float) — trades RSI extremes
   channel_breakout: lookback (int) — trades price channel breakouts
   ensemble: use "ensemble_members" array of [{ "type": "ma_crossover", "params": {...} }, ...] — first non-HOLD signal wins
+  expression: entry_long (str), entry_short (str), exit (str) — custom signal expressions using any subscribed indicators. Variables: all indicator keys (rsi_14, sma_20, macd_hist, bbands_upper, etc.) plus close, high, low, open, volume. Operators: <, >, <=, >=, ==, !=, and, or, not, +, -, *, /. Example: entry_long="rsi_14 < 30 and close > sma_50", exit="rsi_14 > 50". Subscribe the indicators you need via "indicators" field.
 
 You think in percentages, not absolute prices. The runtime handles position sizing and precision.
 Trade direction (long/short) is decided by the rule-based strategy's own signals — you do NOT control direction.
+When using expression policy, subscribe all indicators your expressions reference via the "indicators" field.
 
 ## Guidelines
 
