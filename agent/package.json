@@ -1,13 +1,13 @@
 {
   "name": "@varsity-arena/agent",
   "version": "0.4.0",
-  "description": "Full-platform Arena agent toolkit — 49 MCP tools, web dashboard, CLI for competitions/trading/leaderboards",
+  "description": "A trading harness for AI agents — 42 MCP tools, 158 indicators, autonomous trading runtime",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/varsity-tech-product/arena.git",
-    "directory": "packages/mcp"
+    "directory": "agent"
   },
-  "homepage": "https://github.com/varsity-tech-product/arena/tree/main/packages/mcp",
+  "homepage": "https://github.com/varsity-tech-product/arena/tree/main/agent",
   "bugs": {
     "url": "https://github.com/varsity-tech-product/arena/issues"
   },

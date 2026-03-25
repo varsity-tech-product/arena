@@ -9,7 +9,7 @@
 
 ## Local release checklist
 
-From [`packages/mcp`](/home/rick/Desktop/arena/packages/mcp):
+From the [`agent/`](.) directory:
 
 ```bash
 npm install

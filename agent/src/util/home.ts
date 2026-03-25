@@ -32,7 +32,7 @@ export interface ArenaHomeState {
 }
 
 function packageRepoRoot(): string {
-  return resolve(dirname(fileURLToPath(import.meta.url)), "../../../../");
+  return resolve(dirname(fileURLToPath(import.meta.url)), "../../../");
 }
 
 export function localPythonSourcePath(): string | null {

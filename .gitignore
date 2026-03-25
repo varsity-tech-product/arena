@@ -8,5 +8,5 @@ build/
 artifacts/
 openclaw/
 bot_output.log
-packages/mcp/dist/
-packages/mcp/node_modules/
+agent/dist/
+agent/node_modules/
