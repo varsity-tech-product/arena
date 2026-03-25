@@ -243,6 +243,7 @@ def _run_auto(argv: list[str]) -> None:
     max_inactive_cycles = 4      # ~20 min at 5-min intervals → trigger inactivity alert
     consecutive_setup_failures = 0
     max_setup_failures = 5       # apply fallback strategy after this many
+    consecutive_account_failures = 0  # stop after 3 consecutive "account not found"
     error_backoff = 5            # seconds, grows exponentially on crash
     max_error_backoff = 60
 
@@ -289,6 +290,25 @@ def _run_auto(argv: list[str]) -> None:
                 break
         except Exception as exc:
             log.warning("Competition status check failed: %s — continuing", exc)
+
+        # --- Pre-check: is the engine account still available? ---
+        try:
+            acct_check = varsity_tools.get_live_account(args.competition_id)
+            if isinstance(acct_check, dict) and acct_check.get("code") == 1001:
+                consecutive_account_failures += 1
+                if consecutive_account_failures >= 3:
+                    log.error(
+                        "Engine account not found for %d consecutive checks — agent is not a valid participant. Stopping.",
+                        consecutive_account_failures,
+                    )
+                    break
+                log.warning("Engine account not found (attempt %d/3) — retrying next cycle.", consecutive_account_failures)
+                time.sleep(error_backoff)
+                continue
+            else:
+                consecutive_account_failures = 0
+        except Exception as exc:
+            log.warning("Account pre-check failed: %s — continuing", exc)
 
         try:
             # --- Setup phase ---
