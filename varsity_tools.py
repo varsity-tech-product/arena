@@ -612,7 +612,7 @@ TOOLS = [
     },
     {
         "name": "get_klines",
-        "description": "Get OHLCV candlestick data for a symbol. Use for price charts and technical analysis.",
+        "description": "Get OHLCV candles for a symbol. Size capped to 20 per call via tool proxy.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -624,8 +624,8 @@ TOOLS = [
                 },
                 "size": {
                     "type": "integer",
-                    "description": "Number of candles (max 1500). Default 500.",
-                    "default": 500,
+                    "description": "Number of candles. Capped to 20 via tool proxy. Default 20.",
+                    "default": 20,
                 },
                 "start_time": {
                     "type": "integer",

@@ -163,7 +163,7 @@ def build_tool_prompt_section(
 You can request additional data or perform actions by including a "tool_calls"
 array in your JSON response.  Example:
 
-{{"tool_calls": [{{"tool": "get_klines", "args": {{"symbol": "BTCUSDT", "interval": "5m", "size": 50}}}}]}}
+{{"tool_calls": [{{"tool": "get_klines", "args": {{"symbol": "BTCUSDT", "interval": "5m", "size": 20}}}}]}}
 
 The runtime will execute the tools and send you the results.  You will then
 be re-invoked to continue your analysis or return your final decision.
