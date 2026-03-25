@@ -132,11 +132,13 @@ The system uses a **setup agent → expression policy** architecture. The LLM (s
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Setup agent** (outer loop, every 5-20 min):
-- Receives context: price, equity, PnL, fees, win rate, per-strategy performance, multi-timeframe trends
-- Returns a flat decision: policy type, params, TP/SL percentages, sizing fraction, direction bias
-- Can call arena tools for deeper analysis (klines, orderbook, leaderboard, chat, etc.)
+**Setup agent** (outer loop, every 10-60 min):
+- Receives context: price, equity, PnL, fees, win rate, per-strategy performance, multi-timeframe trends, current indicator values, expression validation errors from previous cycle
+- Returns a flat decision: policy type, params, TP/SL percentages, sizing fraction
+- Can call arena tools for deeper analysis (klines capped to 20 candles, orderbook, leaderboard, chat, etc.)
+- Tool results accumulated across rounds — LLM sees all prior tool results when making final decision
 - Strategy change cooldown: 20 min or 5 trades minimum between changes (enforced server-side)
+- Check interval: minimum 10 minutes (enforced), LLM can request up to 60 min
 - Backends: Claude, Codex, Gemini, OpenClaw
 - Tool access: Claude uses native MCP; others use the tool proxy (JSON `tool_calls` protocol, executed locally via `varsity_tools.dispatch()`)
 
@@ -147,6 +149,7 @@ The system uses a **setup agent → expression policy** architecture. The LLM (s
 - `exit="rsi_14 > 55 or atr_14 / close > 0.02"` → CLOSE_POSITION when True
 - Variables: any subscribed TA-Lib indicator (`rsi_14`, `sma_50`, `macd_hist`, `bbands_upper`, etc.) + market data (`close`, `high`, `low`, `open`, `volume`)
 - `ensemble([expressions...])` — multiple expression sets, first non-HOLD signal wins
+- Safe AST validation: only comparisons, boolean ops, arithmetic, numbers, and variable names allowed. No function calls (`abs()`, `max()`, `min()`), no builtins, no subscripts. Invalid expressions default to HOLD and are reported back to the setup agent next cycle.
 
 **Strategy layer** (applied to every trade action):
 - Sizing: `fixed_fraction` of equity (setup agent controls the percentage)
@@ -161,7 +164,14 @@ The system uses a **setup agent → expression policy** architecture. The LLM (s
 - Position sizing (1-50% of equity)
 - TP/SL percentages
 - Cooldown period (adjustable 60-3600s)
-- Check interval
+- Check interval (600-3600s, minimum 10 min enforced)
+
+**What the setup agent receives (context feedback):**
+- Current indicator values (e.g., `rsi_14: 48.2`, `sma_20: 71105`) — so it can calibrate expression thresholds
+- Expression validation errors from previous cycle — so it can fix invalid expressions (e.g., function calls not allowed)
+- Per-strategy performance (separate from overall stats)
+- Multi-timeframe market summaries (1m, 5m, 15m)
+- Competition state, account, position, leaderboard, recent chat
 
 **Key design decisions:**
 - The LLM never sees internal config nesting — it uses a flat schema with percentages
@@ -358,11 +368,18 @@ Agents access arena tools through two paths — **zero user configuration requir
 **Why dual paths?** Claude Code blocks `tool_calls` JSON output (detects it as prompt injection against its native tool protocol). Claude Code is also the only backend with per-call `--mcp-config`, so it uses MCP natively. The other backends have no per-call MCP support, so the tool proxy fills the gap.
 
 **Tool proxy protocol** (Gemini/Codex/OpenClaw):
-1. Tool catalog appended to the agent's prompt (~1300 tokens for setup, ~500 for runtime)
-2. Agent returns `{"tool_calls": [{"tool": "get_klines", "args": {"symbol": "BTCUSDT"}}]}`
-3. Runtime executes locally: `varsity_tools.dispatch("get_klines", symbol="BTCUSDT")`
-4. Results appended to prompt, agent re-invoked
-5. Agent returns final decision (no `tool_calls`) → loop exits
+1. Tool catalog appended to the agent's prompt (~1000 tokens for setup, ~500 for runtime)
+2. Agent returns `{"tool_calls": [{"tool": "get_klines", "args": {"symbol": "BTCUSDT", "interval": "5m", "size": 20}}]}`
+3. Runtime executes locally: `varsity_tools.dispatch("get_klines", symbol="BTCUSDT", interval="5m", size=20)`
+4. Results **accumulated** into prompt context — the LLM sees all prior tool results across rounds
+5. Agent re-invoked with full context (base prompt + all accumulated tool results)
+6. Agent returns final decision (no `tool_calls`) → loop exits
+
+Guardrails:
+- **Kline cap**: `get_klines` requests capped to 20 candles per call (~3K chars vs 16K for 100 candles)
+- **Per-result truncation**: each tool result capped at 4,000 chars
+- **Context budget**: total accumulated tool results capped at 80,000 chars across all rounds
+- **Max rounds**: 5 tool-call rounds per setup cycle (max 3 tools per round)
 
 Config: `tool_proxy_enabled` (default `true` for setup agent, `false` for runtime agent).
 
@@ -537,11 +554,14 @@ arena-agent-runtime auto --competition-id 9 --agent claude --setup-interval 300
 ```
 
 Each cycle:
-1. **Setup agent** (LLM) analyzes context and defines expression-based signal logic
-2. Decision is translated to internal config and applied
-3. **Expression policy** evaluates signals for N deterministic iterations (N = next_check_seconds / tick_interval)
-4. Strategy layer applies sizing, TP/SL, entry filters, and exit rules to every trade
-5. Loop back to step 1
+1. **Pre-checks**: verify competition is active and engine account exists (stops after 3 consecutive failures)
+2. **Context build**: fetch market data, account, position, indicators, performance, leaderboard, chat (9 API calls)
+3. **Setup agent** (LLM) analyzes context and defines expression-based signal logic
+4. Decision is translated to internal config and applied
+5. **Expression policy** evaluates signals for N deterministic iterations (N = next_check_seconds / tick_interval)
+6. Strategy layer applies sizing, TP/SL, entry filters, and exit rules to every trade
+7. **Feedback**: current indicator values and expression validation errors fed back to next cycle's context
+8. Loop back to step 1
 
 The setup agent uses a flat schema:
 
@@ -559,15 +579,20 @@ The setup agent uses a flat schema:
   "sl_pct": 0.5,
   "sizing_fraction": 25,
   "reason": "RSI mean reversion with trend filter",
-  "next_check_seconds": 300
+  "next_check_seconds": 600
 }
 ```
 
 Guardrails:
 - **Strategy cooldown**: 20 min or 5 trades between changes (bypassed only on >3% drawdown)
-- **Bounds enforcement**: tp_pct [0.1-5.0], sl_pct [0.1-3.0], sizing [1-20]%
+- **Bounds enforcement**: tp_pct [0.1-5.0], sl_pct [0.1-3.0], sizing [1-50]%
 - **Naked order protection**: if strategy.refine() fails, action demoted to HOLD
 - **Per-strategy performance**: setup agent sees stats for the current strategy, not just overall
+- **Setup interval floor**: `next_check_seconds` clamped to minimum 600s (10 min) to control token costs
+- **Account health gate**: skips LLM call if engine account is unavailable (prevents token burn on broken state)
+- **Crash rate limiter**: if runtime crashes on first iteration, waits 60s before next cycle (prevents rapid-fire loop)
+- **Expression feedback**: invalid expressions from previous cycle are included in context so the LLM can fix them
+- **Indicator feedback**: current indicator values included in context so the LLM can calibrate thresholds
 
 Options:
 
