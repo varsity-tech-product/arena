@@ -454,7 +454,15 @@ def _run_auto(argv: list[str]) -> None:
 
             # Reset error backoff on successful cycle
             error_backoff = 5
-            time.sleep(2)
+            # If runtime finished too quickly (e.g. crashed on first iteration),
+            # wait at least setup_interval before the next cycle to avoid
+            # rapid-fire LLM calls.
+            if report is None or report.iterations <= 1:
+                wait = min(args.setup_interval, 60)
+                log.warning("Runtime finished in ≤1 iteration — waiting %ds before next cycle.", wait)
+                time.sleep(wait)
+            else:
+                time.sleep(2)
 
         except Exception as exc:
             # --- Self-healing: never exit during a live competition ---
