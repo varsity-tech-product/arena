@@ -193,7 +193,7 @@ class RuntimeMonitor:
             health["no_transition_threshold_seconds"] = float(
                 self.config.get(
                     "no_transition_threshold_seconds",
-                    max(30.0, float(getattr(runtime_config, "tick_interval_seconds", 30.0)) * 2.0),
+                    max(60.0, float(getattr(runtime_config, "tick_interval_seconds", 60.0)) * 2.0),
                 )
             )
             health["no_transition_error_threshold_seconds"] = _optional_float(

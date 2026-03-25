@@ -409,7 +409,7 @@ def _run_auto(argv: list[str]) -> None:
                 break
 
             # --- Runtime phase ---
-            tick = float(config_dict.get("tick_interval_seconds", 30))
+            tick = float(config_dict.get("tick_interval_seconds", 60))
             iterations = max(1, int(next_check / tick))
             config_dict["max_iterations"] = iterations
             log.info("Starting runtime: %d iterations (%.0fs tick, next setup in ~%ds)", iterations, tick, next_check)

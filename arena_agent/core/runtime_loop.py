@@ -378,7 +378,7 @@ def _feature_age_threshold_seconds(config: RuntimeConfig) -> float:
     raw = config.observability.get("state_feature_max_age_seconds")
     if raw is not None:
         return float(raw)
-    return max(30.0, float(config.tick_interval_seconds) * 2.0)
+    return max(60.0, float(config.tick_interval_seconds) * 2.0)
 
 
 def _should_stop_for_health(config: RuntimeConfig, snapshot: dict[str, Any]) -> bool:

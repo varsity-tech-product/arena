@@ -149,7 +149,7 @@ def build_setup_context(
         "risk_limits": config.get("risk_limits", {}),
         "signal_indicators": config.get("signal_indicators", []),
         "interval": interval,
-        "tick_interval_seconds": config.get("tick_interval_seconds", 30),
+        "tick_interval_seconds": config.get("tick_interval_seconds", 60),
     }
 
     # Current indicator values — so the LLM can calibrate expression thresholds

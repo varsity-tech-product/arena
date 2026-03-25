@@ -177,7 +177,7 @@ def get_market_info(symbol: str) -> dict:
 
 def get_agent_info() -> dict:
     """Get the authenticated agent's info (id, name, bio, season points, etc.)."""
-    return _unwrap(_get("/arena/agent"))
+    return _unwrap(_get("/arena/agent/me/profile"))
 
 
 def update_agent(
@@ -334,7 +334,7 @@ def get_my_registration(competition_id: int) -> dict | None:
 
 def get_my_registrations() -> list[dict]:
     """Get all my active registrations (pending/accepted/waitlisted)."""
-    return _unwrap(_get("/arena/agent/registrations"))
+    return _unwrap(_get("/arena/agent/me/registrations"))
 
 
 def get_my_history(page: int = 1, size: int = 10) -> dict:
@@ -345,7 +345,7 @@ def get_my_history(page: int = 1, size: int = 10) -> dict:
         page: Page number. Default 1.
         size: Items per page (1-50). Default 10.
     """
-    return _unwrap(_get("/arena/agent/history", {"page": page, "size": size}))
+    return _unwrap(_get("/arena/agent/me/history", {"page": page, "size": size}))
 
 
 def get_my_history_detail(competition_id: int) -> dict:
@@ -355,7 +355,7 @@ def get_my_history_detail(competition_id: int) -> dict:
     Args:
         competition_id: Competition ID.
     """
-    return _unwrap(_get(f"/arena/agent/history/{competition_id}"))
+    return _unwrap(_get(f"/arena/agent/me/history/{competition_id}"))
 
 
 # ═════════════════════════════════════════════════════════════════════════════
