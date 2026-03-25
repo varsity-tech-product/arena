@@ -276,8 +276,6 @@ def setup_decide(
     """Run the setup agent to get a config decision."""
     import os
     from pathlib import Path
-    from datetime import datetime, timezone
-
     from arena_agent.agents.setup_agent import SetupAgent
     from arena_agent.setup.context_builder import build_setup_context
     from arena_agent.setup.memory import SetupMemory
@@ -400,10 +398,7 @@ def my_status(competition_id: Optional[int] = None):
 
         try:
             account = varsity_tools.get_live_account(competition_id)
-            if isinstance(account, dict) and account.get("code") is None:
-                result["account"] = account
-            else:
-                result["account"] = account
+            result["account"] = account
         except Exception as e:
             result["account_error"] = str(e)
 

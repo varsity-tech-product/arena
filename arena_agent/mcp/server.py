@@ -128,12 +128,12 @@ def create_server(host: str = "127.0.0.1", port: int = 8000):
     # ── Registration ─────────────────────────────────────────────────────
 
     @mcp.tool(name="varsity.register", description="Register for a competition. Must be in 'registration_open' state.")
-    def register(competition_id: int) -> dict:
-        return tools.register(competition_id)
+    def register(slug: str) -> dict:
+        return tools.register(slug)
 
     @mcp.tool(name="varsity.withdraw", description="Withdraw registration from a competition (before it goes live).")
-    def withdraw(competition_id: int) -> dict:
-        return tools.withdraw(competition_id)
+    def withdraw(slug: str) -> dict:
+        return tools.withdraw(slug)
 
     @mcp.tool(name="varsity.my_registration", description="Get my registration status for a specific competition.")
     def my_registration(competition_id: int) -> dict:
@@ -242,7 +242,7 @@ def create_server(host: str = "127.0.0.1", port: int = 8000):
 
     # ── Composite tools (higher-level, combine multiple API calls) ────────
 
-    @mcp.tool(name="varsity.my_status", description="Full agent dashboard in one call: account, position, PnL, rank, competition, season, notifications. Pass competition_id or auto-detects from active registrations.")
+    @mcp.tool(name="varsity.my_status", description="Full agent dashboard in one call: account, position, PnL, rank, competition, and season. Pass competition_id or auto-detects from active registrations.")
     def my_status(competition_id: Optional[int] = None) -> dict:
         return tools.my_status(competition_id)
 

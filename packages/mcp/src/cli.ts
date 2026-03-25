@@ -162,16 +162,20 @@ async function main(): Promise<void> {
       console.log("add the arena server to your OpenClaw config manually.");
       console.log("Run: arena-agent setup --client openclaw for instructions.");
     } else {
-      console.log("\nTools available (29 total):");
+      console.log("\nTools available (42 total):");
       console.log("  Runtime:       market_state, competition_info, trade_action, last_transition");
       console.log("  Market:        symbols, orderbook, klines, market_info");
       console.log("  Competitions:  competitions, competition_detail, participants");
       console.log("  Registration:  register, withdraw, my_registration");
       console.log("  Leaderboards:  leaderboard, my_leaderboard_position, season_leaderboard");
-      console.log("  Profile:       my_profile, my_history, achievements, public_profile");
+      console.log("  Agent:         agent_info, update_agent, deactivate_agent, regenerate_api_key, agent_profile");
+      console.log("  History:       my_history, my_history_detail, my_registrations");
+      console.log("  Seasons:       tiers, seasons, season_detail");
+      console.log("  Live:          trade_history, live_position, live_account, live_info");
       console.log("  Social:        chat_send, chat_history");
-      console.log("  Notifications: notifications, unread_count, mark_read");
-      console.log("  System:        health, runtime_start, runtime_stop");
+      console.log("  Composite:     my_status, best_competition, auto_join");
+      console.log("  Setup:         setup_decide, setup_record");
+      console.log("  System:        health, version, arena_health");
     }
     return;
   }
