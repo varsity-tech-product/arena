@@ -7,7 +7,7 @@ $setup_context_json
 The JSON above contains:
 - **current_strategy**: your active policy, params, age, and runtime activity:
   - `consecutive_hold_cycles`: how many setup cycles in a row the rule policy produced 0 trades. If this is high, the strategy is NOT generating signals in the current market.
-  - `total_runtime_iterations_since_change`: total 30s ticks since the last strategy change. If this is high but trade count is 0, the strategy cannot fire in these conditions.
+  - `total_runtime_iterations_since_change`: total ticks (one per candle close) since the last strategy change. If this is high but trade count is 0, the strategy cannot fire in these conditions.
 - **performance**: overall stats AND current_strategy_performance (trades since last strategy change) — use the per-strategy stats to evaluate the CURRENT policy, not the overall stats
 - **market_summary / market_5m / market_15m**: recent price, trend, volatility across timeframes
 - **account_state**: equity, balance, realized PnL, trade count
@@ -87,6 +87,7 @@ Trade direction (long/short) is decided by your expressions — design entry_lon
 - Only change the policy TYPE when the current one is clearly failing. Tweaking TP/SL/sizing alone does NOT require an "update" — the current values persist across "hold" decisions.
 - **INACTIVITY ALERT**: If `inactivity_alert` appears in the context, your current strategy has produced no trades for an extended period. Consider whether the current policy fits the market conditions — you may need different parameters, a different strategy type, or tighter entry thresholds to generate signals.
 - **COOLDOWN**: The `current_strategy.cooldown` field shows whether a strategy change cooldown is active, how many seconds/trades remain, and the current cooldown period. You can adjust the cooldown period by including `"cooldown_seconds": N` (60-3600) in your response — useful when you anticipate needing to adapt quickly.
+- **TIMEFRAME**: The runtime uses 1m candles by default (max 5m). Indicator values update once per candle close — the tick interval matches the candle interval. Competitions typically last ~24 hours, so use fast timeframes (1m or 3m) to maximize signal frequency. Longer timeframes like 5m produce fewer signals and may miss short-lived opportunities.
 
 ## Tools
 

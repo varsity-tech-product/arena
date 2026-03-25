@@ -213,7 +213,7 @@ function renderRuleConfig(state: ArenaHomeState): string {
 competition_id: 4
 symbol: BTCUSDT
 interval: 1m
-tick_interval_seconds: 60
+# tick_interval_seconds derived from interval (60s for 1m)
 kline_limit: 120
 orderbook_depth: 20
 max_iterations: null

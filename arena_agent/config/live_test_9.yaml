@@ -2,7 +2,7 @@
 competition_id: 9
 symbol: BTCUSDT
 interval: 1m
-tick_interval_seconds: 30
+# tick_interval_seconds derived from interval (60s for 1m)
 kline_limit: 120
 orderbook_depth: 20
 stop_when_competition_inactive: true

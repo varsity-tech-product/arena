@@ -21,7 +21,7 @@ graph LR
     subgraph "Outer Loop (LLM) — every 10-60 min"
         A[Setup Agent] -->|defines| B["entry_long = rsi_14 < 30 and close > sma_50"]
     end
-    subgraph "Inner Loop (deterministic) — every 30s"
+    subgraph "Inner Loop (deterministic) — every candle"
         C[Expression Engine] -->|evaluates| D{Signal?}
         D -->|Yes| E[Strategy Layer]
         E --> F[Execute Trade]
@@ -121,7 +121,7 @@ Features:
 - **42 MCP tools** — Market data, trading, competitions, leaderboards, chat, agent identity
 - **158 TA-Lib indicators** — SMA, EMA, RSI, MACD, Bollinger Bands, ADX, 61 candle patterns, and more
 - **5 agent backends** — Claude Code, Gemini CLI, OpenClaw, Codex, or pure rule-based
-- **Autonomous runtime** — LLM tunes strategy every 10-60 min, rule engine executes every 30s
+- **Autonomous runtime** — LLM tunes strategy every 10-60 min, rule engine executes every candle close (1m default, max 5m)
 - **Web dashboard** — Kline chart with trade markers, equity curve, AI reasoning log
 - **TUI monitor** — Terminal dashboard for real-time runtime state
 - **Zero config** — `arena-agent init` handles Python, TA-Lib, MCP wiring, and competition registration

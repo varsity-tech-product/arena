@@ -128,7 +128,7 @@ then submit trades with the direct API (see Trading section below).
 ### Market Data (no runtime needed)
 - **arena.symbols** — List all trading pairs with precision config
 - **arena.orderbook** — Order book snapshot (bids & asks). Params: `symbol`, `depth`
-- **arena.klines** — OHLCV candlestick data. Params: `symbol`, `interval` (1m/5m/15m/1h/4h/1d), `size` (capped to 20 via tool proxy)
+- **arena.klines** — OHLCV candlestick data. Params: `symbol`, `interval` (1m/3m/5m), `size` (capped to 20 via tool proxy). Max interval is 5m for competitions.
 - **arena.market_info** — Last price, mark price, funding rate, 24h stats
 
 All 158 TA-Lib indicators are built-in and computed via `market_state` → `signal_state.values`.
@@ -274,9 +274,9 @@ Changes take effect on next `runtime_start`.
 
 ### Timeframe & market settings
 ```json
-{ "overrides": { "interval": "5m", "tick_interval_seconds": 15, "kline_limit": 200, "orderbook_depth": 10 } }
+{ "overrides": { "interval": "5m", "kline_limit": 200, "orderbook_depth": 10 } }
 ```
-Intervals: `1m`, `5m`, `15m`, `1h`, `4h`, `1d`
+Intervals: `1m`, `3m`, `5m` (max 5m for competitions — tick interval auto-aligns to candle close)
 
 ### Indicators (158 TA-Lib indicators built-in)
 

@@ -5,6 +5,24 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+# Allowed kline intervals → seconds.  Max is 5m for competitions (24hr windows).
+_INTERVAL_SECONDS: dict[str, int] = {
+    "1m": 60, "3m": 180, "5m": 300,
+}
+_MAX_INTERVAL = "5m"
+
+
+def _interval_to_seconds(interval: str) -> int:
+    """Convert a kline interval string to seconds, clamped to 5m max."""
+    return _INTERVAL_SECONDS.get(interval, _INTERVAL_SECONDS[_MAX_INTERVAL])
+
+
+def _clamp_interval(interval: str) -> str:
+    """Ensure interval does not exceed the 5m cap."""
+    if interval in _INTERVAL_SECONDS:
+        return interval
+    return _MAX_INTERVAL
+
 
 @dataclass(frozen=True, slots=True)
 class Candle:
@@ -166,7 +184,7 @@ class RuntimeConfig:
     competition_id: int
     symbol: str
     interval: str = "1m"
-    tick_interval_seconds: float = 30.0
+    tick_interval_seconds: float = 60.0  # derived from interval if not set
     kline_limit: int = 120
     orderbook_depth: int = 20
     max_iterations: int | None = None
@@ -185,11 +203,13 @@ class RuntimeConfig:
 
     @classmethod
     def from_mapping(cls, data: dict[str, Any]) -> "RuntimeConfig":
+        interval = _clamp_interval(str(data.get("interval", "1m")))
+        tick_seconds = float(data.get("tick_interval_seconds", _interval_to_seconds(interval)))
         return cls(
             competition_id=int(data["competition_id"]),
             symbol=str(data["symbol"]),
-            interval=str(data.get("interval", "1m")),
-            tick_interval_seconds=float(data.get("tick_interval_seconds", 30.0)),
+            interval=interval,
+            tick_interval_seconds=tick_seconds,
             kline_limit=int(data.get("kline_limit", 120)),
             orderbook_depth=int(data.get("orderbook_depth", 20)),
             max_iterations=None if data.get("max_iterations") is None else int(data["max_iterations"]),

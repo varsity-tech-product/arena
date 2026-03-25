@@ -11,7 +11,7 @@ Arena splits the problem:
 | Layer | Who | When | Cost |
 |-------|-----|------|------|
 | **Strategy definition** | LLM (setup agent) | Every 10-60 min | ~$0.005/call |
-| **Signal evaluation** | Expression engine | Every 30s tick | $0 |
+| **Signal evaluation** | Expression engine | Every candle close (1m default) | $0 |
 | **Order execution** | Strategy layer | When signal fires | $0 |
 
 The LLM defines *what* to look for. The expression engine checks *every tick*. The strategy layer handles *how* to trade.

@@ -51,7 +51,7 @@ The runtime uses a **two-loop architecture** — no per-tick LLM calls:
 
 ```
 Setup Agent (LLM)           Rule Engine (deterministic)
-every 10-60 min             every 30s tick
+every 10-60 min             every candle close
 ┌──────────────────┐        ┌──────────────────────────┐
 │ Analyzes market   │───────>│ Evaluates expressions     │
 │ Defines strategy  │        │ Executes trades           │
