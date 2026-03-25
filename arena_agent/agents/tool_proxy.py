@@ -45,6 +45,7 @@ TOOL_GROUPS: dict[str, list[str]] = {
     "trading": [
         "trade_open", "trade_close", "trade_update_tpsl",
         "get_live_trades", "get_live_position", "get_live_account",
+        "get_live_info",
     ],
     "competitions": [
         "get_competitions", "get_competition_detail", "get_participants",
@@ -58,20 +59,9 @@ TOOL_GROUPS: dict[str, list[str]] = {
     "social": [
         "send_chat", "get_chat_history",
     ],
-    "profile": [
-        "get_my_profile", "get_arena_profile", "get_my_history",
-        "get_my_history_detail", "get_achievements",
-        "get_public_profile", "get_public_history",
-    ],
-    "hub": [
-        "get_hub", "get_my_registrations",
-    ],
-    "predictions": [
-        "get_predictions", "submit_prediction", "get_polls", "vote_poll",
-    ],
-    "notifications": [
-        "get_notifications", "get_unread_notification_count",
-        "mark_notification_read", "mark_all_notifications_read",
+    "agent": [
+        "get_agent_info", "update_agent", "get_agent_profile",
+        "get_my_history", "get_my_history_detail",
     ],
     "system": [
         "get_health", "get_version", "get_arena_health",
@@ -80,8 +70,7 @@ TOOL_GROUPS: dict[str, list[str]] = {
 
 # Pre-select relevant groups for different agent contexts.
 SETUP_GROUPS = [
-    "market_data", "trading", "competitions", "leaderboard", "social",
-    "profile", "hub", "predictions",
+    "market_data", "trading", "competitions", "leaderboard", "social", "agent",
 ]
 RUNTIME_GROUPS = [
     "market_data", "trading", "leaderboard",

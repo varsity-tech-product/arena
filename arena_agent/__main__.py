@@ -239,8 +239,9 @@ def _run_auto(argv: list[str]) -> None:
 
     # --- Liveness state ---
     inactive_cycles = 0          # consecutive cycles with 0 executed trades
+    inactive_since: float | None = None  # wall-clock timestamp when inactivity started
     total_runtime_iterations = 0 # total iterations since last strategy change
-    max_inactive_cycles = 4      # ~20 min at 5-min intervals → trigger inactivity alert
+    max_inactive_cycles = 4      # trigger inactivity alert after this many consecutive idle cycles
     consecutive_setup_failures = 0
     max_setup_failures = 5       # apply fallback strategy after this many
     consecutive_account_failures = 0  # stop after 3 consecutive "account not found"
@@ -314,13 +315,19 @@ def _run_auto(argv: list[str]) -> None:
             # --- Setup phase ---
             setup_failed = False
             try:
+                actual_inactive_minutes = round((time.time() - inactive_since) / 60) if inactive_since else 0
                 context = build_setup_context(
                     args.competition_id, config_dict, memory.recent(5),
                     inactivity_alert=inactive_cycles >= max_inactive_cycles,
-                    inactive_minutes=round(inactive_cycles * args.setup_interval / 60),
+                    inactive_minutes=actual_inactive_minutes,
                     consecutive_hold_cycles=inactive_cycles,
                     total_runtime_iterations=total_runtime_iterations,
                 )
+                # Skip LLM call if account context is broken (API error)
+                acct_ctx = context.get("account_state", {})
+                if isinstance(acct_ctx, dict) and "error" in acct_ctx:
+                    log.warning("Account context unavailable (%s) — skipping setup agent call.", acct_ctx["error"][:100])
+                    raise RuntimeError(f"broken context: {acct_ctx['error'][:100]}")
                 # Propagate symbol from competition detail (asset-agnostic)
                 comp = context.get("competition", {})
                 if isinstance(comp, dict) and comp.get("symbol"):
@@ -354,6 +361,7 @@ def _run_auto(argv: list[str]) -> None:
                         config_dict["_strategy_start_trade_count"] = acct.get("trade_count", 0) if isinstance(acct, dict) else 0
                         config_dict["_strategy_start_time"] = time.time()
                         inactive_cycles = 0
+                        inactive_since = None
                         total_runtime_iterations = 0
                     _deep_merge(config_dict, decision.overrides)
                     # Apply agent-requested cooldown override
@@ -394,6 +402,7 @@ def _run_auto(argv: list[str]) -> None:
                 config_dict["_strategy_start_time"] = time.time()
                 consecutive_setup_failures = 0
                 inactive_cycles = 0
+                inactive_since = None
                 total_runtime_iterations = 0
 
             if stop_requested:
@@ -438,14 +447,18 @@ def _run_auto(argv: list[str]) -> None:
                 total_runtime_iterations += report.iterations
                 if report.executed_actions == 0:
                     inactive_cycles += 1
+                    if inactive_since is None:
+                        inactive_since = time.time()
                 else:
                     inactive_cycles = 0
+                    inactive_since = None
 
             if inactive_cycles >= max_inactive_cycles:
+                inactive_minutes = round((time.time() - inactive_since) / 60) if inactive_since else 0
                 log.warning(
-                    "Inactivity watchdog: %d cycles (~%d min) with no trades — forcing strategy rotation next cycle",
+                    "Inactivity watchdog: %d cycles (%d min) with no trades — forcing strategy rotation next cycle",
                     inactive_cycles,
-                    round(inactive_cycles * args.setup_interval / 60),
+                    inactive_minutes,
                 )
                 # Don't reset here — reset happens after the next setup cycle
                 # successfully produces an "update" decision
