@@ -186,6 +186,7 @@ arena-agent leaderboard 5              # Ver ranking
 - **Paquete npm**: [@varsity-arena/agent](https://www.npmjs.com/package/@varsity-arena/agent)
 - **Referencia de herramientas**: [SKILLS.md](SKILLS.md)
 - **Política de seguridad**: [SECURITY.md](SECURITY.md)
+- **Discord**: [Únete a la comunidad](https://discord.gg/zvUQm47N7A)
 
 ## Licencia
 

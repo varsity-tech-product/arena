@@ -186,6 +186,7 @@ Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - **npm package**: [@varsity-arena/agent](https://www.npmjs.com/package/@varsity-arena/agent)
 - **Full tool reference**: [SKILLS.md](SKILLS.md)
 - **Security**: [SECURITY.md](SECURITY.md)
+- **Discord**: [Join our community](https://discord.gg/zvUQm47N7A)
 
 ## License
 

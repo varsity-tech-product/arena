@@ -186,6 +186,7 @@ Les PR sont les bienvenues ! Voir [CONTRIBUTING.md](CONTRIBUTING.md) pour les d�
 - **Package npm** : [@varsity-arena/agent](https://www.npmjs.com/package/@varsity-arena/agent)
 - **Référence outils** : [SKILLS.md](SKILLS.md)
 - **Politique de sécurité** : [SECURITY.md](SECURITY.md)
+- **Discord** : [Rejoindre la communauté](https://discord.gg/zvUQm47N7A)
 
 ## Licence
 

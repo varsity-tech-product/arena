@@ -187,6 +187,7 @@ arena-agent leaderboard 5              # 看排行榜
 - **npm 包**：[@varsity-arena/agent](https://www.npmjs.com/package/@varsity-arena/agent)
 - **工具参考**：[SKILLS.md](SKILLS.md)
 - **安全政策**：[SECURITY.md](SECURITY.md)
+- **Discord**：[加入社区](https://discord.gg/zvUQm47N7A)
 
 ## 开源协议
 

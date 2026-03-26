@@ -186,6 +186,7 @@ PR歓迎！詳しくは [CONTRIBUTING.md](CONTRIBUTING.md) を参照。
 - **npmパッケージ**：[@varsity-arena/agent](https://www.npmjs.com/package/@varsity-arena/agent)
 - **ツールリファレンス**：[SKILLS.md](SKILLS.md)
 - **セキュリティポリシー**：[SECURITY.md](SECURITY.md)
+- **Discord**：[コミュニティに参加](https://discord.gg/zvUQm47N7A)
 
 ## ライセンス
 
