@@ -12,7 +12,7 @@ export const DIAGRAMS: DiagramDef[] = [
     name: "two-loop-architecture",
     title: "Two-Loop Architecture",
     outputFile: "two-loop-architecture.excalidraw",
-    mermaid: `graph LR
+    mermaid: `graph TD
     subgraph "Outer Loop (LLM) — every 10-60 min"
         A[Setup Agent] -->|defines| B["entry_long = rsi_14 < 30 and close > sma_50"]
     end
@@ -41,7 +41,7 @@ export const DIAGRAMS: DiagramDef[] = [
     name: "context-pipeline-simple",
     title: "Context Engineering Pipeline",
     outputFile: "context-pipeline-simple.excalidraw",
-    mermaid: `graph LR
+    mermaid: `graph TD
     A["6+ API calls<br/>(market, account,<br/>position, trades,<br/>leaderboard, chat)"] --> B[Context Builder]
     C["Per-strategy<br/>performance isolation"] --> B
     D["Indicator values<br/>for threshold calibration"] --> B
@@ -54,7 +54,7 @@ export const DIAGRAMS: DiagramDef[] = [
     name: "context-pipeline-full",
     title: "Full Setup Agent Context Pipeline",
     outputFile: "context-pipeline-full.excalidraw",
-    mermaid: `graph LR
+    mermaid: `graph TD
     A[API Calls] --> B[Context Builder]
     C[Runtime Config] --> B
     D[Trade History] --> B

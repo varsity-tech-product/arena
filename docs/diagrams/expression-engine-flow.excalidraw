@@ -38,7 +38,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -66,7 +66,7 @@
       "versionNonce": 100003,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Expression Policy",
@@ -122,7 +122,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -150,7 +150,7 @@
       "versionNonce": 100007,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Warmup complete?",
@@ -198,7 +198,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -226,7 +226,7 @@
       "versionNonce": 100011,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "HOLD - indicators still computing",
@@ -282,7 +282,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -310,7 +310,7 @@
       "versionNonce": 100015,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Validation errors?",
@@ -358,7 +358,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -386,7 +386,7 @@
       "versionNonce": 100019,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "HOLD - report errors to setup agent",
@@ -438,7 +438,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -466,7 +466,7 @@
       "versionNonce": 100023,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Build namespace from signal_state",
@@ -522,7 +522,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -550,7 +550,7 @@
       "versionNonce": 100027,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Position open?",
@@ -606,7 +606,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -634,7 +634,7 @@
       "versionNonce": 100031,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Eval exit expression",
@@ -690,7 +690,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -718,7 +718,7 @@
       "versionNonce": 100035,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Eval entry_long",
@@ -766,7 +766,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -794,7 +794,7 @@
       "versionNonce": 100039,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "CLOSE_POSITION",
@@ -842,7 +842,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -870,7 +870,7 @@
       "versionNonce": 100043,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "HOLD",
@@ -918,7 +918,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -946,7 +946,7 @@
       "versionNonce": 100047,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "OPEN_LONG",
@@ -1002,7 +1002,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -1030,7 +1030,7 @@
       "versionNonce": 100051,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Eval entry_short",
@@ -1078,7 +1078,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -1106,7 +1106,7 @@
       "versionNonce": 100055,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "OPEN_SHORT",
@@ -1154,7 +1154,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -1182,7 +1182,7 @@
       "versionNonce": 100059,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "HOLD",
@@ -1221,7 +1221,7 @@
       "versionNonce": 100061,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -1282,7 +1282,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -1336,7 +1336,7 @@
       "versionNonce": 100065,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "No",
@@ -1380,7 +1380,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -1434,7 +1434,7 @@
       "versionNonce": 100069,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Yes",
@@ -1478,7 +1478,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -1532,7 +1532,7 @@
       "versionNonce": 100073,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Yes",
@@ -1576,7 +1576,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -1630,7 +1630,7 @@
       "versionNonce": 100077,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "No",
@@ -1669,7 +1669,7 @@
       "versionNonce": 100079,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -1730,7 +1730,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -1784,7 +1784,7 @@
       "versionNonce": 100083,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Yes",
@@ -1828,7 +1828,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -1882,7 +1882,7 @@
       "versionNonce": 100087,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "True",
@@ -1926,7 +1926,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -1980,7 +1980,7 @@
       "versionNonce": 100091,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "False",
@@ -2024,7 +2024,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -2078,7 +2078,7 @@
       "versionNonce": 100095,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "No",
@@ -2122,7 +2122,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -2176,7 +2176,7 @@
       "versionNonce": 100099,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "True",
@@ -2220,7 +2220,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -2274,7 +2274,7 @@
       "versionNonce": 100103,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "False",
@@ -2318,7 +2318,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -2372,7 +2372,7 @@
       "versionNonce": 100107,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "True",
@@ -2416,7 +2416,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "points": [
@@ -2470,7 +2470,7 @@
       "versionNonce": 100111,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "False",

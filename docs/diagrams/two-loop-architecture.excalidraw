@@ -6,10 +6,10 @@
     {
       "id": "sg_1",
       "type": "rectangle",
-      "x": 240,
-      "y": 25,
-      "width": 1640,
-      "height": 140,
+      "x": 20,
+      "y": 110,
+      "width": 380,
+      "height": 940,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "#f8f9fa",
@@ -34,16 +34,16 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206961,
       "link": null,
       "locked": false
     },
     {
       "id": "sglabel_2",
       "type": "text",
-      "x": 250,
-      "y": 33,
-      "width": 1620,
+      "x": 30,
+      "y": 118,
+      "width": 360,
       "height": 17.5,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -62,7 +62,7 @@
       "versionNonce": 100003,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206961,
       "link": null,
       "locked": false,
       "text": "Outer Loop (LLM) — every 10-60 min",
@@ -78,10 +78,10 @@
     {
       "id": "sg_3",
       "type": "rectangle",
-      "x": 520,
-      "y": -50,
-      "width": 1080,
-      "height": 290,
+      "x": -40,
+      "y": 270,
+      "width": 500,
+      "height": 620,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "#f8f9fa",
@@ -106,16 +106,16 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false
     },
     {
       "id": "sglabel_4",
       "type": "text",
-      "x": 530,
-      "y": -42,
-      "width": 1060,
+      "x": -30,
+      "y": 278,
+      "width": 480,
       "height": 17.5,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -134,7 +134,7 @@
       "versionNonce": 100007,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "Inner Loop (deterministic) — every candle",
@@ -150,8 +150,8 @@
     {
       "id": "shape_5",
       "type": "rectangle",
-      "x": 280,
-      "y": 75,
+      "x": 60,
+      "y": 160,
       "width": 300,
       "height": 50,
       "angle": 0,
@@ -186,15 +186,15 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false
     },
     {
       "id": "text_6",
       "type": "text",
-      "x": 290,
-      "y": 90,
+      "x": 70,
+      "y": 175,
       "width": 280,
       "height": 20,
       "angle": 0,
@@ -214,7 +214,7 @@
       "versionNonce": 100011,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "entry_long = rsi_14 < 30 and close > sma_50",
@@ -230,8 +230,8 @@
     {
       "id": "shape_7",
       "type": "rectangle",
-      "x": 560,
-      "y": 75,
+      "x": 122,
+      "y": 320,
       "width": 176,
       "height": 50,
       "angle": 0,
@@ -266,15 +266,15 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false
     },
     {
       "id": "text_8",
       "type": "text",
-      "x": 570,
-      "y": 90,
+      "x": 132,
+      "y": 335,
       "width": 156,
       "height": 20,
       "angle": 0,
@@ -294,7 +294,7 @@
       "versionNonce": 100015,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "Expression Engine",
@@ -310,8 +310,8 @@
     {
       "id": "shape_9",
       "type": "diamond",
-      "x": 840,
-      "y": 50,
+      "x": 98,
+      "y": 480,
       "width": 224,
       "height": 100,
       "angle": 0,
@@ -350,15 +350,15 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false
     },
     {
       "id": "text_10",
       "type": "text",
-      "x": 850,
-      "y": 90,
+      "x": 108,
+      "y": 520,
       "width": 204,
       "height": 20,
       "angle": 0,
@@ -378,7 +378,7 @@
       "versionNonce": 100019,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "Signal?",
@@ -394,8 +394,8 @@
     {
       "id": "shape_11",
       "type": "rectangle",
-      "x": 1120,
-      "y": 0,
+      "x": 0,
+      "y": 640,
       "width": 160,
       "height": 50,
       "angle": 0,
@@ -430,15 +430,15 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false
     },
     {
       "id": "text_12",
       "type": "text",
-      "x": 1130,
-      "y": 15,
+      "x": 10,
+      "y": 655,
       "width": 140,
       "height": 20,
       "angle": 0,
@@ -458,7 +458,7 @@
       "versionNonce": 100023,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "Strategy Layer",
@@ -474,8 +474,8 @@
     {
       "id": "shape_13",
       "type": "rectangle",
-      "x": 1120,
-      "y": 150,
+      "x": 260,
+      "y": 640,
       "width": 160,
       "height": 50,
       "angle": 0,
@@ -506,15 +506,15 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false
     },
     {
       "id": "text_14",
       "type": "text",
-      "x": 1130,
-      "y": 165,
+      "x": 270,
+      "y": 655,
       "width": 140,
       "height": 20,
       "angle": 0,
@@ -534,7 +534,7 @@
       "versionNonce": 100027,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "HOLD",
@@ -550,8 +550,8 @@
     {
       "id": "shape_15",
       "type": "rectangle",
-      "x": 1400,
-      "y": 75,
+      "x": 130,
+      "y": 800,
       "width": 160,
       "height": 50,
       "angle": 0,
@@ -586,15 +586,15 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false
     },
     {
       "id": "text_16",
       "type": "text",
-      "x": 1410,
-      "y": 90,
+      "x": 140,
+      "y": 815,
       "width": 140,
       "height": 20,
       "angle": 0,
@@ -614,7 +614,7 @@
       "versionNonce": 100031,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "Execute Trade",
@@ -630,8 +630,8 @@
     {
       "id": "shape_17",
       "type": "rectangle",
-      "x": 1680,
-      "y": 75,
+      "x": 130,
+      "y": 960,
       "width": 160,
       "height": 50,
       "angle": 0,
@@ -666,15 +666,15 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false
     },
     {
       "id": "text_18",
       "type": "text",
-      "x": 1690,
-      "y": 90,
+      "x": 140,
+      "y": 975,
       "width": 140,
       "height": 20,
       "angle": 0,
@@ -694,7 +694,7 @@
       "versionNonce": 100035,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "Setup Agent",
@@ -710,10 +710,10 @@
     {
       "id": "arrow_19",
       "type": "arrow",
-      "x": 1760,
-      "y": 100,
-      "width": 1330,
-      "height": 0,
+      "x": 210,
+      "y": 985,
+      "width": 0,
+      "height": 800,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -738,7 +738,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "points": [
@@ -747,8 +747,8 @@
           0
         ],
         [
-          -1330,
-          0
+          0,
+          -800
         ]
       ],
       "lastCommittedPoint": null,
@@ -771,8 +771,8 @@
     {
       "id": "elabel_20",
       "type": "text",
-      "x": 1059,
-      "y": 79.25,
+      "x": 174,
+      "y": 564.25,
       "width": 72,
       "height": 17.5,
       "angle": 0,
@@ -792,7 +792,7 @@
       "versionNonce": 100039,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "defines",
@@ -808,10 +808,10 @@
     {
       "id": "arrow_21",
       "type": "arrow",
-      "x": 648,
-      "y": 100,
-      "width": 304,
-      "height": 0,
+      "x": 210,
+      "y": 345,
+      "width": 0,
+      "height": 185,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -836,7 +836,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "points": [
@@ -845,8 +845,8 @@
           0
         ],
         [
-          304,
-          0
+          0,
+          185
         ]
       ],
       "lastCommittedPoint": null,
@@ -869,8 +869,8 @@
     {
       "id": "elabel_22",
       "type": "text",
-      "x": 756,
-      "y": 79.25,
+      "x": 166,
+      "y": 416.75,
       "width": 88,
       "height": 17.5,
       "angle": 0,
@@ -890,7 +890,7 @@
       "versionNonce": 100043,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "evaluates",
@@ -906,10 +906,10 @@
     {
       "id": "arrow_23",
       "type": "arrow",
-      "x": 952,
-      "y": 100,
-      "width": 248,
-      "height": 75,
+      "x": 210,
+      "y": 530,
+      "width": 130,
+      "height": 135,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -934,7 +934,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "points": [
@@ -943,8 +943,8 @@
           0
         ],
         [
-          248,
-          -75
+          -130,
+          135
         ]
       ],
       "lastCommittedPoint": null,
@@ -967,8 +967,8 @@
     {
       "id": "elabel_24",
       "type": "text",
-      "x": 1056,
-      "y": 41.75,
+      "x": 125,
+      "y": 576.75,
       "width": 40,
       "height": 17.5,
       "angle": 0,
@@ -988,7 +988,7 @@
       "versionNonce": 100047,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "Yes",
@@ -1004,10 +1004,10 @@
     {
       "id": "arrow_25",
       "type": "arrow",
-      "x": 1200,
-      "y": 25,
-      "width": 280,
-      "height": 75,
+      "x": 80,
+      "y": 665,
+      "width": 130,
+      "height": 160,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -1027,7 +1027,7 @@
       "versionNonce": 100049,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "points": [
@@ -1036,8 +1036,8 @@
           0
         ],
         [
-          280,
-          75
+          130,
+          160
         ]
       ],
       "lastCommittedPoint": null,
@@ -1060,10 +1060,10 @@
     {
       "id": "arrow_26",
       "type": "arrow",
-      "x": 952,
-      "y": 100,
-      "width": 248,
-      "height": 75,
+      "x": 210,
+      "y": 530,
+      "width": 130,
+      "height": 135,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -1088,7 +1088,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "points": [
@@ -1097,8 +1097,8 @@
           0
         ],
         [
-          248,
-          75
+          130,
+          135
         ]
       ],
       "lastCommittedPoint": null,
@@ -1121,8 +1121,8 @@
     {
       "id": "elabel_27",
       "type": "text",
-      "x": 1060,
-      "y": 116.75,
+      "x": 259,
+      "y": 576.75,
       "width": 32,
       "height": 17.5,
       "angle": 0,
@@ -1142,7 +1142,7 @@
       "versionNonce": 100053,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "No",
@@ -1158,10 +1158,10 @@
     {
       "id": "arrow_28",
       "type": "arrow",
-      "x": 430,
-      "y": 100,
-      "width": 218,
-      "height": 0,
+      "x": 210,
+      "y": 185,
+      "width": 0,
+      "height": 160,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -1181,7 +1181,7 @@
       "versionNonce": 100055,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "points": [
@@ -1190,8 +1190,8 @@
           0
         ],
         [
-          218,
-          0
+          0,
+          160
         ]
       ],
       "lastCommittedPoint": null,
@@ -1214,10 +1214,10 @@
     {
       "id": "arrow_29",
       "type": "arrow",
-      "x": 1480,
-      "y": 100,
-      "width": 280,
-      "height": 0,
+      "x": 210,
+      "y": 825,
+      "width": 0,
+      "height": 160,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -1242,7 +1242,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "points": [
@@ -1251,8 +1251,8 @@
           0
         ],
         [
-          280,
-          0
+          0,
+          160
         ]
       ],
       "lastCommittedPoint": null,
@@ -1275,8 +1275,8 @@
     {
       "id": "elabel_30",
       "type": "text",
-      "x": 1532,
-      "y": 79.25,
+      "x": 122,
+      "y": 884.25,
       "width": 176,
       "height": 17.5,
       "angle": 0,
@@ -1296,7 +1296,7 @@
       "versionNonce": 100059,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790950,
+      "updated": 1774504206962,
       "link": null,
       "locked": false,
       "text": "performance feedback",

@@ -36,14 +36,14 @@ function renderNode(node: LayoutNode): string {
     .map((line, i) => `<tspan x="${cx}" dy="${i === 0 ? 0 : lineHeight}">${escapeXml(line)}</tspan>`)
     .join("");
 
-  const text = `<text x="${cx}" y="${textStartY}" text-anchor="middle" dominant-baseline="central" font-family="system-ui, -apple-system, sans-serif" font-size="${fontSize}" fill="#1e1e1e">${textEls}</text>`;
+  const text = `<text x="${cx}" y="${textStartY}" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="${fontSize}" fill="#1e1e1e">${textEls}</text>`;
 
   return shape + "\n" + text;
 }
 
 function renderSubgraph(sg: LayoutSubgraph): string {
   const rect = `<rect x="${sg.x}" y="${sg.y}" width="${sg.width}" height="${sg.height}" rx="8" ry="8" fill="#f8f9fa" stroke="#868e96" stroke-width="1" stroke-dasharray="6,4" />`;
-  const label = `<text x="${sg.x + 12}" y="${sg.y + 18}" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#868e96" font-weight="600">${escapeXml(sg.label)}</text>`;
+  const label = `<text x="${sg.x + 12}" y="${sg.y + 18}" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#868e96" font-weight="600">${escapeXml(sg.label)}</text>`;
   return rect + "\n" + label;
 }
 
@@ -94,7 +94,7 @@ function renderArrow(edge: MermaidEdge, from: LayoutNode, to: LayoutNode): strin
     const textWidth = edge.label.length * 7 + 12;
     const textHeight = 18;
     label = `<rect x="${midX - textWidth / 2 - pad}" y="${midY - textHeight / 2 - pad - 2}" width="${textWidth + pad * 2}" height="${textHeight + pad * 2}" rx="4" fill="white" stroke="none" opacity="0.9" />`;
-    label += `\n<text x="${midX}" y="${midY - 2}" text-anchor="middle" dominant-baseline="central" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#495057" font-style="italic">${escapeXml(edge.label)}</text>`;
+    label += `\n<text x="${midX}" y="${midY - 2}" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">${escapeXml(edge.label)}</text>`;
   }
 
   return line + "\n" + label;
@@ -126,6 +126,7 @@ export function toSvg(layout: LayoutResult): string {
   const parts: string[] = [];
 
   parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">`);
+  parts.push(`<rect width="${width}" height="${height}" fill="#ffffff" />`);
   parts.push(`<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#495057" /></marker></defs>`);
   parts.push(`<g transform="translate(${offsetX}, ${offsetY})">`);
 

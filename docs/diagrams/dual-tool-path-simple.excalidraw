@@ -38,7 +38,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false
     },
@@ -66,7 +66,7 @@
       "versionNonce": 100003,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "text": "Setup Agent",
@@ -122,7 +122,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false
     },
@@ -150,7 +150,7 @@
       "versionNonce": 100007,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "text": "Backend?",
@@ -202,7 +202,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false
     },
@@ -230,7 +230,7 @@
       "versionNonce": 100011,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "text": "Native MCP\n(--mcp-config)",
@@ -282,7 +282,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false
     },
@@ -310,7 +310,7 @@
       "versionNonce": 100015,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "text": "Tool Proxy\n(prompt injection + tool_calls JSON)",
@@ -366,7 +366,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false
     },
@@ -394,7 +394,7 @@
       "versionNonce": 100019,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "text": "varsity_tools.dispatch()",
@@ -442,7 +442,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false
     },
@@ -470,7 +470,7 @@
       "versionNonce": 100023,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "text": "Arena API",
@@ -509,7 +509,7 @@
       "versionNonce": 100025,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "points": [
@@ -570,7 +570,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "points": [
@@ -624,7 +624,7 @@
       "versionNonce": 100029,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "text": "Claude",
@@ -668,7 +668,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "points": [
@@ -722,7 +722,7 @@
       "versionNonce": 100033,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "text": "Gemini / Codex / OpenClaw",
@@ -761,7 +761,7 @@
       "versionNonce": 100035,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "points": [
@@ -817,7 +817,7 @@
       "versionNonce": 100037,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "points": [
@@ -873,7 +873,7 @@
       "versionNonce": 100039,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790952,
+      "updated": 1774504206963,
       "link": null,
       "locked": false,
       "points": [

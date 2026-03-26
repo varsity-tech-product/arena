@@ -38,7 +38,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -66,7 +66,7 @@
       "versionNonce": 100003,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Setup Agent",
@@ -122,7 +122,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -150,7 +150,7 @@
       "versionNonce": 100007,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Which backend?",
@@ -202,7 +202,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -230,7 +230,7 @@
       "versionNonce": 100011,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Native MCP Path",
@@ -282,7 +282,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -310,7 +310,7 @@
       "versionNonce": 100015,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Tool Proxy Path",
@@ -362,7 +362,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -390,7 +390,7 @@
       "versionNonce": 100019,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "claude -p --mcp-config .mcp.json",
@@ -442,7 +442,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -470,7 +470,7 @@
       "versionNonce": 100023,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "Inject tool catalog into prompt",
@@ -522,7 +522,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false
     },
@@ -550,7 +550,7 @@
       "versionNonce": 100027,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206965,
       "link": null,
       "locked": false,
       "text": "MCP Server - TypeScript",
@@ -602,7 +602,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false
     },
@@ -630,7 +630,7 @@
       "versionNonce": 100031,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "text": "Python Bridge - stdio",
@@ -686,7 +686,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false
     },
@@ -714,7 +714,7 @@
       "versionNonce": 100035,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "text": "Execute locally via dispatch()",
@@ -766,7 +766,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false
     },
@@ -794,7 +794,7 @@
       "versionNonce": 100039,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "text": "varsity_tools.dispatch()",
@@ -846,7 +846,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false
     },
@@ -874,7 +874,7 @@
       "versionNonce": 100043,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "text": "Append results to prompt",
@@ -930,7 +930,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false
     },
@@ -958,7 +958,7 @@
       "versionNonce": 100047,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "text": "More tool calls?",
@@ -1010,7 +1010,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false
     },
@@ -1038,7 +1038,7 @@
       "versionNonce": 100051,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "text": "Arena API",
@@ -1094,7 +1094,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false
     },
@@ -1122,7 +1122,7 @@
       "versionNonce": 100055,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "text": "LLM returns tool_calls JSON",
@@ -1170,7 +1170,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false
     },
@@ -1198,7 +1198,7 @@
       "versionNonce": 100059,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "text": "Final decision",
@@ -1237,7 +1237,7 @@
       "versionNonce": 100061,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -1298,7 +1298,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -1352,7 +1352,7 @@
       "versionNonce": 100065,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "text": "Claude",
@@ -1396,7 +1396,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -1450,7 +1450,7 @@
       "versionNonce": 100069,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "text": "Gemini / Codex / OpenClaw",
@@ -1489,7 +1489,7 @@
       "versionNonce": 100071,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -1545,7 +1545,7 @@
       "versionNonce": 100073,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -1601,7 +1601,7 @@
       "versionNonce": 100075,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -1657,7 +1657,7 @@
       "versionNonce": 100077,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -1713,7 +1713,7 @@
       "versionNonce": 100079,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -1769,7 +1769,7 @@
       "versionNonce": 100081,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -1825,7 +1825,7 @@
       "versionNonce": 100083,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -1881,7 +1881,7 @@
       "versionNonce": 100085,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -1937,7 +1937,7 @@
       "versionNonce": 100087,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -1998,7 +1998,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -2052,7 +2052,7 @@
       "versionNonce": 100091,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "text": "Yes",
@@ -2096,7 +2096,7 @@
           "type": "text"
         }
       ],
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -2150,7 +2150,7 @@
       "versionNonce": 100095,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "text": "No",
@@ -2189,7 +2189,7 @@
       "versionNonce": 100097,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
@@ -2245,7 +2245,7 @@
       "versionNonce": 100099,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1774503790953,
+      "updated": 1774504206966,
       "link": null,
       "locked": false,
       "points": [
