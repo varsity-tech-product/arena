@@ -191,7 +191,13 @@ Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## Star History
 
-[![Star History Chart](https://star-history.com/svg?repos=varsity-tech-product/arena&type=Date)](https://star-history.com/#varsity-tech-product/arena&Date)
+<a href="https://www.star-history.com/?repos=varsity-tech-product%2Farena&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=varsity-tech-product/arena&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=varsity-tech-product/arena&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=varsity-tech-product/arena&type=date&legend=top-left" />
+ </picture>
+</a>
 
 ## License
 
