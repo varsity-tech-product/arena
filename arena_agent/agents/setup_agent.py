@@ -224,7 +224,7 @@ def _translate_flat_decision(payload: dict[str, Any]) -> dict[str, Any]:
     # --- Sizing (percentage-based -> fixed_fraction) ---
     sizing_fraction = payload.get("sizing_fraction")
     if sizing_fraction is not None:
-        sizing_fraction = max(1, min(50, float(sizing_fraction)))
+        sizing_fraction = max(1, min(100, float(sizing_fraction)))
         overrides.setdefault("strategy", {})["sizing"] = {
             "type": "fixed_fraction",
             "fraction": sizing_fraction / 100.0,

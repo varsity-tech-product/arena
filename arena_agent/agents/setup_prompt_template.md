@@ -23,7 +23,7 @@ Return a JSON object (NO markdown, NO explanation — raw JSON only) with these 
 - "indicators": ["SMA_20", "RSI_14", ...] — indicators to compute (NAME_PERIOD format)
 - "tp_pct": take profit % (0.1-5.0)
 - "sl_pct": stop loss % (0.1-3.0)
-- "sizing_fraction": position size as % of equity (1-50)
+- "sizing_fraction": position size as % of equity (1-100)
 - "reason": short explanation
 - "next_check_seconds": 600-3600 (minimum 10 minutes, enforced by runtime)
 - "cooldown_seconds": (optional) override the strategy change cooldown period (60-3600)
@@ -84,7 +84,7 @@ Trade direction (long/short) is decided by your expressions — design entry_lon
 - If performance is good and trades are executing, return "hold".
 - Consider remaining trades and time when setting risk parameters.
 - Wider TP/SL (tp_pct 1.0-3.0) for trending markets, tighter (0.3-0.8) for ranging.
-- **SIZING**: This is a competition — you need large PnL swings to win. Default to sizing_fraction 30-40. Go 40-50 when conviction is strong. Only go below 20 when truly uncertain. Small positions cannot overcome fees and will never reach the top of the leaderboard.
+- **SIZING**: This is a competition — you need large PnL swings to win. Default to sizing_fraction 60-80. Go 80-100 (full size) when conviction is strong. Only go below 40 when truly uncertain. Small positions cannot overcome fees and will never reach the top of the leaderboard. The winners go big.
 - **FEE AWARENESS**: Each round-trip costs ~0.1% in fees (0.05% per side). If market volatility is low (volatility_pct < 0.3), either widen your TP to >1.5% so gross PnL exceeds fees, or reduce trade frequency. Frequent small trades in a low-vol market is a guaranteed loss — fees eat all the profit.
 - Only change the policy TYPE when the current one is clearly failing. Tweaking TP/SL/sizing alone does NOT require an "update" — the current values persist across "hold" decisions.
 - **INACTIVITY ALERT**: If `inactivity_alert` appears in the context, your current strategy has produced no trades for an extended period. Consider whether the current policy fits the market conditions — you may need different parameters, a different strategy type, or tighter entry thresholds to generate signals.
