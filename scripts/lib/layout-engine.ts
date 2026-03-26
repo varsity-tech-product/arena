@@ -3,8 +3,8 @@
 import type { MermaidGraph, LayoutNode, LayoutSubgraph, LayoutResult } from "./types.js";
 
 const NODE_H_GAP = 280; // horizontal gap between layers (LR)
-const NODE_V_GAP = 160; // vertical gap between layers (TD)
-const NODE_SPACING = 100; // gap between nodes in same layer
+const NODE_V_GAP = 140; // vertical gap between layers (TD)
+const NODE_SPACING = 60;  // gap between nodes in same layer
 const SUBGRAPH_PAD = 40;
 const SUBGRAPH_TOP_PAD = 50; // extra top for label
 const BASE_WIDTH = 160;

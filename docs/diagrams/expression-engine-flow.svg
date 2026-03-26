@@ -1,76 +1,652 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1095.2 1250" width="1095.2" height="1250">
-<rect width="1095.2" height="1250" fill="#ffffff" />
-<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#495057" /></marker></defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 975.2 1110" width="975.2" height="1110">
+<rect width="975.2" height="1110" fill="#ffffff" />
+<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#000000" /></marker></defs>
 <g transform="translate(40, 40)">
-<line x1="507.6" y1="50" x2="507.6" y2="165" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<path d="M 447.6,50 Q 449.23494306532086,96.53341093493509 447.6,145" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
 
-<line x1="448.00000000000006" y1="255" x2="361.91111111111115" y2="320" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
-<rect x="387.95555555555563" y="272.5" width="34" height="26" rx="4" fill="white" stroke="none" opacity="0.9" />
-<text x="404.95555555555563" y="285.5" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">No</text>
-<line x1="563.85" y1="255" x2="651.35" y2="325" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
-<rect x="587.1" y="275" width="41" height="26" rx="4" fill="white" stroke="none" opacity="0.9" />
-<text x="607.6" y="288" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">Yes</text>
-<line x1="591.6800000000001" y1="409.123" x2="381.6740740740741" y2="480" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
-<rect x="466.17703703703705" y="429.5615" width="41" height="26" rx="4" fill="white" stroke="none" opacity="0.9" />
-<text x="486.67703703703705" y="442.5615" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">Yes</text>
-<line x1="707.6" y1="415" x2="707.6" y2="480" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
-<rect x="690.6" y="432.5" width="34" height="26" rx="4" fill="white" stroke="none" opacity="0.9" />
-<text x="707.6" y="445.5" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">No</text>
-<line x1="680.572972972973" y1="530" x2="556.2486486486487" y2="645" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<path d="M 385.4608695652174,235 Q 356.12118394479523,255.8833927099331 323.3217391304348,280" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<rect x="335.8913043478261" y="242.5" width="37" height="26" rx="4" fill="white" stroke="none" />
+<text x="354.3913043478261" y="256.5" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">No</text>
+<path d="M 505.4571428571429,235 Q 537.2131983154628,259.580681774416 569.7428571428571,285" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<rect x="515.35" y="245" width="44.5" height="26" rx="4" fill="white" stroke="none" />
+<text x="537.6" y="259" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">Yes</text>
+<path d="M 511.68000000000006,367.03 Q 429.0143385636633,393.5537595211796 345.8608695652174,420" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<rect x="406.52043478260873" y="378.515" width="44.5" height="26" rx="4" fill="white" stroke="none" />
+<text x="428.77043478260873" y="392.515" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">Yes</text>
+<path d="M 627.6,375 Q 626.1898309416589,396.1585138674418 627.6,420" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<rect x="609.1" y="382.5" width="37" height="26" rx="4" fill="white" stroke="none" />
+<text x="627.6" y="396.5" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">No</text>
+<path d="M 600.3272727272728,470 Q 550.2714245929351,518.234036822425 496.69090909090914,565" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
 
-<line x1="462.0375" y1="735" x2="391.1625" y2="805" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
-<rect x="406.1" y="755" width="41" height="26" rx="4" fill="white" stroke="none" opacity="0.9" />
-<text x="426.6" y="768" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">Yes</text>
-<line x1="257.0666666666667" y1="895" x2="129.1851851851852" y2="960" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
-<rect x="169.12592592592597" y="912.5" width="48" height="26" rx="4" fill="white" stroke="none" opacity="0.9" />
-<text x="193.12592592592597" y="925.5" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">True</text>
-<line x1="343.73333333333335" y1="895" x2="341.03703703703707" y2="960" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
-<rect x="314.8851851851852" y="912.5" width="55" height="26" rx="4" fill="white" stroke="none" opacity="0.9" />
-<text x="342.3851851851852" y="925.5" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">False</text>
-<line x1="561.0375" y1="735" x2="644.1625" y2="805" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
-<rect x="585.6" y="755" width="34" height="26" rx="4" fill="white" stroke="none" opacity="0.9" />
-<text x="602.6" y="768" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">No</text>
-<line x1="665.0666666666667" y1="895" x2="618.0740740740741" y2="960" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
-<rect x="617.5703703703705" y="912.5" width="48" height="26" rx="4" fill="white" stroke="none" opacity="0.9" />
-<text x="641.5703703703705" y="925.5" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">True</text>
-<line x1="753.85" y1="895" x2="841.35" y2="965" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
-<rect x="770.1" y="915" width="55" height="26" rx="4" fill="white" stroke="none" opacity="0.9" />
-<text x="797.6" y="928" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">False</text>
-<line x1="791.76" y1="1037.4776923076922" x2="457.6" y2="1124.2307692307693" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
-<rect x="600.6800000000001" y="1065.8542307692308" width="48" height="26" rx="4" fill="white" stroke="none" opacity="0.9" />
-<text x="624.6800000000001" y="1078.8542307692308" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">True</text>
-<line x1="810.9333333333334" y1="1055" x2="685.7481481481482" y2="1120" stroke="#495057" stroke-width="1.5" marker-end="url(#arrowhead)" />
-<rect x="720.8407407407408" y="1072.5" width="55" height="26" rx="4" fill="white" stroke="none" opacity="0.9" />
-<text x="748.3407407407408" y="1085.5" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">False</text>
-<rect x="419.6" y="0" width="176" height="50" rx="8" ry="8" fill="#a5d8ff" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="507.6" y="25" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="507.6" dy="0">Expression Policy</tspan></text>
-<polygon points="507.6,160 625.2,210 507.6,260 390,210" fill="#ffec99" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="507.6" y="210" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="507.6" dy="0">Warmup complete?</tspan></text>
-<rect x="178.80000000000007" y="320" width="300" height="50" rx="8" ry="8" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="328.80000000000007" y="345" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="328.80000000000007" dy="0">HOLD - indicators still computing</tspan></text>
-<polygon points="707.6,320 836.4000000000001,370 707.6,420 578.8000000000001,370" fill="#ffec99" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="707.6" y="370" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="707.6" dy="0">Validation errors?</tspan></text>
-<rect x="157.60000000000002" y="480" width="300" height="50" rx="8" ry="8" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="307.6" y="505" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="307.6" dy="0">HOLD - report errors to setup agent</tspan></text>
-<rect x="557.6" y="480" width="300" height="50" rx="8" ry="8" fill="#a5d8ff" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="707.6" y="505" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="707.6" dy="0">Build namespace from signal_state</tspan></text>
-<polygon points="507.6,640 619.6,690 507.6,740 395.6,690" fill="#ffec99" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="507.6" y="690" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="507.6" dy="0">Position open?</tspan></text>
-<polygon points="345.6,800 485.6,850 345.6,900 205.60000000000002,850" fill="#ffec99" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="345.6" y="850" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="345.6" dy="0">Eval exit expression</tspan></text>
-<polygon points="697.6,800 809.6,850 697.6,900 585.6,850" fill="#ffec99" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="697.6" y="850" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="697.6" dy="0">Eval entry_long</tspan></text>
-<rect x="0" y="960" width="160" height="50" rx="8" ry="8" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="80" y="985" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="80" dy="0">CLOSE_POSITION</tspan></text>
-<rect x="260" y="960" width="160" height="50" rx="8" ry="8" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="340" y="985" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="340" dy="0">HOLD</tspan></text>
-<rect x="520" y="960" width="160" height="50" rx="8" ry="8" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="600" y="985" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="600" dy="0">OPEN_LONG</tspan></text>
-<polygon points="897.6,960 1015.2,1010 897.6,1060 780,1010" fill="#ffec99" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="897.6" y="1010" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="897.6" dy="0">Eval entry_short</tspan></text>
-<rect x="297.6" y="1120" width="160" height="50" rx="8" ry="8" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="377.6" y="1145" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="377.6" dy="0">OPEN_SHORT</tspan></text>
-<rect x="557.6" y="1120" width="160" height="50" rx="8" ry="8" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="1.5" />
-<text x="637.6" y="1145" text-anchor="middle" dominant-baseline="central" font-family="'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#1e1e1e"><tspan x="637.6" dy="0">HOLD</tspan></text>
+<path d="M 401.95714285714286,655 Q 375.0187653527188,681.5655356465577 351.2428571428572,705" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<rect x="354.35" y="665" width="44.5" height="26" rx="4" fill="white" stroke="none" />
+<text x="376.6" y="679" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">Yes</text>
+<path d="M 217.3217391304348,795 Q 172.51476527102437,819.219848209912 129.04347826086956,840" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<rect x="147.18260869565216" y="802.5" width="52" height="26" rx="4" fill="white" stroke="none" />
+<text x="173.18260869565216" y="816.5" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">True</text>
+<path d="M 303.40869565217395,795 Q 302.57196768183644,816.81077991653 301.2173913043478,840" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<rect x="272.56304347826085" y="802.5" width="59.5" height="26" rx="4" fill="white" stroke="none" />
+<text x="302.31304347826085" y="816.5" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">False</text>
+<path d="M 502.2428571428572,655 Q 533.8116725384403,680.1338019854738 562.9571428571429,705" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<rect x="514.1" y="665" width="37" height="26" rx="4" fill="white" stroke="none" />
+<text x="532.6" y="679" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">No</text>
+<path d="M 579.408695652174,795 Q 559.2264065486336,818.4624397240696 541.2173913043479,840" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<rect x="534.3130434782609" y="802.5" width="52" height="26" rx="4" fill="white" stroke="none" />
+<text x="560.3130434782609" y="816.5" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">True</text>
+<path d="M 669.0285714285715,795 Q 698.0506521756994,821.852810316952 726.1714285714286,845" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<rect x="667.85" y="805" width="59.5" height="26" rx="4" fill="white" stroke="none" />
+<text x="697.6" y="819" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">False</text>
+<path d="M 671.76,917.6627272727272 Q 545.8183680801956,952.2370679869987 417.6,984.0909090909091" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<rect x="518.6800000000001" y="935.8768181818182" width="52" height="26" rx="4" fill="white" stroke="none" />
+<text x="544.6800000000001" y="949.8768181818182" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">True</text>
+<path d="M 691.5130434782609,935 Q 649.5460293726728,955.5344449930126 605.4260869565218,980" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrowhead)" />
+<rect x="618.7195652173914" y="942.5" width="59.5" height="26" rx="4" fill="white" stroke="none" />
+<text x="648.4695652173914" y="956.5" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="12" fill="#495057" font-style="italic">False</text>
+<g><path d="M 365.2375291006007,0.48844872434165154
+    L 528.8968547924102,-0.35328212005151727
+    Q 535.6828693504737,-0.5062207110786403 535.2427797852303,5.852065683739056
+    L 535.8595851197748,44.100992501731525
+    Q 535.9936951043907,49.95405629251127 530.2487048488634,49.393772266224914
+    L 365.9382609028595,50.70243182718332
+    Q 360.3166158927676,50.701192280859686 359.4974149020469,44.09640665274492
+    L 359.8154711467447,5.849634980080737
+    Q 360.1978663334754,0.36265536757673544 365.6979822422378,-0.1450506317014515
+    Z" fill="#a5d8ff" stroke="#000000" stroke-width="1.5" />
+<line x1="359.7404344183593" y1="43.00150678912433" x2="362.41953509873764" y2="49.59060459167813" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="359.6096898802949" y1="23.63925460243526" x2="370.45475267453565" y2="49.51699960447149" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="359.39129268346153" y1="5.206823839172083" x2="378.66570698129925" y2="49.924538516424946" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="365.7080729065798" y1="0.11979216465442732" x2="386.85523246236534" y2="50.15519412815047" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="373.12470914085645" y1="0.4405834209610475" x2="394.9231701425144" y2="50.10628380851631" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="381.28043109623434" y1="0.12357718802377349" x2="402.64902270664805" y2="49.86977110217413" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="389.8539824834894" y1="-0.34433111074758926" x2="410.5683520271761" y2="50.429067521916295" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="397.37555219877834" y1="-0.007281618105480447" x2="418.9073879335103" y2="49.83303914384305" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="405.1972007781602" y1="0.46705133598152315" x2="426.6412715645476" y2="49.94538181704047" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="413.6647310508939" y1="-0.17230502086749766" x2="434.24225330196913" y2="49.64141381115678" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="421.68722786804267" y1="-0.38936935692618135" x2="442.78393947968124" y2="50.426805221126415" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="429.68656188123134" y1="0.006175018570502289" x2="450.93080922514235" y2="50.08091584590875" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="437.6467711174279" y1="0.1286354554067657" x2="458.4680017045013" y2="50.24060993101739" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="445.2776404192424" y1="-0.008649986044474645" x2="466.770028135774" y2="49.70347065087117" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="454.063202579238" y1="0.30403007008862915" x2="474.3313714185844" y2="49.970205689543945" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="461.4922353746821" y1="-0.334359974549443" x2="482.43104591751234" y2="50.347892614183365" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="470.0168618978802" y1="0.3236839089222485" x2="491.0755750091923" y2="50.23738144179515" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="477.44617690398593" y1="0.26911603882035706" x2="498.2482721851613" y2="50.443306237888464" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="485.6478598409245" y1="0.1563566887343768" x2="506.4948469209541" y2="49.808835936786636" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="493.94358596142195" y1="-0.01819902974239085" x2="514.8780066556702" y2="49.55452718293418" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="501.23445028110984" y1="0.017114535272412468" x2="523.2195436931307" y2="49.75378306293351" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="509.71989018131865" y1="-0.06272764266032027" x2="530.5433028428653" y2="49.61489715043717" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="518.0633683114007" y1="-0.22381090345879784" x2="535.975113640228" y2="42.35530018397815" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="525.9621291262171" y1="0.41911291450742283" x2="535.9777152818948" y2="23.26977832534154" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="533.952812747431" y1="0.006948426107555861" x2="535.3856149220679" y2="4.580448314266498" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="447.6" y="25" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="447.6" dy="0">Expression Policy</tspan></text></g>
+<g><path d="M 448.18277857853684,139.0163171455897
+    L 565.5521587462019,190.1294621017878
+    L 447.255389958265,239.00518473012198
+    L 329.28282762231356,189.97270355116052
+    Z" fill="#ffec99" stroke="#000000" stroke-width="1.5" />
+<line x1="330.0442785427731" y1="225.57481234253441" x2="336.4231463161787" y2="240.30291813461008" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="330.1911482882342" y1="206.30714360700387" x2="343.8975501721189" y2="239.86100000054284" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="329.7283407675932" y1="187.54505833179962" x2="352.1232496947205" y2="239.58297600696824" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="330.03036719886586" y1="168.0861396913405" x2="359.78833683562067" y2="239.71202476375038" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="329.5917104816763" y1="149.4310953697004" x2="368.26780315439197" y2="239.7376244034458" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="333.6913849806042" y1="140.34789261418337" x2="376.56391389386505" y2="240.34006245129513" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="342.33591407228414" y1="140.23738144179515" x2="384.70760994365725" y2="240.29689201883593" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="349.50861124825315" y1="140.44330623788846" x2="392.70407210575655" y2="239.8231734869987" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="357.75518598404597" y1="139.80883593678664" x2="399.94773320685005" y2="239.75866580649017" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="366.13834571876214" y1="139.55452718293418" x2="407.9368894269001" y2="239.89263577860038" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="374.47988275622265" y1="139.7537830629335" x2="416.32716288334" y2="240.24716781098596" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="381.8036419059572" y1="139.61489715043717" x2="424.32002872349864" y2="239.50304485792367" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="390.37511364022794" y1="139.7812966232741" x2="431.99396532288625" y2="240.20599826524995" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="398.3777152818948" y1="139.6175541249504" x2="439.9048013720613" y2="239.7826138952587" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="405.7856149220679" y1="139.85000347418827" x2="448.58661149601636" y2="240.08621960622622" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="414.0627826713753" y1="139.7986720393892" x2="456.3448167785037" y2="240.47853935597186" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="422.14065051724765" y1="139.8817747672365" x2="464.39398058394823" y2="239.64183672217405" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="430.161405530107" y1="139.6395213079013" x2="472.5404234660337" y2="240.38778172562888" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="438.24760592225357" y1="140.4610495443776" x2="480.4850251309554" y2="240.18009982910735" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="446.13162783666485" y1="140.30755836174012" x2="488.578568168633" y2="239.64342859116368" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="454.11824885229" y1="139.66904890420847" x2="496.2036385205584" y2="240.48416693036756" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="461.8973807867578" y1="139.6585360425015" x2="504.6141251005038" y2="239.90764667305484" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="469.6691909128349" y1="140.4483059586055" x2="511.8946763267604" y2="239.97715542267542" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="477.7621623403611" y1="139.64476573990396" x2="520.4823307102644" y2="240.3928862454195" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="485.7288902376604" y1="140.37496012319937" x2="528.3219171805478" y2="239.86300648809993" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="494.3509178442073" y1="139.58251287796884" x2="536.4446449519538" y2="239.7112718757329" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="501.62684852224254" y1="139.51829137267487" x2="544.69191996443" y2="239.52566272709373" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="509.6695160025338" y1="139.68393018123606" x2="552.610141355541" y2="239.53544163837796" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="518.3659460964045" y1="140.4468627359056" x2="560.6602903362956" y2="239.90882469956705" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="526.0837525701791" y1="140.49837052793123" x2="565.1936450134483" y2="232.73281091677572" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="534.4931912884167" y1="139.78655796708335" x2="565.483245047729" y2="213.4007960946746" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="541.8830946635712" y1="139.98716580463224" x2="565.2875849789773" y2="194.62381935363763" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="549.9039956376109" y1="139.8691501549256" x2="565.161551592096" y2="175.52847193464584" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="557.5503322358854" y1="140.11694152703785" x2="565.6740342246587" y2="157.2919681755124" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="447.6" y="190" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="447.6" dy="0">Warmup complete?</tspan></text></g>
+<g><path d="M 144.7059085360096,279.7054628589358
+    L 432.2223457256558,280.0610602745237
+    Q 438.0545672868856,279.67893571942477 439.1151442237566,286.69505246710105
+    L 438.46428364481187,324.5626704603419
+    Q 438.4719449349112,329.5719651736051 433.108997397875,330.0078784551806
+    L 145.1719104760076,330.54319368932556
+    Q 139.4286693717612,330.56657292284217 138.22633118742567,323.43821924736767
+    L 138.4739208428881,286.5874930856287
+    Q 138.4771508563034,280.5292191211465 144.8104226391614,279.67842238310186
+    Z" fill="#b2f2bb" stroke="#000000" stroke-width="1.5" />
+<line x1="138.65891947138323" y1="322.91937062927434" x2="142.00244360828347" y2="329.7986720393892" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="138.83735086219247" y1="303.8728525711112" x2="150.0803114541558" y2="329.8817747672365" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="139.036026382896" y1="284.7180123739481" x2="158.10106646701516" y2="329.6395213079013" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="145.02986751684227" y1="280.2315730680375" x2="166.18726685916172" y2="330.4610495443776" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="152.9626340640615" y1="279.5579980899165" x2="174.071288773573" y2="330.3075583617401" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="160.91519820601127" y1="280.2828332414574" x2="182.05790978919813" y2="329.66904890420847" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="168.7788004476214" y1="279.5926761789233" x2="189.83704172366598" y2="329.6585360425015" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="176.3495774712036" y1="280.21531325839896" x2="197.60885184974305" y2="330.4483059586055" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="185.01503525784653" y1="280.04214918381865" x2="205.70182327726926" y2="329.64476573990396" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="193.2709461091298" y1="279.8448844382474" x2="213.66855117456853" y2="330.37496012319934" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="200.7558037802876" y1="280.4144381921942" x2="222.29057878111544" y2="329.58251287796884" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="208.522835795863" y1="279.5181561054633" x2="229.5665094591507" y2="329.51829137267487" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="216.6368086115225" y1="279.7445278391242" x2="237.60917693944194" y2="329.68393018123606" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="224.63557080695034" y1="280.2972593242357" x2="246.30560703331267" y2="330.4468627359056" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="232.8030895549099" y1="280.1077433467326" x2="254.0234135070872" y2="330.49837052793123" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="240.7346662267297" y1="280.278010795264" x2="262.4328522253249" y2="329.78655796708335" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="248.8183129864018" y1="279.50815871712257" x2="269.8227556004794" y2="329.98716580463224" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="256.377435632069" y1="279.8320700700424" x2="277.8436565745191" y2="329.8691501549256" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="264.36287397022977" y1="280.44287793955937" x2="285.4899931727936" y2="330.11694152703785" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="272.3131215639486" y1="279.61567452609233" x2="293.59556558602475" y2="330.12389545281303" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="280.40557760771105" y1="280.36474487397936" x2="302.2461618286556" y2="329.5573280569515" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="288.3855958691282" y1="280.12061271946004" x2="310.1592954015918" y2="329.54477192786726" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="297.0976244330785" y1="279.7053017179278" x2="318.0257299930976" y2="329.57367488615273" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="304.6213354799228" y1="279.9260866706336" x2="325.79267987059706" y2="329.87479706880185" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="312.58505914796194" y1="279.6654750543785" x2="333.79757785950045" y2="329.6991355537657" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="320.32064144577714" y1="280.1197069514965" x2="341.5222053631746" y2="330.19834341465685" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="328.9178330467229" y1="279.960726111276" x2="350.1275681370466" y2="329.62472918270214" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="336.369465912151" y1="279.5608627059846" x2="357.8419447255923" y2="330.41459560736985" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="344.78791348385573" y1="280.19662404666724" x2="365.7971518478893" y2="329.9092010122622" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="352.4340926290214" y1="279.5803452693108" x2="373.9944896940737" y2="329.67473544561017" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="361.028723839" y1="279.9423900333859" x2="382.08415246246426" y2="330.0391998720297" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="369.08226201575314" y1="279.681380157861" x2="390.2753888802467" y2="329.61522906620667" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="376.8104050597875" y1="279.5634769555618" x2="397.9532673232438" y2="330.05676789167774" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="385.1917573690415" y1="279.7084325316473" x2="406.13209809748645" y2="330.3767153977533" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="392.70776799211023" y1="279.7085683120895" x2="413.5034450924008" y2="329.50592984427476" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="401.0739078070427" y1="280.1873128692605" x2="421.78781901145834" y2="330.4342419872555" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="408.5215391652208" y1="279.98347578987887" x2="430.1454038983515" y2="329.8596456719097" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="417.0826247948979" y1="279.8447900777828" x2="437.9964196145606" y2="330.21314610214904" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="425.11387929493947" y1="279.9212013755405" x2="438.3311235618065" y2="313.5136523719965" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="433.287136949043" y1="280.42216464042576" x2="438.4537152700476" y2="293.8454196486536" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="288.80000000000007" y="305" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="288.80000000000007" dy="0">HOLD - indicators still computing</tspan></text></g>
+<g><path d="M 628.385772490839,280.58680153322706
+    L 756.8631214600522,330.94189221825945
+    L 627.2897688764948,379.45778047532076
+    L 499.5499202463988,330.08519061346306
+    Z" fill="#ffec99" stroke="#000000" stroke-width="1.5" />
+<line x1="499.15091784420736" y1="364.73051999937684" x2="505.24464495195383" y2="379.7112718757329" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="498.4268485222426" y1="345.74451913376987" x2="513.49191996443" y2="379.52566272709373" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="498.46951600253385" y1="326.9883785820182" x2="521.4101413555411" y2="379.53544163837796" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="499.1659460964046" y1="308.8295317763749" x2="529.4602903362957" y2="379.90882469956705" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="498.8837525701791" y1="289.95926020808764" x2="537.0729668872646" y2="380.0160920512426" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="503.2931912884168" y1="279.78655796708335" x2="545.3625669215453" y2="379.60585658945433" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="510.6830946635713" y1="279.98716580463224" x2="553.1669068527935" y2="379.7506592087302" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="518.703995637611" y1="279.8691501549256" x2="561.0408734659122" y2="379.5770911500513" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="526.3503322358855" y1="280.11694152703785" x2="569.553356098475" y2="380.26236675123073" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="534.4559046491166" y1="280.12389545281303" x2="576.734720901999" y2="380.3449505317767" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="543.1065008917475" y1="279.5573280569515" x2="584.8053555797505" y2="379.6142552995425" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="551.0196344646837" y1="279.54477192786726" x2="593.2079692727366" y2="379.8657445782774" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="558.8860690561895" y1="279.57367488615273" x2="601.1400142024822" y2="379.57016777266836" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="566.6530189336889" y1="279.87479706880185" x2="609.2681228726706" y2="380.0350285473396" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="574.6579169225923" y1="279.6991355537657" x2="616.6563761351845" y2="380.06173398887404" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="582.3825444262665" y1="280.19834341465685" x2="624.9737353563742" y2="380.1846845082882" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="590.9879072001385" y1="279.62472918270214" x2="633.4145611247714" y2="380.1810809844392" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="598.7022837886842" y1="280.41459560736985" x2="641.2582418204183" y2="379.93687919183867" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="606.6574909109812" y1="279.9092010122622" x2="649.2846190439832" y2="379.8558084380202" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="614.8548287571656" y1="279.67473544561017" x2="657.4327747365514" y2="380.34727165155346" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="622.9444915255561" y1="280.0391998720297" x2="665.2208040672976" y2="379.76879155754796" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="631.1357279433386" y1="279.61522906620667" x2="672.6179047591122" y2="380.03257681930336" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="638.8136063863357" y1="280.05676789167774" x2="680.9422238231091" y2="380.05415355785954" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="646.9924371605783" y1="280.3767153977533" x2="689.2576237408375" y2="380.4015572088683" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="654.3637841554927" y1="279.50592984427476" x2="696.7038104866206" y2="380.3498915383025" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="662.6481580745502" y1="280.4342419872555" x2="704.8516805488744" y2="379.82319977030147" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="671.0057429614434" y1="279.8596456719097" x2="712.6821573294201" y2="379.7805535804546" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="678.8567586776525" y1="280.21314610214904" x2="720.7330735022679" y2="380.2542612653706" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="686.3311235618065" y1="280.40053849144897" x2="728.818009266075" y2="380.3973005599473" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="694.4537152700476" y1="279.65408512841896" x2="737.1537902299806" y2="380.1842745105823" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="702.3831480207126" y1="279.7612115090451" x2="745.1232001719163" y2="379.81104862655593" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="711.1338902683573" y1="279.65719095395616" x2="753.505544280013" y2="379.8083883706204" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="718.4455782193226" y1="279.6450698422559" x2="756.4854901469066" y2="368.75784429165367" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="726.3907210108417" y1="280.0693839164596" x2="756.8947855114152" y2="349.62709714303577" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="734.3450740287198" y1="279.58823478211525" x2="756.8314291137999" y2="331.0191461764889" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="743.0739614672756" y1="280.41987249216254" x2="756.5643366651407" y2="312.3705523491218" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="751.0478668720779" y1="280.2636140617469" x2="756.3421369616976" y2="292.76637894175036" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="627.6" y="330" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="627.6" dy="0">Validation errors?</tspan></text></g>
+<g><path d="M 123.78091907919008,420.32945169702543
+    L 410.9171578918009,420.19297109838044
+    Q 417.3986168674161,419.6688671849006 417.4345879471467,426.4464366496177
+    L 417.1579525768917,464.12910358428417
+    Q 416.9605123292291,470.0910384929989 410.95525165900256,469.9414765338406
+    L 122.94232658827025,469.73200321988406
+    Q 117.48913000595041,469.7795284005333 117.4121956032028,464.2832014982814
+    L 117.65254282100943,426.22944406357146
+    Q 118.24745536903504,419.6775887219428 123.09821258156774,419.7868753838884
+    Z" fill="#b2f2bb" stroke="#000000" stroke-width="1.5" />
+<line x1="117.1206414457771" y1="462.6937105122005" x2="120.3222053631745" y2="470.19834341465685" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="117.71783304672283" y1="443.61295031166713" x2="128.9275681370465" y2="469.62472918270214" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="117.16946591215094" y1="424.29130754606285" x2="136.64194472559225" y2="470.41459560736985" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="123.58791348385569" y1="420.19662404666724" x2="144.59715184788925" y2="469.9092010122622" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="131.23409262902135" y1="419.5803452693108" x2="152.79448969407363" y2="469.67473544561017" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="139.82872383899996" y1="419.9423900333859" x2="160.8841524624642" y2="470.0391998720297" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="147.8822620157531" y1="419.681380157861" x2="169.0753888802466" y2="469.61522906620667" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="155.61040505978747" y1="419.5634769555618" x2="176.7532673232437" y2="470.05676789167774" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="163.99175736904147" y1="419.7084325316473" x2="184.93209809748637" y2="470.3767153977533" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="171.5077679921102" y1="419.7085683120895" x2="192.30344509240072" y2="469.50592984427476" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="179.87390780704266" y1="420.1873128692605" x2="200.58781901145827" y2="470.4342419872555" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="187.32153916522077" y1="419.98347578987887" x2="208.94540389835143" y2="469.8596456719097" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="195.88262479489788" y1="419.8447900777828" x2="216.7964196145605" y2="470.21314610214904" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="203.91387929493942" y1="419.9212013755405" x2="224.27078449871456" y2="470.40053849144897" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="212.08713694904293" y1="420.42216464042576" x2="232.39337620695565" y2="469.65408512841896" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="219.79395241038003" y1="420.16466409539134" x2="240.32280895762065" y2="469.7612115090451" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="227.65509430518944" y1="419.61623208212404" x2="249.07355120526532" y2="469.65719095395616" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="235.69238515516338" y1="419.50224007480574" x2="256.3852391562306" y2="469.6450698422559" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="243.58687376403543" y1="420.30190373062214" x2="264.3303819477498" y2="470.0693839164596" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="251.8878735662089" y1="420.115522853499" x2="272.2847349656278" y2="469.58823478211525" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="259.118758180373" y1="420.14099061546585" x2="281.01362240418365" y2="470.41987249216254" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="267.4805083738298" y1="420.37743651433993" x2="288.98752780898593" y2="470.2636140617469" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="275.7893185017325" y1="419.5979621777806" x2="297.1120625208188" y2="470.16250212122395" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="283.19468550975" y1="420.32632649900734" x2="304.8712506740905" y2="470.4363941970587" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="291.8613563417472" y1="420.2040081951527" x2="313.14927307697343" y2="469.78660718632455" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="299.36884039155814" y1="420.33992953260895" x2="320.6207288795469" y2="469.8306144363196" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="307.37491294805807" y1="420.1136467644101" x2="329.2052651828455" y2="469.8919440473692" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="315.9656814414644" y1="420.15772891436063" x2="336.5491300408632" y2="469.62421899697074" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="323.8724259331808" y1="420.4805913847158" x2="344.69618145722615" y2="469.51808980026544" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="331.9957146523317" y1="420.12255012394235" x2="353.1098706347022" y2="469.73814423454314" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="340.0538116997483" y1="419.942982902161" x2="361.1416047119548" y2="470.43303484240096" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="347.89641016107237" y1="419.7203438324141" x2="369.2334144820563" y2="469.71327520440536" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="356.0555642134001" y1="420.16992646350263" x2="376.25001060757694" y2="469.9379505071338" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="363.70623827187376" y1="420.2626656323646" x2="384.6495945007029" y2="470.2933547234934" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="371.31683852528806" y1="420.3242103595567" x2="392.24041349239104" y2="469.94400925714945" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="379.67087566012344" y1="420.09033453220763" x2="400.6117334739958" y2="469.6845026004903" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="387.5855116099207" y1="420.14203634291334" x2="408.56584301716083" y2="469.8575942546231" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="395.9340583283134" y1="419.58456831907824" x2="416.75104510217915" y2="470.06047274768207" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="403.73321163527874" y1="420.1838609448896" x2="417.47703582629913" y2="452.81557352123934" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="411.8893507283807" y1="420.2787328345603" x2="417.4260585940225" y2="434.11041726990965" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="267.6" y="445" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="267.6" dy="0">HOLD - report errors to setup agent</tspan></text></g>
+<g><path d="M 484.2023358133025,419.75143472864784
+    L 771.972704944959,419.86165198816525
+    Q 777.1628524681342,419.3456762332389 776.8588947664122,425.4367329192064
+    L 778.1248373074537,463.6322280876684
+    Q 777.1676018810882,470.41086171056395 771.8809693038908,469.77223711182523
+    L 484.2513629808833,469.6585380125871
+    Q 477.33479965545223,470.47626576558105 476.8503339272735,463.5823087478311
+    L 477.5752136848183,426.308614442165
+    Q 477.38946850786454,419.4042531834057 483.2708303706819,420.0318156489084
+    Z" fill="#a5d8ff" stroke="#000000" stroke-width="1.5" />
+<line x1="477.2537516284516" y1="462.82826482607453" x2="480.8944479321637" y2="469.76925045116514" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="477.33868739225875" y1="444.0495247603384" x2="488.38151889468116" y2="470.35978274065565" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="477.6744683561643" y1="424.91471935066056" x2="496.48511237447946" y2="469.53268416381616" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="483.64387829810005" y1="419.81104862655593" x2="504.6639503945682" y2="470.21266581529926" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="492.0262224061968" y1="419.8083883706204" x2="513.2269989912876" y2="470.3682547354492" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="499.68549014690655" y1="419.82548129818315" x2="520.7395637657957" y2="469.5857731194701" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="508.0947855114151" y1="419.61651350987813" x2="529.2121934455682" y2="469.65748620849627" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="516.0314291137998" y1="419.93034190364415" x2="536.3201809366348" y2="469.5280698563729" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="523.7643366651406" y1="420.20352743658987" x2="544.3664682602013" y2="470.1012155225544" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="531.5421369616976" y1="419.5211333895313" x2="552.5865294923843" y2="470.1241030968904" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="539.2835156988091" y1="420.0128114742838" x2="561.0161759963795" y2="470.44169194265123" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="547.6337762347954" y1="419.8813464509876" x2="568.5889786418976" y2="470.3758739468103" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="556.066411555899" y1="419.63217784489825" x2="576.5817969215296" y2="469.53224053390295" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="563.89328174681" y1="420.4814009810907" x2="584.9463980612765" y2="470.2008323454211" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="571.7202045217797" y1="420.34411379563244" x2="592.9867971536715" y2="470.38721145298405" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="579.5630812749438" y1="420.01872188220295" x2="600.7031301646913" y2="469.76717883287347" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="587.5230977074367" y1="420.0628026301056" x2="609.0243544776241" y2="469.70690682672284" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="595.592690560277" y1="420.2969873349721" x2="616.8326856431069" y2="470.4284346783679" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="603.1413546647469" y1="420.136525595648" x2="625.2274480457037" y2="469.5093429935587" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="611.5673108989009" y1="419.7215053368618" x2="632.5261972234422" y2="469.6524446522508" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="620.0277825521877" y1="420.0039507569745" x2="640.8167835131518" y2="470.0108977043328" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="627.3118758000343" y1="420.0808668777754" x2="649.0187673641323" y2="469.80101937386644" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="635.4649636241171" y1="419.89409113166766" x2="656.6176204501681" y2="470.1488969041675" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="643.570179279946" y1="419.67335418671246" x2="665.0745396922995" y2="469.98644452345616" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="651.1285933728592" y1="420.11489316998086" x2="672.2540877263001" y2="470.42763846232447" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="659.1680574160943" y1="420.0883420013488" x2="680.4119865885715" y2="469.6385588137109" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="667.5323719740969" y1="419.9045854575015" x2="689.0591327955682" y2="469.7679675719264" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="675.5784979389879" y1="420.35395843934384" x2="696.4648749350637" y2="469.67494557308237" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="683.1923006966769" y1="419.61042867710785" x2="704.3929445830419" y2="469.55274663169257" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="691.4883935732884" y1="420.0018133065332" x2="713.1707402074009" y2="470.2350886396307" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="699.4596986140219" y1="420.3517235165709" x2="720.5830264315429" y2="470.13145608961895" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="707.7014479765872" y1="419.5520969552672" x2="728.6173515170432" y2="469.6777172604343" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="715.8682369803734" y1="419.56727836946084" x2="736.8876916079045" y2="470.03699143711856" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="723.9711727434056" y1="420.4818583917331" x2="745.1273810089025" y2="470.0888529544609" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="731.7711712390243" y1="419.8742781410947" x2="753.2273394615387" y2="469.61302556903684" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="739.3623810229889" y1="419.8348254661396" x2="760.4645304109782" y2="469.98498891069175" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="747.3220459023229" y1="420.0906141786036" x2="769.1488406764239" y2="469.5613722401249" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="755.3078675031153" y1="420.384071098626" x2="776.3857655707089" y2="470.3145072908519" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="763.8211944431984" y1="419.8387829081694" x2="777.1214102738901" y2="453.54759617073154" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="771.1423779426347" y1="420.23728753312207" x2="777.1863713101862" y2="434.30840752217864" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="627.6" y="445" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="627.6" dy="0">Build namespace from signal_state</tspan></text></g>
+<g><path d="M 448.3548730286799,560.4957337441556
+    L 560.1272281234939,609.8842739233951
+    L 446.64226677906265,659.6937371109525
+    L 335.8482061937808,610.378637003465
+    Z" fill="#ffec99" stroke="#000000" stroke-width="1.5" />
+<line x1="335.87651505947144" y1="645.5896990640592" x2="341.4740073835662" y2="660.3263264990073" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="335.44931770498954" y1="626.6021017079054" x2="350.14067821556336" y2="660.2040081951527" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="335.4421359846216" y1="606.8366889346852" x2="357.6481622653743" y2="660.339929532609" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="335.8067371243684" y1="588.5835013858904" x2="365.65423482187424" y2="660.1136467644101" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="335.8471362167635" y1="569.8481011331405" x2="374.2450033152806" y2="660.1577289143606" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="339.56346922778323" y1="559.7671788328735" x2="382.151747806997" y2="660.4805913847158" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="347.88469354071606" y1="559.7069068267228" x2="390.27503652614786" y2="660.1225501239423" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="355.6930247061988" y1="560.4284346783679" x2="398.33313357356445" y2="659.942982902161" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="364.0877871087956" y1="559.5093429935587" x2="406.17573203488854" y2="659.7203438324141" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="371.3865362865341" y1="559.6524446522508" x2="414.33488608721626" y2="660.1699264635026" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="379.67712257624373" y1="560.0108977043328" x2="421.98556014568993" y2="660.2626656323646" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="387.8791064272242" y1="559.8010193738664" x2="429.59616039910424" y2="660.3242103595567" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="395.4779595132601" y1="560.1488969041675" x2="437.9501975339396" y2="660.0903345322076" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="403.9348787553914" y1="559.9864445234562" x2="445.86483348373685" y2="660.1420363429133" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="411.11442678939204" y1="560.4276384623245" x2="454.2133802021296" y2="659.5845683190782" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="419.27232565166344" y1="559.6385588137109" x2="462.0125335090949" y2="660.1838609448896" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="427.91947185866013" y1="559.7679675719264" x2="470.16867260219686" y2="660.2787328345603" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="435.3252139981556" y1="559.6749455730824" x2="477.9826545025268" y2="659.8817080165609" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="443.2532836461338" y1="559.5527466316926" x2="486.2459166908945" y2="660.3723159212241" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="452.0310792704928" y1="560.2350886396307" x2="493.79570516584744" y2="660.3123472466032" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="459.4433654946348" y1="560.131456089619" x2="502.22066586635145" y2="659.7703190844877" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="467.4776905801351" y1="559.6777172604343" x2="510.09686208101874" y2="660.4710769985522" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="475.7480306709964" y1="560.0369914371186" x2="517.8984214120126" y2="660.3772651441614" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="483.98772007199443" y1="560.0888529544609" x2="525.8286976664901" y2="660.4538635884819" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="492.08767852463063" y1="559.6130255690368" x2="534.0362951578088" y2="660.2237264791402" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="499.32486947407017" y1="559.9849889106918" x2="541.5488760234173" y2="659.5644826742246" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="508.00917973951584" y1="559.5613722401249" x2="549.5255778124217" y2="660.3999359383306" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="515.2461046338009" y1="560.3145072908519" x2="558.148566899107" y2="659.5985437881027" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="523.1214102738901" y1="560.434482290184" x2="559.8303962278111" y2="645.6264142905908" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="531.1863713101862" y1="560.1170730019439" x2="559.6485247024335" y2="626.3742988203755" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="540.092668865234" y1="559.7071698074942" x2="559.6077427038123" y2="607.4309981334279" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="547.9514204886378" y1="560.4121411597735" x2="559.3617603082545" y2="587.9589098333853" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="555.3070807739292" y1="559.6359486634101" x2="559.8865413714317" y2="568.9903240187687" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="447.6" y="610" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="447.6" dy="0">Position open?</tspan></text></g>
+<g><path d="M 305.76173375555084,700.5582128544484
+    L 445.2020387477329,749.4336770505761
+    L 306.24842071911337,799.0015051109658
+    L 165.48801851429891,749.7299272482342
+    Z" fill="#ffec99" stroke="#000000" stroke-width="1.5" />
+<line x1="165.47207253708768" y1="784.8325097218983" x2="171.84950115376222" y2="799.6733541867125" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="165.42618208025272" y1="766.0838220157182" x2="179.40791524667537" y2="800.1148931699809" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="165.61138416527103" y1="747.3649211484643" x2="187.44737928991043" y2="800.0883420013488" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="165.47703582629913" y1="728.0851286811611" x2="195.8116938479131" y2="799.9045854575015" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="165.4260585940225" y1="709.3799724298315" x2="203.85781981280405" y2="800.3539584393438" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="169.96590756186345" y1="700.0587036434117" x2="211.47162257049303" y2="799.6104286771078" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="177.5424825479182" y1="700.4146485569509" x2="219.76771544710454" y2="800.0018133065332" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="185.4331460826885" y1="699.9976510072083" x2="227.7390204878381" y2="800.3517235165709" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="193.38293765047422" y1="699.6461235816241" x2="235.98076985040342" y2="799.5520969552672" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="201.92185295513048" y1="700.1934444123508" x2="244.14755885418953" y2="799.5672783694608" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="209.59779557016157" y1="700.0441703170309" x2="252.25049461722182" y2="800.4818583917331" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="217.90649650673515" y1="700.4348544723325" x2="260.05049311284046" y2="799.8742781410947" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="226.08191788989063" y1="699.8044339137414" x2="267.64170289680504" y2="799.8348254661396" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="233.19172957115518" y1="699.9846150808517" x2="275.60136777613906" y2="800.0906141786036" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="241.51479226592494" y1="700.3138400219577" x2="283.58718937693146" y2="800.384071098626" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="249.52286048702229" y1="700.1427959349603" x2="292.1005163170145" y2="799.8387829081694" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="257.9648535714965" y1="699.9302449780807" x2="299.4216998164508" y2="800.2372875331221" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="266.0511816456507" y1="699.5847986001536" x2="307.59752687581084" y2="799.5402375562408" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="273.9055202242322" y1="699.536893693301" x2="316.1640040209774" y2="799.6363570831163" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="282.0825378301321" y1="699.8451316721766" x2="324.18816974780447" y2="799.612839611269" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="289.9378465656133" y1="699.8683359999795" x2="331.8871173109389" y2="800.2508179123215" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="297.14552778371365" y1="699.8754555859487" x2="340.0886117818906" y2="799.6073269282788" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="305.82312239412533" y1="700.491646942588" x2="348.0295791562118" y2="800.4334043775307" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="313.56343631629136" y1="700.0797927330859" x2="356.1482756349339" y2="800.3544367936192" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="321.45387771313983" y1="700.3717299352065" x2="363.9987205848035" y2="800.0197628733804" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="330.08191997713004" y1="699.7448975878888" x2="371.426892149381" y2="800.3074826163102" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="337.85641259902843" y1="700.2087475801382" x2="380.3011209642452" y2="799.5108540180117" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="345.8701428320579" y1="699.7266529757326" x2="388.34051270630033" y2="800.4436578149835" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="353.2405856529091" y1="700.3472440513287" x2="396.02437757199795" y2="800.458690835374" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="361.4088975988067" y1="700.4990065154052" x2="404.1027787103764" y2="800.327931242522" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="369.23742806676603" y1="700.3054184012399" x2="411.48778331711463" y2="799.6196073140673" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="377.48391591355323" y1="699.833067554122" x2="420.3524836021849" y2="800.4827754475336" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="385.6563877380264" y1="699.5400616370316" x2="427.9111469872939" y2="800.4652854956003" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="394.0469842605104" y1="700.0295456263193" x2="436.2546293225402" y2="800.2114697400903" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="401.6792002477174" y1="699.8546859853086" x2="443.6189154626033" y2="800.2166248770736" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="409.7306155180137" y1="700.0901370107722" x2="445.50999093576104" y2="784.968726791494" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="417.3915765312137" y1="699.6171421888648" x2="445.30070362216213" y2="766.2911428534965" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="425.63927664248706" y1="700.2304390406935" x2="445.81976812366486" y2="747.663082608431" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="433.1264486723645" y1="699.7726726971814" x2="446.01568753105414" y2="728.3060442799123" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="441.9481733377776" y1="700.090215215132" x2="445.4198985697782" y2="709.7815255449732" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="305.6" y="750" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="305.6" dy="0">Eval exit expression</tspan></text></g>
+<g><path d="M 618.5077271769638,700.6129930134703
+    L 730.4697089446651,750.3423424780485
+    L 617.3485562821894,800.9753570492612
+    L 504.8260511380737,750.3139465679851
+    Z" fill="#ffec99" stroke="#000000" stroke-width="1.5" />
+<line x1="505.32486947407017" y1="785.1329960320998" x2="511.5488760234172" y2="799.5644826742246" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="506.00917973951584" y1="765.78760000122" x2="519.5255778124217" y2="800.3999359383306" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="505.2461046338009" y1="747.618955691634" x2="528.148566899107" y2="799.5985437881027" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="505.1214102738901" y1="728.8171513306532" x2="536.1097181016273" y2="800.4784071691829" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="505.18637131018625" y1="709.5779626821004" x2="543.9278465762497" y2="800.1480710592805" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="510.09266886523403" y1="699.7071698074942" x2="551.8870645776285" y2="800.1265497326458" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="517.9514204886378" y1="700.4121411597735" x2="559.6410821820707" y2="799.576240792916" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="525.3070807739292" y1="699.6359486634101" x2="568.1658632452479" y2="799.5294343386122" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="533.6750992595058" y1="700.3876306222373" x2="575.573845708687" y2="799.5866297535467" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="541.1803639994265" y1="700.3216894370598" x2="583.5003274005674" y2="799.8728201941267" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="549.9646213091997" y1="699.8171195774294" x2="592.0762237887345" y2="800.0359104897616" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="557.7225234833182" y1="700.186342219582" x2="599.6718630344792" y2="799.5216529559139" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="565.4080629827555" y1="700.1786256294072" x2="608.363356575707" y2="800.1171937053368" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="573.706036175217" y1="699.7037747778668" x2="615.6957862114293" y2="799.9680293061974" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="581.8740690677092" y1="699.8215907055019" x2="623.819949359359" y2="800.1427014491564" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="589.2013913331117" y1="699.8435513144086" x2="631.9085962568813" y2="799.8925650506426" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="597.719813713689" y1="699.8044446884815" x2="639.889403585107" y2="799.7670455698499" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="606.0171338934812" y1="700.1685258665239" x2="648.1329567439741" y2="800.2734958771907" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="613.3069192495401" y1="700.0951185181766" x2="655.9416054759847" y2="799.8607295612237" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="622.0233002753754" y1="700.2331523405883" x2="663.9881039298514" y2="799.6589875650752" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="629.1071881524346" y1="700.3232448661311" x2="672.1278822491465" y2="800.3185204918882" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="637.3184360771062" y1="700.152146196102" x2="679.6089094263177" y2="799.8509758278815" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="645.5948836214735" y1="699.8800891365536" x2="687.8440483085349" y2="799.8755179912696" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="653.6048053610335" y1="700.2298818113268" x2="695.7702602637867" y2="799.5512423922482" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="661.3355163475804" y1="700.1957903328002" x2="704.1402632306442" y2="800.0787966394928" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="670.0304600187025" y1="699.799513241328" x2="711.4294954677487" y2="799.9591659967627" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="677.8699830851089" y1="700.0814847241563" x2="720.1899919016021" y2="800.3181496073926" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="685.5959459816128" y1="699.6359334147637" x2="727.8421239882653" y2="799.7670608271765" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="693.7599853187727" y1="699.7316339984391" x2="729.3558142050657" y2="785.5221890161607" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="701.4701129088659" y1="700.3733188921542" x2="729.1655250305645" y2="766.2406641326832" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="709.3645444200389" y1="699.8206624974055" x2="729.1815451308445" y2="747.7890730574707" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="717.7011460739792" y1="700.4119841877473" x2="729.7579852923096" y2="728.1005490081117" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="725.470540649564" y1="699.8065329410019" x2="729.1681200862819" y2="709.2205922885096" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="617.6" y="750" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="617.6" dy="0">Eval entry_long</tspan></text></g>
+<g><path d="M 6.531655190428864,840.1837852249773
+    L 154.279513329373,839.6888117409944
+    Q 159.28247943387078,839.7808165697097 160.5575949028098,846.179098066481
+    L 160.02964431007058,883.7120944741332
+    Q 160.26793844411077,890.7260520528362 154.17579055800525,890.722879965695
+    L 5.617346381833158,889.3213554133472
+    Q 0.4612239244652301,890.1590542628255 -0.44433783319982467,883.7246965064196
+    L -0.047956040703866165,846.3846188985426
+    Q 0.3131213702072273,840.6326986356435 5.266281027017612,840.4111036015638
+    Z" fill="#b2f2bb" stroke="#000000" stroke-width="1.5" />
+<line x1="0.46119083248413517" y1="883.0176613756875" x2="2.741052270019768" y2="889.8435513144086" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="0.1450556981817499" y1="864.1109150357651" x2="11.259474650597017" y2="889.8044446884815" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="0.22345683656021698" y1="845.0583760826003" x2="19.55679483038924" y2="890.1685258665239" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="5.608461443298438" y1="839.6196073140673" x2="26.84658018644817" y2="890.0951185181766" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="14.473161728368723" y1="840.4827754475336" x2="35.562961212283454" y2="890.2331523405883" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="22.03182511347768" y1="840.4652854956003" x2="42.64684908934262" y2="890.3232448661311" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="30.375307448724016" y1="840.2114697400903" x2="50.85809701401425" y2="890.152146196102" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="37.7395935887871" y1="840.2166248770736" x2="59.13454455838158" y2="889.8800891365536" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="45.909990935761016" y1="839.820719670086" x2="67.14446629794159" y2="890.2298818113268" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="53.70070362216211" y1="840.0649150924014" x2="74.8751772844885" y2="890.1957903328002" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="62.219768123664835" y1="840.3586342076487" x2="83.57012095561052" y2="889.799513241328" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="70.41568753105412" y1="839.923375239443" x2="91.40964402201692" y2="890.0814847241563" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="77.81989856977816" y1="840.3206358648167" x2="99.13560691852084" y2="889.6359334147637" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="86.12354015534947" y1="839.568408357849" x2="107.29964625568076" y2="889.7316339984391" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="94.4864814336106" y1="839.8044754321963" x2="115.00977384577394" y2="890.3733188921542" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="102.35806160598804" y1="839.95124719038" x2="122.90420535694696" y2="889.8206624974055" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="109.7173743107735" y1="839.9529503074882" x2="131.24080701088727" y2="890.4119841877473" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="117.64882994539948" y1="840.2296347473093" x2="139.01020158647205" y2="889.8065329410019" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="125.87267784851429" y1="839.5456626871637" x2="147.5044869148119" y2="890.1786715174385" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="134.2578993478237" y1="840.2524935567552" x2="155.5784233180789" y2="890.4552838628442" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="141.753850770805" y1="840.0390341592356" x2="159.94827348549734" y2="882.5124502060895" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="149.72829161034923" y1="839.7063213612855" x2="159.51239126478686" y2="863.5840566636897" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="158.44203244351593" y1="840.4875820722737" x2="160.06601972804634" y2="844.5402933538599" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="80" y="865" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="80" dy="0">CLOSE_POSITION</tspan></text></g>
+<g><path d="M 225.32686358837236,839.6873647968205
+    L 373.4257132832972,839.5510554332432
+    Q 380.0973726386021,839.6032745213706 380.29368549920036,846.391412035242
+    L 380.1181949592392,884.0589149637306
+    Q 380.3456585610402,890.3296521854973 374.5379513114731,890.6456900280537
+    L 225.69926986199198,889.3252603908986
+    Q 219.93874899514412,889.2896730085467 219.6590090457721,884.6235312965812
+    L 219.88506285916446,846.4049746276633
+    Q 220.1222270862345,840.4660050416787 226.47722441108886,840.5222600066663
+    Z" fill="#b2f2bb" stroke="#000000" stroke-width="1.5" />
+<line x1="219.962802114449" y1="882.3410643878805" x2="223.47195764761685" y2="889.6450558111064" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="219.7558142050657" y1="864.0264060951439" x2="231.45836438968084" y2="890.3966071800241" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="219.56552503056446" y1="844.7448812116663" x2="238.81070414601712" y2="890.1443745307915" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="225.58154513084446" y1="840.4846246566885" x2="247.19511542110607" y2="890.1776331282963" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="234.1579852923096" y1="839.7178799676424" x2="255.39096635688887" y2="889.8821091291356" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="241.56812008628185" y1="839.7597026083531" x2="262.79814453869454" y2="889.5203982245744" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="250.10626870111082" y1="839.71193046595" x2="270.91870028130194" y2="889.9751691875063" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="258.22273424745435" y1="840.0327930242202" x2="279.5399407281457" y2="889.6761348107102" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="265.94247530551365" y1="839.5910805901913" x2="287.3816232553841" y2="889.7998676478383" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="273.7218284221017" y1="839.6025410497999" x2="295.5162106107351" y2="889.9332714459633" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="282.07438646509036" y1="839.6339849592769" x2="302.7106294391238" y2="890.2690616927739" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="290.38917910787325" y1="839.9942572154032" x2="311.5991104564278" y2="890.1257996478271" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="298.4633539931965" y1="839.654765713407" x2="318.81314655901105" y2="890.2672704940705" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="306.1855330345934" y1="840.0020800547791" x2="327.4638733058351" y2="890.1486955589862" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="314.4986819789556" y1="839.5260189222411" x2="335.4043960365639" y2="889.9742890849266" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="321.74746428056096" y1="840.1406298347647" x2="342.7175221054027" y2="890.4450679996519" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="330.0504921330121" y1="839.6978890871469" x2="350.7582986792591" y2="889.591959258003" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="337.5475248364637" y1="840.3547465894153" x2="359.0762780307219" y2="890.406175469885" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="345.8165023350739" y1="840.4698052534986" x2="366.70914966523975" y2="889.6868064768933" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="354.03171848363854" y1="840.0421609170526" x2="375.5496856742944" y2="889.7646989464301" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="361.82411023941313" y1="840.0017862072236" x2="380.23407967278763" y2="882.1760160332781" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="369.5367747924488" y1="840.3460351215326" x2="380.48589013449237" y2="863.7410761092714" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="377.76348540174513" y1="839.5601474284631" x2="379.6366385780648" y2="844.358044361582" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="300" y="865" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="300" dy="0">HOLD</tspan></text></g>
+<g><path d="M 445.5594820419283,839.2685868971803
+    L 593.897748694948,839.5827426331525
+    Q 599.4038115747,840.5648245107404 599.899907168945,846.6630486652739
+    L 600.7313731084105,884.0990295920695
+    Q 599.7147727706724,890.1115796976355 593.4509774389153,889.3564527533235
+    L 446.40359253916085,889.6003036345573
+    Q 440.69328032528574,889.7638705183253 440.1551612088697,884.5837686618099
+    L 439.9913858231048,846.6891742792795
+    Q 440.1886994717406,840.7324207222919 445.9434400186184,840.0087022591179
+    Z" fill="#b2f2bb" stroke="#000000" stroke-width="1.5" />
+<line x1="439.68707986157824" y1="882.9614764597161" x2="443.6061949261171" y2="889.7065191140473" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="439.89465756646564" y1="863.2890171771131" x2="450.9163229310985" y2="890.3990906874969" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="440.4451242303585" y1="844.3226304012524" x2="459.1680781116334" y2="890.110910396259" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="446.2352316038523" y1="840.055687707958" x2="466.98582780162593" y2="889.9920069589498" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="453.6973924677077" y1="840.487935366195" x2="475.22832704143053" y2="890.2271840214198" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="462.40921486507796" y1="839.7328412258175" x2="482.99044233216097" y2="889.6788823185889" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="469.6625351895327" y1="840.2443955240669" x2="491.27776934791524" y2="889.5429326205558" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="477.9324538756591" y1="839.9944034336368" x2="499.34366048242197" y2="890.2213542504251" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="485.8603390054632" y1="840.0931341324358" x2="506.79658003115816" y2="890.2835686720427" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="494.45192669203243" y1="840.3826660348577" x2="515.2980335771322" y2="890.4365025020634" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="502.14199464078047" y1="839.7834780884514" x2="522.8191683674127" y2="890.408336881027" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="510.4793830779972" y1="840.0753861745616" x2="530.9505068432268" y2="890.0649128368786" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="518.2058286468709" y1="840.0979943844795" x2="539.1804774426696" y2="889.6989105624889" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="526.0454038185999" y1="840.3719878137344" x2="546.7229679695306" y2="890.3700199532541" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="534.3659307027992" y1="840.1973675930476" x2="554.7797070430574" y2="889.5914994517807" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="542.0762117157356" y1="840.2210725506993" x2="562.7183216556773" y2="890.444932049898" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="549.7956047399575" y1="839.721703776122" x2="571.117404452893" y2="889.640262477682" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="557.5932154017391" y1="840.2591146624109" x2="579.1299104989371" y2="890.1468480690528" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="566.181506429115" y1="839.721403137868" x2="587.0992922984119" y2="889.5955590419399" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="574.1011933630361" y1="840.4790104407357" x2="595.053154644233" y2="889.5294362654022" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="582.3705239616393" y1="839.701979368263" x2="600.2220200564334" y2="882.9084224263287" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="590.0660949759804" y1="839.8203781421616" x2="599.7892435047543" y2="863.5714354728543" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="598.4474153754527" y1="839.7859626523204" x2="599.508557468931" y2="844.94381657959" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="520" y="865" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="520" dy="0">OPEN_LONG</tspan></text></g>
+<g><path d="M 778.2920702430653,840.9717802689847
+    L 895.3777038177607,890.9038533840649
+    L 778.3653320697155,940.3167452804482
+    L 660.8730050041268,889.5269708034903
+    Z" fill="#ffec99" stroke="#000000" stroke-width="1.5" />
+<line x1="659.6795074305046" y1="925.5563440024349" x2="666.5741973891719" y2="939.7763195649022" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="659.8108459063187" y1="906.2911405979737" x2="674.1905781697507" y2="939.7032250051916" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="660.0408165057615" y1="887.003358963271" x2="681.7900624074038" y2="939.9123052675241" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="659.5833070326225" y1="868.7526889937234" x2="690.5760864955356" y2="939.5078643311281" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="659.6400461061494" y1="849.0523891319372" x2="698.7056086761705" y2="939.6509731073747" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="663.5786607187692" y1="840.444932049898" x2="706.3137144358053" y2="939.7347829538121" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="671.9777435159849" y1="839.640262477682" x2="714.0544903205019" y2="940.0583307577172" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="679.990249562029" y1="840.1468480690528" x2="722.2615487998056" y2="939.5410428671166" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="687.9596313615039" y1="839.5955590419399" x2="730.0622395951215" y2="939.7979377121956" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="695.913493707325" y1="839.5294362654022" x2="738.155802190403" y2="939.9594423867602" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="704.2220200564334" y1="840.3344188656247" x2="746.6829480576281" y2="940.1906363499802" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="711.7892435047543" y1="839.9192112724631" x2="754.588565887586" y2="939.6519134388991" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="719.508557468931" y1="840.2133717395118" x2="762.6600461891295" y2="939.5321879015246" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="728.1446919123009" y1="840.2563449243753" x2="770.7322749649276" y2="939.8755949581755" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="736.3138237673993" y1="840.1207225097023" x2="778.7581014903891" y2="939.7696563812133" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="744.3315199570643" y1="839.616707615176" x2="786.0059338036236" y2="940.0227538127874" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="752.3622133098543" y1="839.5283345099742" x2="794.5268235551349" y2="940.022182773937" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="760.0584167688521" y1="839.590975915351" x2="802.0938528235939" y2="939.5066153096705" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="767.5204316842901" y1="839.6002017889114" x2="810.0507135867766" y2="940.4442964873888" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="776.1321092414437" y1="840.270043171171" x2="817.9000207586843" y2="940.3173150474613" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="783.6775281402806" y1="839.8243311153801" x2="826.5628446254278" y2="940.1445613320466" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="791.7788309898242" y1="840.0719236146288" x2="834.6517770433212" y2="939.6995879292845" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="800.1104559271735" y1="840.0157532519806" x2="842.6363043012326" y2="940.0632623387974" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="808.4905577676145" y1="839.8263717157824" x2="850.4904107190315" y2="940.2509214415113" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="815.6160951727288" y1="839.9174516995117" x2="857.9904900516132" y2="939.7894819731373" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="824.0790746877828" y1="840.4809153583774" x2="866.5907092116114" y2="939.5051211486061" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="832.08550529075" y1="840.1333789605414" x2="873.7946521435161" y2="940.2052902374671" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="840.1447815320789" y1="840.2666601526216" x2="882.324702460218" y2="939.7805267015829" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="848.4791405473115" y1="840.0853158482059" x2="890.5340798742192" y2="940.0850223553934" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="855.9709493876289" y1="840.0394277559681" x2="895.379127417363" y2="933.0411165667357" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="864.4040326379618" y1="840.099659045467" x2="895.204851502803" y2="913.8851200178399" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="872.2918314076669" y1="840.2766235333183" x2="894.7562332687332" y2="894.9228053353547" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="879.6524950358908" y1="840.1647394273823" x2="895.0799583544751" y2="876.1690660147891" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="887.929192586269" y1="840.478564243298" x2="895.5964850850316" y2="856.8076386661965" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="777.6" y="890" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="777.6" dy="0">Eval entry_short</tspan></text></g>
+<g><path d="M 263.3305672132425,979.6838652571314
+    L 411.47881690869474,980.4638660206547
+    Q 417.0778701583487,979.4616235534595 417.13152630904517,986.671123063179
+    L 417.2789439784807,1023.2628362033965
+    Q 417.9200576092677,1030.57108647297 410.8982818522869,1030.5384887937944
+    L 264.2832332395361,1029.4223041122132
+    Q 257.60509345622415,1030.2170378684514 257.98451738656297,1024.679429636667
+    L 257.41339243726327,986.2431240381811
+    Q 256.87884021591674,980.5513735402164 263.25366406157775,980.470735651099
+    Z" fill="#b2f2bb" stroke="#000000" stroke-width="1.5" />
+<line x1="257.75029833983865" y1="1022.432563408124" x2="261.07118089397244" y2="1029.616707615176" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="257.3517817799344" y1="1003.7051185431982" x2="269.1018742467624" y2="1029.5283345099742" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="257.7447141849967" y1="984.6689161562126" x2="276.79807770576025" y2="1029.590975915351" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="263.2475099336458" y1="980.1139776163109" x2="284.2600926211982" y2="1029.6002017889114" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="271.5233337365877" y1="979.6021852690737" x2="292.8717701783518" y2="1030.270043171171" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="279.10648786825334" y1="980.3005466474315" x2="300.41718907718877" y2="1029.8243311153801" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="287.92116221915023" y1="980.1445126332401" x2="308.51849192673234" y2="1030.0719236146288" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="295.68350839773996" y1="979.9280487988872" x2="316.8501168640816" y2="1030.0157532519806" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="303.1379363257089" y1="979.9842598473188" x2="325.23021870452266" y2="1029.8263717157824" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="311.17529315239665" y1="979.5042337400264" x2="332.35575610963696" y2="1029.9174516995117" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="320.0945429308937" y1="979.6164311646098" x2="340.818735624691" y2="1030.4809153583774" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="327.85183076118994" y1="979.8635446974804" x2="348.82516622765814" y2="1030.1333789605414" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="335.2829100350151" y1="979.9173674590274" x2="356.88444246898706" y2="1030.2666601526216" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="343.1018880004864" y1="979.5815182451697" x2="365.2188014842197" y2="1030.085315848206" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="351.7791086389931" y1="979.9912023117322" x2="372.7106103245371" y2="1030.039427755968" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="359.7333580163337" y1="980.374872113629" x2="381.1436935748699" y2="1030.099659045467" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="367.6319985221122" y1="980.0205869301135" x2="389.03149234457504" y2="1030.2766235333183" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="375.98133040313917" y1="980.0202015333998" x2="396.3921559727989" y2="1030.1647394273823" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="383.31311810426416" y1="979.9102244485839" x2="404.6688535231771" y2="1030.478564243298" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="391.23937465173515" y1="979.5674776143169" x2="413.09971661630533" y2="1029.6498986110018" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="400.0042549362639" y1="980.1261239003925" x2="417.169249838838" y2="1022.7558270872876" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="407.76200192006365" y1="980.4677115209779" x2="417.96958348310875" y2="1003.6997602291711" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="415.2350446652141" y1="980.3013135989968" x2="417.7371985243368" y2="984.3027457932867" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="337.6" y="1005" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="337.6" dy="0">OPEN_SHORT</tspan></text></g>
+<g><path d="M 483.976382162267,980.3854048352623
+    L 631.9783495333355,979.3629397285949
+    Q 636.8563506100396,979.4241427590932 637.4761775492676,985.5667522666954
+    L 637.284222959706,1023.3991217172261
+    Q 637.393903499216,1030.7418143963405 631.0246467469148,1030.1186120316743
+    L 484.3213730375661,1030.4670810066928
+    Q 476.8576817229092,1029.6516714341597 477.32887969399746,1024.3777461417849
+    L 477.3953170462206,986.128257936125
+    Q 477.8000684408122,979.2729954045499 483.9079353562007,979.4164737897845
+    Z" fill="#b2f2bb" stroke="#000000" stroke-width="1.5" />
+<line x1="477.64538058640176" y1="1022.3545302622867" x2="480.62213424235796" y2="1029.700891037117" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="477.85475800040297" y1="1003.7372465557845" x2="489.129238943233" y2="1029.5352541827779" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="477.77912741736293" y1="985.0548425412808" x2="496.29796115087646" y2="1030.3318661875965" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="483.60485150280294" y1="980.0901805126196" x2="504.5452548849045" y2="1029.63572085966" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="491.1562332687332" y1="980.0496451904473" x2="512.3297801151767" y2="1029.7187409151884" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="499.4799583544751" y1="980.2176852301945" x2="520.3745510964637" y2="1029.864492208193" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="507.9964850850316" y1="979.7780372419147" x2="528.6522084175868" y2="1030.1751691653753" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="516.0721004147632" y1="980.0113417760731" x2="536.9803796084744" y2="1029.8743517988987" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="523.1169818709692" y1="979.9231838328124" x2="544.7726974271901" y2="1029.618875151078" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="532.0242705939105" y1="979.7306952164199" x2="552.9094510220585" y2="1029.7156543860328" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="539.422881590364" y1="979.9163316115737" x2="560.9440445217607" y2="1030.2371996639777" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="547.7432311905956" y1="980.2024598783246" x2="568.518003476389" y2="1029.709377616513" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="555.654750348585" y1="979.8905436492278" x2="576.8967440137877" y2="1030.3726824222467" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="563.5601110534495" y1="980.0662472068434" x2="584.65848979749" y2="1029.7966747457103" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="571.6976195596159" y1="979.7326747441657" x2="593.1919421335534" y2="1029.7943099283293" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="579.3972889133671" y1="980.4018317691753" x2="600.3210648708028" y2="1030.2995638318716" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="587.616322536103" y1="980.2709691218697" x2="608.639860445952" y2="1029.659417852079" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="596.0074181391388" y1="979.9531425331879" x2="616.5722030237686" y2="1029.7494424213874" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="604.0067234746981" y1="979.6210943601545" x2="624.6866621068494" y2="1030.1479857641825" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="611.2035501446677" y1="979.5245290467246" x2="632.2399189178233" y2="1030.0664748029521" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="619.2863704791686" y1="980.1847954388522" x2="637.4054920130235" y2="1022.0904815817293" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="627.1529260752701" y1="979.9355181237624" x2="637.7511821400127" y2="1003.1846664532704" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<line x1="635.6246451776148" y1="980.1411962439452" x2="637.408451582172" y2="984.6967014373176" stroke="#000000" stroke-width="0.8" opacity="0.35" />
+<text x="557.6" y="1005" text-anchor="middle" dominant-baseline="central" font-family="'Virgil', 'Segoe Print', 'Comic Sans MS', 'Patrick Hand', cursive" font-size="14" fill="#000000"><tspan x="557.6" dy="0">HOLD</tspan></text></g>
 </g>
 </svg>
