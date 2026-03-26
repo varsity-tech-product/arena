@@ -26,17 +26,7 @@ def build_setup_context(
     """Assemble everything the setup agent needs to make a decision."""
     context: dict[str, Any] = {}
 
-    # Cooldown lock — placed first so the LLM sees it before anything else
-    strategy_start_time = config.get("_strategy_start_time")
-    _cooldown_seconds = config.get("_cooldown_seconds", 1200)
-    _cooldown_min_trades = config.get("_cooldown_min_trades", 5)
-    _age = round(time.time() - strategy_start_time) if strategy_start_time else None
-    _remaining = max(0, _cooldown_seconds - _age) if _age is not None else 0
-    if _remaining > 0:
-        context["STRATEGY_LOCKED"] = (
-            f"Strategy change is LOCKED for {round(_remaining / 60, 1)} more minutes. "
-            "You MUST return action=hold. Analyze the market and chat, but do NOT propose strategy changes."
-        )
+    # Cooldown lock is injected later (after trade count is known) as STRATEGY_LOCKED.
 
     if inactivity_alert:
         context["inactivity_alert"] = {
@@ -139,6 +129,14 @@ def build_setup_context(
         strategy_trades = perf.get("trade_count", 0)
     cooldown_trades_needed = max(0, cooldown_min_trades - strategy_trades)
     cooldown_active = cooldown_remaining > 0 and cooldown_trades_needed > 0
+
+    # Inject STRATEGY_LOCKED as first key so the LLM can't miss it
+    if cooldown_active:
+        mins = round(cooldown_remaining / 60, 1)
+        context["STRATEGY_LOCKED"] = (
+            f"Strategy change is LOCKED ({mins} min / {cooldown_trades_needed} trades remaining). "
+            "You MUST return action=hold. Analyze the market and chat, but do NOT propose strategy changes."
+        )
 
     context["current_strategy"] = {
         "policy": policy_config.get("type", "unknown"),

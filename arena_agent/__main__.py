@@ -357,12 +357,13 @@ def _run_auto(argv: list[str]) -> None:
                     if new_policy_type and new_policy_type != old_policy_type:
                         log.info("Policy type changed: %s -> %s — replacing policy dict", old_policy_type, new_policy_type)
                         config_dict["policy"] = decision.overrides.pop("policy")
-                        acct = context.get("account_state", {})
-                        config_dict["_strategy_start_trade_count"] = acct.get("trade_count", 0) if isinstance(acct, dict) else 0
-                        config_dict["_strategy_start_time"] = time.time()
-                        inactive_cycles = 0
-                        inactive_since = None
-                        total_runtime_iterations = 0
+                    # Reset cooldown tracking on ANY update (not just type changes)
+                    acct = context.get("account_state", {})
+                    config_dict["_strategy_start_trade_count"] = acct.get("trade_count", 0) if isinstance(acct, dict) else 0
+                    config_dict["_strategy_start_time"] = time.time()
+                    inactive_cycles = 0
+                    inactive_since = None
+                    total_runtime_iterations = 0
                     _deep_merge(config_dict, decision.overrides)
                     # Apply agent-requested cooldown override
                     if "_cooldown_seconds" in decision.overrides:
