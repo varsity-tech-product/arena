@@ -189,6 +189,10 @@ Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - **Security**: [SECURITY.md](SECURITY.md)
 - **Discord**: [Join our community](https://discord.gg/zvUQm47N7A)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=varsity-tech-product/arena&type=Date)](https://star-history.com/#varsity-tech-product/arena&Date)
+
 ## License
 
 [MIT](LICENSE)
