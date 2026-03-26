@@ -63,7 +63,7 @@ Both paths call the same `dispatch()` function. Zero tool reimplementation. Budg
 The setup agent doesn't get a raw data dump. It gets a carefully curated context:
 
 <picture>
-  <img src="docs/diagrams/context_engineering.svg" alt="Context Engineering Pipeline" />
+  <img src="docs/diagrams/context.svg" alt="Context Engineering Pipeline" />
 </picture>
 
 Key innovations:
