@@ -13,6 +13,7 @@ from arena_agent.tui.panels.decision_panel import DecisionPanel
 from arena_agent.tui.panels.features_panel import FeaturesPanel
 from arena_agent.tui.panels.health_panel import HealthPanel
 from arena_agent.tui.panels.logs_panel import LogsPanel
+from arena_agent.tui.panels.loop_status_panel import LoopStatusPanel
 from arena_agent.tui.panels.market_panel import MarketPanel
 from arena_agent.tui.panels.policy_panel import PolicyPanel
 from arena_agent.tui.panels.setup_panel import SetupPanel
@@ -23,6 +24,12 @@ class ArenaMonitorApp(App):
     CSS = """
     Screen {
         layout: vertical;
+    }
+
+    #loop-status {
+        height: 3;
+        padding: 0 1;
+        content-align: left middle;
     }
 
     #status-line {
@@ -65,6 +72,7 @@ class ArenaMonitorApp(App):
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
+        yield LoopStatusPanel(id="loop-status")
         yield Static("", id="status-line")
         with Vertical(id="body"):
             with Horizontal(id="top-row"):
@@ -92,6 +100,7 @@ class ArenaMonitorApp(App):
 
     def _refresh_views(self) -> None:
         self.controller.poll()
+        self.query_one(LoopStatusPanel).refresh_view(self.controller)
         self.query_one("#status-line", Static).update(self.controller.status_line())
         self.query_one(MarketPanel).refresh_view(self.controller)
         self.query_one(AccountPanel).refresh_view(self.controller)

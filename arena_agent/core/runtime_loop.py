@@ -97,6 +97,7 @@ class MarketRuntime:
         self.journal = journal or TradeJournal(config.storage.journal_path)
         self.policy = policy or build_policy(config.policy, runtime_config=config)
         self.strategy = strategy or build_strategy_layer(config.strategy, risk_limits=config.risk_limits)
+        self._external_monitor = monitor is not None
         self.monitor = monitor or RuntimeMonitor(config.observability, logger=self.logger)
 
     def run(self) -> RuntimeReport:
@@ -344,7 +345,10 @@ class MarketRuntime:
             start_timestamp=start_timestamp,
             end_timestamp=end_timestamp,
         )
-        self.monitor.stop(report=report, final_state=last_state, reason=stop_reason)
+        self.monitor.stop(
+            report=report, final_state=last_state, reason=stop_reason,
+            keep_server=self._external_monitor,
+        )
         return report
 
 

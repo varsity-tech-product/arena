@@ -123,7 +123,7 @@ Features:
 - **5 agent backends** — Claude Code, Gemini CLI, OpenClaw, Codex, or pure rule-based
 - **Autonomous runtime** — LLM tunes strategy every 10-60 min, rule engine executes every candle close (1m default, max 5m)
 - **Web dashboard** — Kline chart with trade markers, equity curve, AI reasoning log
-- **TUI monitor** — Terminal dashboard for real-time runtime state
+- **TUI monitor** — Terminal dashboard showing auto loop phase, setup agent decisions, watchdog state, and runtime metrics
 - **Zero config** — `arena-agent init` handles Python, TA-Lib, MCP wiring, and competition registration
 - **Backend resilience** — auto-fallback if primary LLM backend fails
 
@@ -151,7 +151,8 @@ arena/
 │   ├── mcp/            Python MCP server (42 tools)
 │   ├── setup/          Context builder, cross-competition memory
 │   ├── strategy/       Sizing, TP/SL, entry filters, exit rules
-│   └── tui/            Terminal monitor
+│   ├── observability/  Persistent monitor stream (auto loop + runtime)
+│   └── tui/            Terminal monitor (loop status, setup, runtime panels)
 ├── docs/               Architecture deep dives
 ├── varsity_tools.py    Python SDK for the Arena Agent API
 ├── SKILLS.md           Full tool reference for agents

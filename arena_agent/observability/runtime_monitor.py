@@ -15,7 +15,7 @@ from arena_agent.core.serialization import to_jsonable
 
 def build_empty_snapshot() -> dict[str, Any]:
     return {
-        "schema_version": "arena.monitor.v1",
+        "schema_version": "arena.monitor.v2",
         "stream": {"host": None, "port": None},
         "runtime": {
             "status": "idle",
@@ -56,6 +56,26 @@ def build_empty_snapshot() -> dict[str, Any]:
             "last_position_drift_message": None,
             "no_transition_threshold_seconds": None,
             "no_transition_error_threshold_seconds": None,
+        },
+        "auto_loop": {
+            "active": False,
+            "phase": None,
+            "cycle": 0,
+            "phase_started_at": None,
+            "next_setup_check_seconds": None,
+            "last_setup_decision": None,
+            "setup_backend": None,
+            "inactive_cycles": 0,
+            "inactive_since": None,
+            "inactive_minutes": 0,
+            "total_runtime_iterations": 0,
+            "consecutive_setup_failures": 0,
+            "consecutive_account_failures": 0,
+            "error_backoff_seconds": 0,
+            "last_runtime_stop_reason": None,
+            "last_runtime_iterations": None,
+            "last_runtime_executed": None,
+            "competition_status": None,
         },
         "decision_state": None,
         "current_state": None,
@@ -163,55 +183,87 @@ class RuntimeMonitor:
         self.stream_active = False
 
     def start(self, *, runtime_config: Any, policy_name: str) -> None:
-        if not self.enabled or self._started:
+        if not self.enabled:
             return
+
+        # If already started (persistent mode), reset runtime fields for the new cycle
+        # without restarting the TCP server.
+        if self._started:
+            self._reset_runtime_state(runtime_config=runtime_config, policy_name=policy_name)
+            return
+
         try:
             self._start_server()
         except OSError as exc:
             self.logger.warning("Observability stream unavailable: %s", exc)
             self.stream_active = False
 
-        self._log_handler = _MonitorLogHandler(self)
-        for logger_name in self.attach_loggers:
-            logging.getLogger(logger_name).addHandler(self._log_handler)
+        self._attach_log_handler()
 
         with self._lock:
-            runtime = self._snapshot["runtime"]
-            health = self._snapshot["health"]
-            runtime.update(
-                {
-                    "status": "starting",
-                    "policy_name": policy_name,
-                    "competition_id": runtime_config.competition_id,
-                    "symbol": runtime_config.symbol,
-                    "started_at": time.time(),
-                    "updated_at": time.time(),
-                }
-            )
-            # Expose runtime config for the policy panel
-            self._snapshot["runtime_config"] = _safe_config_dict(runtime_config)
-            health["no_transition_threshold_seconds"] = float(
-                self.config.get(
-                    "no_transition_threshold_seconds",
-                    max(60.0, float(getattr(runtime_config, "tick_interval_seconds", 60.0)) * 2.0),
-                )
-            )
-            health["no_transition_error_threshold_seconds"] = _optional_float(
-                self.config.get("no_transition_error_threshold_seconds")
-            )
-            timeout_seconds = getattr(runtime_config, "policy", {}).get("timeout_seconds")
-            health["decision_timeout_seconds"] = _optional_float(timeout_seconds)
-            health["max_decision_latency_seconds"] = _optional_float(
-                self.config.get("max_decision_latency_seconds")
-            )
-            health["max_consecutive_runtime_errors"] = _optional_float(
-                self.config.get("max_consecutive_runtime_errors")
-            )
+            self._init_runtime_state_locked(runtime_config, policy_name)
             self._snapshot["stream"] = {"host": self.host, "port": self.port, "active": self.stream_active}
         self._started = True
         self._publish_snapshot()
 
-    def stop(self, *, report: Any | None = None, final_state: Any | None = None, reason: str = "stopped") -> None:
+    def _attach_log_handler(self) -> None:
+        if self._log_handler is not None:
+            return
+        self._log_handler = _MonitorLogHandler(self)
+        for logger_name in self.attach_loggers:
+            logging.getLogger(logger_name).addHandler(self._log_handler)
+
+    def _init_runtime_state_locked(self, runtime_config: Any, policy_name: str) -> None:
+        runtime = self._snapshot["runtime"]
+        health = self._snapshot["health"]
+        runtime.update(
+            {
+                "status": "starting",
+                "policy_name": policy_name,
+                "competition_id": runtime_config.competition_id,
+                "symbol": runtime_config.symbol,
+                "iteration": 0,
+                "decisions": 0,
+                "executed_actions": 0,
+                "started_at": time.time(),
+                "updated_at": time.time(),
+                "stopped_at": None,
+            }
+        )
+        # Expose runtime config for the policy panel
+        self._snapshot["runtime_config"] = _safe_config_dict(runtime_config)
+        health["no_transition_threshold_seconds"] = float(
+            self.config.get(
+                "no_transition_threshold_seconds",
+                max(60.0, float(getattr(runtime_config, "tick_interval_seconds", 60.0)) * 2.0),
+            )
+        )
+        health["no_transition_error_threshold_seconds"] = _optional_float(
+            self.config.get("no_transition_error_threshold_seconds")
+        )
+        timeout_seconds = getattr(runtime_config, "policy", {}).get("timeout_seconds")
+        health["decision_timeout_seconds"] = _optional_float(timeout_seconds)
+        health["max_decision_latency_seconds"] = _optional_float(
+            self.config.get("max_decision_latency_seconds")
+        )
+        health["max_consecutive_runtime_errors"] = _optional_float(
+            self.config.get("max_consecutive_runtime_errors")
+        )
+
+    def _reset_runtime_state(self, *, runtime_config: Any, policy_name: str) -> None:
+        """Reset runtime fields for a new cycle without restarting the TCP server."""
+        with self._lock:
+            self._init_runtime_state_locked(runtime_config, policy_name)
+        self._publish_snapshot()
+
+    def stop(
+        self,
+        *,
+        report: Any | None = None,
+        final_state: Any | None = None,
+        reason: str = "stopped",
+        keep_server: bool = False,
+    ) -> None:
         if not self._started:
             return
 
@@ -225,6 +277,11 @@ class RuntimeMonitor:
             if final_state is not None:
                 self._snapshot["current_state"] = _serialize_state(final_state)
         self._publish_snapshot()
+
+        if keep_server:
+            # Persistent mode: keep TCP server and log handler alive between cycles
+            return
+
         self._detach_log_handler()
         self._stop_server()
         self._started = False
@@ -404,6 +461,15 @@ class RuntimeMonitor:
             return
         with self._lock:
             self._append_log_locked(level, logger_name, message, timestamp=timestamp)
+        self._publish_snapshot()
+
+    def update_auto_loop(self, data: dict[str, Any]) -> None:
+        """Merge *data* into the auto_loop section of the snapshot and publish."""
+        if not self.enabled:
+            return
+        with self._lock:
+            auto_loop = self._snapshot.setdefault("auto_loop", {})
+            auto_loop.update(data)
         self._publish_snapshot()
 
     def endpoint(self) -> tuple[str, int]:

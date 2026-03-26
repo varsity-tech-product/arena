@@ -35,6 +35,7 @@ class ArenaMonitorController:
     def status_line(self) -> str:
         runtime = self._snapshot.get("runtime", {})
         connection = self._snapshot.get("connection", {})
+        auto_loop = self._snapshot.get("auto_loop", {})
         health = self.health_state()
         connection_status = connection.get("status", "unknown")
         runtime_status = runtime.get("status", "idle")
@@ -43,7 +44,13 @@ class ArenaMonitorController:
         decisions = runtime.get("decisions", 0)
         executed = runtime.get("executed_actions", 0)
         error = connection.get("error")
-        parts = [
+        parts = []
+        if auto_loop.get("active"):
+            phase = (auto_loop.get("phase") or "unknown").upper()
+            cycle = auto_loop.get("cycle", 0)
+            parts.append(f"cycle={cycle}")
+            parts.append(f"phase={phase}")
+        parts.extend([
             f"connection={connection_status}",
             f"health={health.get('status', 'unknown')}",
             f"runtime={runtime_status}",
@@ -51,13 +58,16 @@ class ArenaMonitorController:
             f"iteration={iteration}",
             f"decisions={decisions}",
             f"executed={executed}",
-        ]
+        ])
         if error:
             parts.append(f"error={error}")
         return " | ".join(parts)
 
     def health_state(self) -> dict[str, Any]:
         return derive_health(self._snapshot, now=time.time())
+
+    def auto_loop_state(self) -> dict[str, Any]:
+        return dict(self._snapshot.get("auto_loop", {}))
 
     def market_state(self) -> dict[str, Any]:
         state = self._decision_state()
