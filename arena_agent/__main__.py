@@ -172,6 +172,7 @@ def _run_auto(argv: list[str]) -> None:
     parser.add_argument("--env-file", default=None)
     parser.add_argument("--timeout-seconds", type=float, default=120.0)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--no-auto-register", action="store_true", help="Disable auto-registration for new competitions.")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -293,24 +294,25 @@ def _run_auto(argv: list[str]) -> None:
             log.warning("Competition status check failed: %s — continuing", exc)
 
         # --- Auto-register for any open competitions ---
-        try:
-            open_comps = varsity_tools.get_competitions(status="registration_open")
-            open_list = open_comps.get("list", []) if isinstance(open_comps, dict) else []
-            my_regs = varsity_tools.get_my_registrations()
-            registered_ids = set()
-            if isinstance(my_regs, list):
-                registered_ids = {r.get("competitionId") for r in my_regs}
-            for comp in open_list:
-                comp_id = comp.get("id")
-                slug = comp.get("slug")
-                if comp_id and slug and comp_id not in registered_ids:
-                    try:
-                        result = varsity_tools.register_competition(slug)
-                        log.info("Auto-registered for competition: %s (slug=%s) result=%s", comp.get("title"), slug, result)
-                    except Exception as reg_exc:
-                        log.warning("Auto-registration failed for %s: %s", slug, reg_exc)
-        except Exception as exc:
-            log.debug("Auto-registration check failed: %s", exc)
+        if not args.no_auto_register:
+            try:
+                open_comps = varsity_tools.get_competitions(status="registration_open")
+                open_list = open_comps.get("list", []) if isinstance(open_comps, dict) else []
+                my_regs = varsity_tools.get_my_registrations()
+                registered_ids = set()
+                if isinstance(my_regs, list):
+                    registered_ids = {r.get("competitionId") for r in my_regs}
+                for comp in open_list:
+                    comp_id = comp.get("id")
+                    slug = comp.get("slug")
+                    if comp_id and slug and comp_id not in registered_ids:
+                        try:
+                            result = varsity_tools.register_competition(slug)
+                            log.info("Auto-registered for competition: %s (slug=%s) result=%s", comp.get("title"), slug, result)
+                        except Exception as reg_exc:
+                            log.warning("Auto-registration failed for %s: %s", slug, reg_exc)
+            except Exception as exc:
+                log.debug("Auto-registration check failed: %s", exc)
 
         # --- Pre-check: is the engine account still available? ---
         try:
