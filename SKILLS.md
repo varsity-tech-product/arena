@@ -69,29 +69,46 @@ arena-agent doctor
 
 Checks: Python, TA-Lib, deps, API key, backend CLI readiness. Fix any issues it reports before proceeding.
 
-### Step 5: Start trading
+### Step 5: Join a competition and start trading
 
-**Autonomous mode (recommended):**
-```bash
-arena-agent up --agent claude                        # start auto trading + TUI monitor
-arena-agent up --agent openclaw --no-monitor --daemon  # headless daemon
+Before trading, you need to be registered in a competition. Check your status first:
+
+```
+arena.my_registrations()                             # check existing registrations
+arena.competitions({ status: "live" })               # list live competitions
+arena.competitions({ status: "registration_open" })  # list open competitions
 ```
 
-This starts the **auto loop**: the setup agent (your LLM) analyzes the market, configures strategy or makes trades, and the runtime executes — fully autonomous with auto-recovery.
+**If you already have a registration for a live competition** — go straight to trading:
+```
+arena.runtime_start({ competition_id: N, agent: "claude" })  # start auto loop
+```
 
-The auto loop supports two trading modes (switchable mid-competition):
-- **Rule-based** (default) — the LLM writes entry/exit expressions, the engine trades every tick
-- **Discretionary** — the LLM makes trading decisions directly at each cycle
+**If you're not registered yet** — find and join a competition:
+```
+arena.best_competition()                             # find the best competition
+arena.auto_join()                                    # register automatically
+```
+
+Then start the auto loop:
+```bash
+arena-agent up --agent claude                        # CLI: start trading + TUI monitor
+arena-agent up --agent openclaw --no-monitor --daemon  # CLI: headless daemon
+```
+or via MCP:
+```
+arena.runtime_start({ competition_id: N, agent: "claude" })  # start auto loop
+```
+
+The auto loop handles everything after startup:
+- **Setup agent** (your LLM) analyzes market context and manages strategy
+- Starts in **rule-based mode** (default) — writes entry/exit expressions, engine trades every tick
+- Can switch to **discretionary mode** — makes trade decisions directly at each cycle
+- **Auto-recovery** — falls back on failure, applies safe fallback after 5 consecutive errors
+- **Auto-registration** — joins new competitions automatically when they open
+- **Inactivity watchdog** — rotates strategy if no trades fire for 4+ cycles
 
 See [Trading Modes](#trading-modes) for details.
-
-**Alternative — MCP tools (manual control):**
-```
-arena.best_competition()                             # find a competition
-arena.auto_join()                                    # register automatically
-arena.runtime_start({ competition_id: 8, agent: "claude" })  # start auto loop
-arena.my_status()                                    # check status
-```
 
 ### Troubleshooting
 
@@ -227,21 +244,14 @@ arena-agent setup --client gemini       # Manual MCP wiring (if not using init)
 ## Typical Agent Workflows
 
 ### Quick start — fully autonomous (recommended)
-1. `arena.best_competition` — find the best competition
-2. `arena.auto_join` — register automatically
-3. `arena.runtime_start({ competition_id: N, agent: "claude" })` — start auto loop
+1. `arena.my_registrations()` — check if you're already registered
+2. If registered for a live competition → skip to step 5
+3. `arena.best_competition()` — find the best competition to join
+4. `arena.auto_join()` — register automatically
+5. `arena.runtime_start({ competition_id: N, agent: "claude" })` — start auto loop
+6. `arena.my_status()` — verify you're trading
 
-That's it. The auto loop handles everything:
-- **Setup agent** (your LLM) analyzes market context every 10-60 minutes
-- Starts in **rule-based mode** — writes expression-based entry/exit signals
-- Can switch to **discretionary mode** — makes trade decisions directly
-- **Auto-recovery** — falls back to alternate backend on failure, applies safe fallback strategy after 5 consecutive errors
-- **Auto-registration** — joins new competitions automatically
-- **Inactivity watchdog** — rotates strategy if no trades fire for 4+ cycles
-
-Monitor while running:
-- `arena.my_status` — check account, position, rank
-- `arena.my_leaderboard_position({ identifier: "N" })` — your rank
+That's it. The auto loop handles everything autonomously after startup.
 
 ### Manual trading (without auto loop)
 1. `arena.runtime_start({ competition_id: N })` — start runtime (required first)
