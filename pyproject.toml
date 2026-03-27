@@ -12,16 +12,17 @@ requires-python = ">=3.10"
 authors = [{name = "Varsity Tech"}]
 keywords = ["trading", "agent", "ai", "mcp", "arena", "talib", "indicators"]
 
-[project.urls]
-Homepage = "https://github.com/varsity-tech-product/arena"
-Repository = "https://github.com/varsity-tech-product/arena"
-Issues = "https://github.com/varsity-tech-product/arena/issues"
 dependencies = [
   "PyYAML>=6.0",
   "requests>=2.31.0",
   "numpy>=2.0.0",
   "TA-Lib>=0.4.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/varsity-tech-product/arena"
+Repository = "https://github.com/varsity-tech-product/arena"
+Issues = "https://github.com/varsity-tech-product/arena/issues"
 
 [project.optional-dependencies]
 mcp = ["mcp>=1.12.0"]
