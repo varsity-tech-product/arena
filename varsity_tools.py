@@ -276,20 +276,16 @@ def get_competition_detail(identifier: str | int) -> dict:
     return _unwrap(_get(f"/arena/agent/competitions/{identifier}", auth=False))
 
 
-def get_participants(
-    identifier: str | int, page: int = 1, size: int = 50
-) -> dict:
+def get_eligible_competitions(page: int = 1, size: int = 20) -> dict:
     """
-    List accepted participants for a competition (public).
+    Discover competitions the current agent can register for right now.
+    Excludes invite-only, tier/points-ineligible, and already-registered competitions.
 
     Args:
-        identifier: Competition ID or slug.
         page: Page number. Default 1.
-        size: Items per page (1-100). Default 50.
+        size: Items per page (1-100). Default 20.
     """
-    return _unwrap(
-        _get(f"/arena/agent/competitions/{identifier}/participants", {"page": page, "size": size}, auth=False)
-    )
+    return _unwrap(_get("/arena/agent/me/competitions/eligible", {"page": page, "size": size}))
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -304,7 +300,7 @@ def register_competition(slug: str) -> dict:
     Args:
         slug: Competition slug (string).
     """
-    return _unwrap(_post(f"/arena/agent/competitions/{slug}/register"))
+    return _unwrap(_post(f"/arena/agent/me/competitions/{slug}/register"))
 
 
 def withdraw_competition(slug: str) -> dict:
@@ -324,7 +320,7 @@ def get_my_registration(competition_id: int) -> dict | None:
     Args:
         competition_id: Competition ID.
     """
-    return _unwrap(_get(f"/arena/agent/competitions/{competition_id}/my-registration"))
+    return _unwrap(_get(f"/arena/agent/me/competitions/{competition_id}/my-registration"))
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -742,16 +738,14 @@ TOOLS = [
         },
     },
     {
-        "name": "get_participants",
-        "description": "List accepted participants for a competition (public, paginated).",
+        "name": "get_eligible_competitions",
+        "description": "Discover competitions the agent can register for right now. Excludes ineligible and already-registered.",
         "parameters": {
             "type": "object",
             "properties": {
-                "identifier": {"type": "string", "description": "Competition ID or slug"},
                 "page": {"type": "integer", "default": 1},
-                "size": {"type": "integer", "default": 50},
+                "size": {"type": "integer", "default": 20},
             },
-            "required": ["identifier"],
         },
     },
     # ── Registration ─────────────────────────────────────────────────────
@@ -1012,7 +1006,7 @@ _FUNCTIONS: dict[str, callable] = {
     "get_season_detail": get_season_detail,
     "get_competitions": get_competitions,
     "get_competition_detail": get_competition_detail,
-    "get_participants": get_participants,
+    "get_eligible_competitions": get_eligible_competitions,
     "register_competition": register_competition,
     "withdraw_competition": withdraw_competition,
     "get_my_registration": get_my_registration,
@@ -1073,7 +1067,7 @@ if __name__ == "__main__":
         ("get_season_detail", {"season_id": 1}),
         ("get_competitions", {}),
         ("get_competition_detail", {"identifier": "4"}),
-        ("get_participants", {"identifier": "4"}),
+        ("get_eligible_competitions", {}),
         ("get_my_registrations", {}),
         ("get_my_registration", {"competition_id": 4}),
         ("get_my_history", {}),

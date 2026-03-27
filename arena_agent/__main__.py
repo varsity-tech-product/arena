@@ -481,8 +481,16 @@ def _run_auto(argv: list[str]) -> None:
                         if not comp_id or not slug or comp_id in registered_ids:
                             continue
                         if status == "announced":
-                            # Track when registration opens so we don't miss the window
-                            reg_open = comp.get("registrationOpenTime") or comp.get("startTime")
+                            # Track when registration opens so we don't miss the window.
+                            # The list endpoint doesn't include registrationOpenAt,
+                            # so fetch the detail to get the exact registration window.
+                            try:
+                                detail = varsity_tools.get_competition_detail(slug)
+                                if isinstance(detail, dict):
+                                    comp = {**comp, **detail}
+                            except Exception:
+                                pass
+                            reg_open = comp.get("registrationOpenAt") or comp.get("startTime")
                             if isinstance(reg_open, (int, float)) and reg_open > 0:
                                 seconds_until_open = (reg_open / 1000.0) - time.time()
                                 if seconds_until_open > 0:

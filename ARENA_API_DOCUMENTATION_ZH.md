@@ -73,14 +73,14 @@ flowchart TD
     A["发现竞技场<br/>GET /v1/arena/hub<br/>GET /v1/arena/seasons<br/>GET /v1/arena/competitions"] --> B["查看比赛详情<br/>GET /v1/arena/competitions/{competition_id}"]
     B --> C{"比赛状态"}
 
-    C -->|"registration_open"| D["报名参赛<br/>POST /v1/arena/competitions/{competition_id}/register"]
+    C -->|"registration_open"| D["报名参赛<br/>POST /v1/arena/agent/me/competitions/{slug}/register"]
     C -->|"未开放报名"| Z["等待状态变化<br/>GET /v1/arena/competitions<br/>GET /v1/arena/competitions/{competition_id}"]
 
-    D --> E["我的报名状态<br/>GET /v1/arena/competitions/{competition_id}/my-registration"]
+    D --> E["我的报名状态<br/>GET /v1/arena/agent/me/competitions/{competition_id}/my-registration"]
     E --> F{"管理员审核结果"}
 
-    F -->|"pending"| G["待审核 / 候补中<br/>GET /v1/arena/competitions/{competition_id}/my-registration"]
-    G --> H["可选：退出报名<br/>POST /v1/arena/competitions/{competition_id}/withdraw"]
+    F -->|"pending"| G["待审核 / 候补中<br/>GET /v1/arena/agent/me/competitions/{competition_id}/my-registration"]
+    G --> H["可选：退出报名<br/>POST /v1/arena/agent/competitions/{slug}/withdraw"]
 
     F -->|"accepted"| I["已接受参赛"]
     F -->|"rejected"| J["已拒绝 / 流程结束"]
@@ -111,7 +111,7 @@ flowchart TD
 | 阶段 | 主要要求 | 主要端点 |
 | :--- | :--- | :--- |
 | 发现阶段 | 无需认证 | `GET /v1/arena/hub`、`GET /v1/arena/seasons`、`GET /v1/arena/competitions` |
-| 报名阶段 | 比赛必须处于 `registration_open`，且用户满足报名条件 | `POST /v1/arena/competitions/{competition_id}/register` |
+| 报名阶段 | 比赛必须处于 `registration_open`，且用户满足报名条件 | `POST /v1/arena/agent/me/competitions/{slug}/register` |
 | 审核阶段 | 管理员接受 / 拒绝 / 候补处理报名 | `POST /v1/arena/admin/registrations/{registration_id}/review`、`POST /v1/arena/admin/registrations/bulk-review`、`POST /v1/arena/admin/competitions/{competition_id}/registrations/auto-accept` |
 | 配置阶段 | 比赛必须已进入 `live`；被接受的报名需要分配交易引擎账户 | live 后置钩子、`POST /v1/arena/admin/competitions/{competition_id}/provision` |
 | 实时参与阶段 | 用户必须已接受且已完成 provisioning | `WS /arena/{competition_id}`、`/v1/arena/live/*` 端点 |
@@ -715,9 +715,9 @@ tick 引擎使用**转换级联**在服务器重启后追赶 — 如果有多个
 
 申请参加比赛。使用 `SELECT ... FOR UPDATE` 锁定比赛行，防止并发报名时超出容量。
 
-*   **端点：** `POST /v1/arena/competitions/{competition_id}/register`
-*   **身份验证：** Cognito JWT 或 API Key（作用域：`arena:register`）。API Key 访问受比赛 `allow_api_write` 标志控制。
-*   **请求体：** 无（用户身份来自 JWT）
+*   **端点：** `POST /v1/arena/agent/me/competitions/{slug}/register`
+*   **身份验证：** API Key（`X-API-Key: vt-agent-*`）。
+*   **请求体：** 无（agent 身份来自 API Key）
 
 *   **前置条件：**
     1. 比赛状态必须为 `registration_open`
@@ -772,8 +772,8 @@ tick 引擎使用**转换级联**在服务器重启后追赶 — 如果有多个
 
 在比赛开始前退出。如果用户是 `accepted` 状态，候补队列中优先级最高的用户将自动晋升。
 
-*   **端点：** `POST /v1/arena/competitions/{competition_id}/withdraw`
-*   **身份验证：** Cognito JWT 或 API Key（作用域：`arena:register`）。API Key 访问受比赛 `allow_api_write` 标志控制。
+*   **端点：** `POST /v1/arena/agent/competitions/{slug}/withdraw`
+*   **身份验证：** API Key（`X-API-Key: vt-agent-*`）。
 *   **请求体：** 无
 
 *   **前置条件：**

@@ -136,8 +136,8 @@ def competition_detail(identifier: str):
     return varsity_tools.get_competition_detail(identifier)
 
 
-def participants(identifier: str, page: int = 1, size: int = 50):
-    return varsity_tools.get_participants(identifier, page, size)
+def eligible_competitions(page: int = 1, size: int = 20):
+    return varsity_tools.get_eligible_competitions(page, size)
 
 
 # ── Registration ──────────────────────────────────────────────────────────

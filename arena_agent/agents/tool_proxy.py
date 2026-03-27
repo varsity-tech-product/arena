@@ -53,7 +53,7 @@ TOOL_GROUPS: dict[str, list[str]] = {
         "get_live_info",
     ],
     "competitions": [
-        "get_competitions", "get_competition_detail", "get_participants",
+        "get_competitions", "get_competition_detail", "get_eligible_competitions",
         "register_competition", "withdraw_competition",
         "get_my_registration", "get_my_registrations",
     ],

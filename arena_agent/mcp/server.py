@@ -121,9 +121,9 @@ def create_server(host: str = "127.0.0.1", port: int = 8000):
     def competition_detail(identifier: str) -> dict:
         return tools.competition_detail(identifier)
 
-    @mcp.tool(name="varsity.participants", description="List accepted participants for a competition (public, paginated).")
-    def participants(identifier: str, page: int = 1, size: int = 50) -> dict:
-        return tools.participants(identifier, page, size)
+    @mcp.tool(name="varsity.eligible_competitions", description="Discover competitions the agent can register for right now. Excludes ineligible and already-registered.")
+    def eligible_competitions(page: int = 1, size: int = 20) -> dict:
+        return tools.eligible_competitions(page, size)
 
     # ── Registration ─────────────────────────────────────────────────────
 
