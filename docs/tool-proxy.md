@@ -10,6 +10,8 @@ Agent CLIs handle tools differently:
 - **Codex** supports native MCP via per-run config overrides (`-c mcp_servers...`)
 - **Gemini CLI** and **OpenClaw** still need a prompt-side tool proxy
 
+Observed in the current Arena auto runtime: Claude Code and Codex take the native MCP path; Gemini CLI and OpenClaw take the tool-proxy path.
+
 Most agent frameworks solve this by requiring users to manually configure MCP servers for each backend. Arena solves it automatically.
 
 ## The Solution: Two Paths, Same Tools
@@ -17,20 +19,24 @@ Most agent frameworks solve this by requiring users to manually configure MCP se
 ```mermaid
 graph TD
     A[Setup Agent] --> B{Which backend?}
-    B -->|Claude / Codex| C[Native MCP Path]
-    B -->|Gemini / OpenClaw| D[Tool Proxy Path]
+    B -->|Claude Code| C1[Native MCP Path]
+    B -->|Codex| C2[Native MCP Path]
+    B -->|Gemini CLI| D1[Tool Proxy Path]
+    B -->|OpenClaw| D2[Tool Proxy Path]
 
-    C --> E["claude -p --mcp-config .mcp.json"]
-    C --> E2["codex exec -c mcp_servers.arena..."]
-    E --> F[MCP Server - TypeScript]
+    C1 --> E1["claude -p --mcp-config .mcp.json"]
+    C2 --> E2["codex exec -c mcp_servers.arena..."]
+
+    E1 --> F[MCP Server]
     E2 --> F
-    F --> G[Python Bridge - stdio]
+    F --> G[TypeScript wrapper / Python bridge]
     G --> H["varsity_tools.dispatch()"]
 
-    D --> I["Inject tool catalog into prompt"]
+    D1 --> I["Inject tool catalog into prompt"]
+    D2 --> I
     I --> J[LLM returns tool_calls JSON]
     J --> K["Execute locally via dispatch()"]
-    K --> L[Append results to prompt]
+    K --> L[Append tool results to prompt]
     L --> M{More tool calls?}
     M -->|Yes| J
     M -->|No| N[Final decision]

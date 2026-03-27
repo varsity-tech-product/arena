@@ -43,6 +43,8 @@ No global config files are touched. Your agent's settings stay exactly as they a
 | **OpenClaw** | Tool proxy (automatic) |
 | **Rule-only** | Expression engine, no LLM needed |
 
+Observed in the current Arena auto runtime: Claude Code and Codex use native MCP; Gemini CLI and OpenClaw use the tool proxy.
+
 All backends get the same 42 tools with zero configuration.
 
 ## How It Works

@@ -142,13 +142,29 @@ def _apply_agent_override(config, args: Any):
     return config
 
 
-def _deep_merge(base: dict, overrides: dict) -> dict:
-    """Recursively merge *overrides* into *base* (mutates base)."""
+_REPLACE_DICT_PATHS = {
+    ("strategy", "sizing"),
+    ("strategy", "tpsl"),
+}
+
+
+def _deep_merge(base: dict, overrides: dict, path: tuple[str, ...] = ()) -> dict:
+    """Recursively merge *overrides* into *base* (mutates base).
+
+    Strategy subcomponents such as ``strategy.sizing`` and ``strategy.tpsl``
+    are typeful config blocks. When the setup agent switches one of these
+    components, the new block must replace the old one wholesale; otherwise
+    stale keys from the previous type leak through and get stripped by the
+    strategy builder every cycle.
+    """
     for key, value in overrides.items():
-        if key in base and isinstance(base[key], dict) and isinstance(value, dict):
-            _deep_merge(base[key], value)
+        child_path = path + (str(key),)
+        if child_path in _REPLACE_DICT_PATHS and isinstance(value, dict):
+            base[key] = copy.deepcopy(value)
+        elif key in base and isinstance(base[key], dict) and isinstance(value, dict):
+            _deep_merge(base[key], value, child_path)
         else:
-            base[key] = value
+            base[key] = copy.deepcopy(value)
     return base
 
 
