@@ -32,6 +32,18 @@ _COOLDOWN_MIN_TRADES = 5
 _CATASTROPHIC_DRAWDOWN_PCT = 0.03  # 3%
 
 
+def _normalize_sizing(value: float) -> float:
+    """Normalize sizing_fraction that may be in 0-1 range to 1-100 range.
+
+    LLMs sometimes output 0.9 meaning 90% or 0.8 meaning 80%.
+    If the value is below 1.0, assume it's a decimal fraction and rescale.
+    Clamped to 10-100 (minimum 10% to prevent micro-positions that lose to fees).
+    """
+    if value < 1.0:
+        value = value * 100.0
+    return max(10, min(100, value))
+
+
 def _parse_codex_jsonl(raw: str) -> str | None:
     """Parse Codex ``--json`` JSONL output, log events for auditing.
 
@@ -353,17 +365,18 @@ def _translate_flat_decision(payload: dict[str, Any]) -> dict[str, Any]:
     if tp_pct is not None or sl_pct is not None:
         tpsl: dict[str, Any] = {"type": "fixed_pct"}
         if tp_pct is not None:
-            tp_pct = max(0.1, min(5.0, float(tp_pct)))
+            tp_pct = max(0.5, min(5.0, float(tp_pct)))
             tpsl["tp_pct"] = tp_pct / 100.0
         if sl_pct is not None:
-            sl_pct = max(0.1, min(3.0, float(sl_pct)))
+            sl_pct = max(0.3, min(3.0, float(sl_pct)))
             tpsl["sl_pct"] = sl_pct / 100.0
         overrides.setdefault("strategy", {})["tpsl"] = tpsl
 
     # --- Sizing (percentage-based -> fixed_fraction) ---
+    # LLM outputs e.g. sizing_fraction=80 meaning 80%, but may output 0.8 meaning the same.
     sizing_fraction = payload.get("sizing_fraction")
     if sizing_fraction is not None:
-        sizing_fraction = max(1, min(100, float(sizing_fraction)))
+        sizing_fraction = _normalize_sizing(float(sizing_fraction))
         overrides.setdefault("strategy", {})["sizing"] = {
             "type": "fixed_fraction",
             "fraction": sizing_fraction / 100.0,
@@ -928,11 +941,11 @@ class SetupAgent:
             sl_pct = trade_raw.get("sl_pct")
             sizing_fraction = trade_raw.get("sizing_fraction")
             if tp_pct is not None:
-                tp_pct = max(0.1, min(5.0, float(tp_pct)))
+                tp_pct = max(0.5, min(5.0, float(tp_pct)))
             if sl_pct is not None:
-                sl_pct = max(0.1, min(3.0, float(sl_pct)))
+                sl_pct = max(0.3, min(3.0, float(sl_pct)))
             if sizing_fraction is not None:
-                sizing_fraction = max(1, min(100, float(sizing_fraction)))
+                sizing_fraction = _normalize_sizing(float(sizing_fraction))
             trade = TradeDecision(
                 type=trade_type,
                 tp_pct=tp_pct,
