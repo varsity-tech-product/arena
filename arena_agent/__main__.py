@@ -459,7 +459,29 @@ def _run_auto(argv: list[str]) -> None:
             comp_status = comp_detail.get("status") if isinstance(comp_detail, dict) else None
             monitor.update_auto_loop({"competition_status": comp_status})
             if comp_status in ("completed", "settled", "cancelled", "ended_early"):
-                log.info("Competition %d is %s — stopping auto loop.", args.competition_id, comp_status)
+                log.info("Competition %d is %s — running final auto-register before stopping.", args.competition_id, comp_status)
+                # Run auto-register one last time so we join the next competition
+                if not args.no_auto_register:
+                    try:
+                        my_regs = varsity_tools.get_my_registrations()
+                        registered_ids = set()
+                        if isinstance(my_regs, list):
+                            registered_ids = {r.get("competitionId") for r in my_regs}
+                        for reg_status in ("registration_open",):
+                            comps = varsity_tools.get_competitions(status=reg_status)
+                            comp_list = comps.get("list", []) if isinstance(comps, dict) else []
+                            for comp in comp_list:
+                                cid = comp.get("id")
+                                slug = comp.get("slug")
+                                if not cid or not slug or cid in registered_ids:
+                                    continue
+                                try:
+                                    result = varsity_tools.register_competition(slug)
+                                    log.info("Auto-registered for next competition: %s (slug=%s) result=%s", comp.get("title"), slug, result)
+                                except Exception as reg_exc:
+                                    log.warning("Auto-registration failed for %s: %s", slug, reg_exc)
+                    except Exception as exc:
+                        log.debug("Final auto-registration check failed: %s", exc)
                 break
             # --- Wait for competition to go live ---
             if comp_status and comp_status != "live":
