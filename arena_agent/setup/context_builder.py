@@ -356,6 +356,23 @@ def _summarize_trades(trades: list[dict]) -> dict[str, Any]:
     win_rate = wins / len(pnls) if pnls else 0
     avg_hold_seconds = sum(hold_times) / len(hold_times) if hold_times else 0
 
+    # Per-direction consecutive loss tracking (most recent trades first)
+    def _consecutive_losses_for(direction: str) -> int:
+        count = 0
+        for t in reversed(trades):
+            if not isinstance(t, dict):
+                continue
+            if str(t.get("direction", "")).lower() != direction:
+                continue
+            if t.get("closeTime") is None:
+                continue  # skip open positions
+            pnl_val = float(t.get("pnl") or 0)
+            if pnl_val < 0:
+                count += 1
+            else:
+                break
+        return count
+
     return {
         "trade_count": len(pnls),
         "wins": wins,
@@ -367,6 +384,8 @@ def _summarize_trades(trades: list[dict]) -> dict[str, Any]:
         "avg_hold_seconds": round(avg_hold_seconds, 1),
         "trades_stopped_out": trades_stopped_out,
         "recent_pnls": [round(p, 4) for p in pnls[-10:]],
+        "consecutive_long_losses": _consecutive_losses_for("long"),
+        "consecutive_short_losses": _consecutive_losses_for("short"),
     }
 
 
