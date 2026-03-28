@@ -295,6 +295,67 @@ def _execute_discretionary_trade(
         return None
 
 
+def _find_next_competition(args, log) -> int | None:
+    """Auto-register for open competitions and return the best next competition ID.
+
+    Checks registration_open and live competitions. Registers for any open ones,
+    then returns the ID of the best competition to trade (prefer live > registered).
+    Returns None if nothing is available.
+    """
+    import varsity_tools
+
+    try:
+        my_regs = varsity_tools.get_my_registrations()
+        registered_ids = {}
+        if isinstance(my_regs, list):
+            registered_ids = {r.get("competitionId"): r for r in my_regs}
+
+        # Register for any open competitions we haven't joined
+        for status in ("registration_open",):
+            comps = varsity_tools.get_competitions(status=status)
+            comp_list = comps.get("list", []) if isinstance(comps, dict) else []
+            for comp in comp_list:
+                cid = comp.get("id")
+                slug = comp.get("slug")
+                if not cid or not slug or cid in registered_ids:
+                    continue
+                try:
+                    result = varsity_tools.register_competition(slug)
+                    log.info("Auto-registered for %s (slug=%s) result=%s", comp.get("title"), slug, result)
+                    registered_ids[cid] = result
+                except Exception as reg_exc:
+                    log.warning("Auto-registration failed for %s: %s", slug, reg_exc)
+
+        # Find the best UPCOMING competition to switch to.
+        # Prefer the newest competition (highest startTime) that isn't completed.
+        best_id = None
+        best_start = 0
+        for cid, reg in registered_ids.items():
+            if cid == args.competition_id:
+                continue  # skip the one that just ended
+            reg_status = reg.get("status", "")
+            if reg_status not in ("pending", "accepted"):
+                continue
+            try:
+                detail = varsity_tools.get_competition_detail(str(cid))
+                if not isinstance(detail, dict):
+                    continue
+                comp_status = detail.get("status")
+            except Exception:
+                continue
+            if comp_status in ("completed", "settled", "cancelled", "ended_early"):
+                continue
+            start_time = detail.get("startTime", 0)
+            if start_time > best_start:
+                best_start = start_time
+                best_id = cid
+
+        return best_id
+    except Exception as exc:
+        log.warning("_find_next_competition failed: %s", exc)
+        return None
+
+
 def _run_auto(argv: list[str]) -> None:
     """Setup → control → runtime loop.
 
@@ -459,30 +520,25 @@ def _run_auto(argv: list[str]) -> None:
             comp_status = comp_detail.get("status") if isinstance(comp_detail, dict) else None
             monitor.update_auto_loop({"competition_status": comp_status})
             if comp_status in ("completed", "settled", "cancelled", "ended_early"):
-                log.info("Competition %d is %s — running final auto-register before stopping.", args.competition_id, comp_status)
-                # Run auto-register one last time so we join the next competition
-                if not args.no_auto_register:
-                    try:
-                        my_regs = varsity_tools.get_my_registrations()
-                        registered_ids = set()
-                        if isinstance(my_regs, list):
-                            registered_ids = {r.get("competitionId") for r in my_regs}
-                        for reg_status in ("registration_open",):
-                            comps = varsity_tools.get_competitions(status=reg_status)
-                            comp_list = comps.get("list", []) if isinstance(comps, dict) else []
-                            for comp in comp_list:
-                                cid = comp.get("id")
-                                slug = comp.get("slug")
-                                if not cid or not slug or cid in registered_ids:
-                                    continue
-                                try:
-                                    result = varsity_tools.register_competition(slug)
-                                    log.info("Auto-registered for next competition: %s (slug=%s) result=%s", comp.get("title"), slug, result)
-                                except Exception as reg_exc:
-                                    log.warning("Auto-registration failed for %s: %s", slug, reg_exc)
-                    except Exception as exc:
-                        log.debug("Final auto-registration check failed: %s", exc)
-                break
+                log.info("Competition %d is %s — searching for next competition.", args.competition_id, comp_status)
+                # Find and register for the next competition, then switch to it
+                next_comp_id = _find_next_competition(args, log)
+                if next_comp_id:
+                    log.info("Switching to competition %d.", next_comp_id)
+                    args.competition_id = next_comp_id
+                    config_dict["competition_id"] = next_comp_id
+                    # Reset runtime state for the new competition
+                    consecutive_account_failures = 0
+                    inactive_cycles = 0
+                    inactive_since = None
+                    total_runtime_iterations = 0
+                    consecutive_setup_failures = 0
+                    continue
+                else:
+                    # No competition found — sleep and retry
+                    log.info("No upcoming competition found — sleeping 5 min before retrying.")
+                    _interruptible_sleep(300, lambda: stop_requested)
+                    continue
             # --- Wait for competition to go live ---
             if comp_status and comp_status != "live":
                 start_time = comp_detail.get("startTime") if isinstance(comp_detail, dict) else None
@@ -583,11 +639,21 @@ def _run_auto(argv: list[str]) -> None:
             if isinstance(acct_check, dict) and acct_check.get("code") == 1001:
                 consecutive_account_failures += 1
                 if consecutive_account_failures >= 3:
-                    log.error(
-                        "Engine account not found for %d consecutive checks — agent is not a valid participant. Stopping.",
+                    log.warning(
+                        "Engine account not found for %d consecutive checks — searching for next competition.",
                         consecutive_account_failures,
                     )
-                    break
+                    next_comp_id = _find_next_competition(args, log)
+                    if next_comp_id and next_comp_id != args.competition_id:
+                        log.info("Switching to competition %d.", next_comp_id)
+                        args.competition_id = next_comp_id
+                        config_dict["competition_id"] = next_comp_id
+                        consecutive_account_failures = 0
+                    else:
+                        log.info("No other competition available — sleeping 5 min.")
+                        _interruptible_sleep(300, lambda: stop_requested)
+                        consecutive_account_failures = 0
+                    continue
                 log.warning("Engine account not found (attempt %d/3) — retrying next cycle.", consecutive_account_failures)
                 _interruptible_sleep(error_backoff, lambda: stop_requested)
                 continue
