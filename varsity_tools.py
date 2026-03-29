@@ -170,6 +170,128 @@ def get_market_info(symbol: str) -> dict:
     return _unwrap(_get(f"/market/info/{symbol}", auth=False))
 
 
+def query_indicators(
+    indicators: list[str],
+    symbol: str = "BTCUSDT",
+    interval: str = "1m",
+    size: int = 120,
+) -> dict:
+    """
+    Compute TA-Lib indicators from recent klines and return current value + recent range.
+
+    Use this to explore indicator values before deciding which to use in your strategy.
+    Returns each indicator's current value, min, and max over the requested window.
+
+    Args:
+        indicators: List of indicator names in NAME_PERIOD format, e.g. ["RSI_14", "CCI_14", "BBANDS_20", "ADX_14", "MACD"].
+        symbol: Trading pair. Default "BTCUSDT".
+        interval: Candle interval. Default "1m".
+        size: Number of candles to compute over (30-500). Default 120.
+    """
+    try:
+        from arena_agent.core.models import Candle, FeatureSpec
+        from arena_agent.features.engine import FeatureEngine
+        from arena_agent.features.registry import feature_key
+    except ImportError:
+        return {"error": "TA-Lib or arena_agent not available"}
+
+    # Parse indicator specs from NAME_PERIOD strings
+    specs: list[FeatureSpec] = []
+    for ind_str in indicators:
+        parts = ind_str.strip().split("_")
+        name = parts[0].upper()
+        params = {}
+        if len(parts) > 1:
+            try:
+                params["timeperiod"] = int(parts[-1])
+            except ValueError:
+                pass
+        specs.append(FeatureSpec(indicator=name, params=params))
+
+    if not specs:
+        return {"error": "No valid indicators provided"}
+
+    # Fetch klines
+    size = max(30, min(500, size))
+    raw_response = get_klines(symbol, interval, size)
+    # get_klines returns {"symbol": ..., "interval": ..., "klines": [...]}
+    if isinstance(raw_response, dict):
+        raw_klines = raw_response.get("klines", [])
+    elif isinstance(raw_response, list):
+        raw_klines = raw_response
+    else:
+        raw_klines = []
+    if not raw_klines:
+        return {"error": "Failed to fetch klines"}
+
+    # Parse into Candle objects
+    candles: list[Candle] = []
+    for k in raw_klines:
+        if isinstance(k, dict):
+            candles.append(Candle(
+                open_time=int(k.get("openTime", 0)),
+                close_time=int(k.get("closeTime", 0)),
+                open=float(k.get("open", 0)),
+                high=float(k.get("high", 0)),
+                low=float(k.get("low", 0)),
+                close=float(k.get("close", 0)),
+                volume=float(k.get("volume", 0)),
+                is_final=bool(k.get("isFinal", True)),
+            ))
+
+    if len(candles) < 10:
+        return {"error": f"Not enough candles: {len(candles)}"}
+
+    # Compute indicators
+    engine = FeatureEngine(specs)
+    signal_state = engine.compute(candles)
+
+    # Build result with rolling min/max over last 30 values
+    # Recompute over a sliding window by computing for all candles, then taking ranges
+    window = min(30, len(candles))
+    result: dict[str, Any] = {}
+    for k, v in signal_state.values.items():
+        if isinstance(v, (int, float)) and not (isinstance(v, float) and (v != v)):  # skip NaN
+            result[k] = {"current": round(float(v), 4)}
+        elif isinstance(v, dict):
+            for sub_k, sub_v in v.items():
+                if isinstance(sub_v, (int, float)) and not (isinstance(sub_v, float) and (sub_v != sub_v)):
+                    result[f"{k}_{sub_k}"] = {"current": round(float(sub_v), 4)}
+
+    # Compute min/max by running the engine on sliding candle windows
+    history: dict[str, list[float]] = {k: [] for k in result}
+    for i in range(window):
+        end_idx = len(candles) - window + i + 1
+        if end_idx < 10:
+            continue
+        sub_signal = engine.compute(candles[:end_idx])
+        # Flatten sub_signal values the same way we built result keys
+        flat: dict[str, float] = {}
+        for sk, sv in sub_signal.values.items():
+            if isinstance(sv, (int, float)) and sv == sv:
+                flat[sk] = float(sv)
+            elif isinstance(sv, dict):
+                for sub_k, sub_v in sv.items():
+                    if isinstance(sub_v, (int, float)) and sub_v == sub_v:
+                        flat[f"{sk}_{sub_k}"] = float(sub_v)
+        for k in history:
+            if k in flat:
+                history[k].append(flat[k])
+
+    for k, vals in history.items():
+        if vals and k in result:
+            result[k]["min"] = round(min(vals), 4)
+            result[k]["max"] = round(max(vals), 4)
+
+    return {
+        "symbol": symbol,
+        "interval": interval,
+        "candles_used": len(candles),
+        "window": window,
+        "indicators": result,
+    }
+
+
 # ═════════════════════════════════════════════════════════════════════════════
 #  3. AGENT IDENTITY
 # ═════════════════════════════════════════════════════════════════════════════
@@ -636,6 +758,24 @@ TOOLS = [
         },
     },
     {
+        "name": "query_indicators",
+        "description": "Compute TA-Lib indicators from recent klines. Returns current value + min/max range. Use this to explore indicators before choosing a strategy.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "indicators": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Indicator names in NAME_PERIOD format, e.g. ['RSI_14', 'CCI_14', 'BBANDS_20', 'ADX_14', 'MACD']",
+                },
+                "symbol": {"type": "string", "default": "BTCUSDT"},
+                "interval": {"type": "string", "default": "1m"},
+                "size": {"type": "integer", "default": 120, "description": "Number of candles (30-500)"},
+            },
+            "required": ["indicators"],
+        },
+    },
+    {
         "name": "get_market_info",
         "description": "Get full market info for a symbol: last price, mark price, index price, funding rate, 24h volume.",
         "parameters": {
@@ -997,6 +1137,7 @@ _FUNCTIONS: dict[str, callable] = {
     "get_orderbook": get_orderbook,
     "get_klines": get_klines,
     "get_market_info": get_market_info,
+    "query_indicators": query_indicators,
     "get_agent_info": get_agent_info,
     "update_agent": update_agent,
     "deactivate_agent": deactivate_agent,

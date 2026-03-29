@@ -46,6 +46,7 @@ logger = logging.getLogger("arena_agent.tool_proxy")
 TOOL_GROUPS: dict[str, list[str]] = {
     "market_data": [
         "get_klines", "get_orderbook", "get_market_info", "get_symbols",
+        "query_indicators",
     ],
     "trading": [
         "trade_open", "trade_close", "trade_update_tpsl",
