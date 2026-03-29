@@ -541,37 +541,12 @@ def _run_auto(argv: list[str]) -> None:
                     log.info("No upcoming competition found — sleeping 5 min before retrying.")
                     _interruptible_sleep(300, lambda: stop_requested)
                     continue
-            # --- Wait for competition to go live ---
-            if comp_status and comp_status != "live":
-                start_time = comp_detail.get("startTime") if isinstance(comp_detail, dict) else None
-                if isinstance(start_time, (int, float)) and start_time > 0:
-                    seconds_until_live = (start_time / 1000.0) - time.time()
-                    if seconds_until_live > 0:
-                        log.info(
-                            "Competition %d is '%s' — goes live in %.1f min. Sleeping until then.",
-                            args.competition_id, comp_status, seconds_until_live / 60,
-                        )
-                        monitor.update_auto_loop({
-                            "phase": "waiting_for_live",
-                            "phase_started_at": time.time(),
-                            "live_at": start_time,
-                        })
-                        # Sleep until start time + small buffer, wake early to re-check
-                        wait = min(seconds_until_live + 5, 300)
-                        _interruptible_sleep(wait, lambda: stop_requested)
-                        continue
-                # No start time or already past — short poll
-                log.info(
-                    "Competition %d is '%s' (not live yet) — rechecking in 30s.",
-                    args.competition_id, comp_status,
-                )
-                monitor.update_auto_loop({"phase": "waiting_for_live", "phase_started_at": time.time()})
-                _interruptible_sleep(30, lambda: stop_requested)
-                continue
         except Exception as exc:
             log.warning("Competition status check failed: %s — continuing", exc)
 
         # --- Auto-register for open competitions + track announced ones ---
+        # Runs BEFORE the "wait for live" gate so the agent registers while
+        # the current competition is still in registration_open.
         monitor.update_auto_loop({"phase": "registering", "phase_started_at": time.time()})
         if not args.no_auto_register:
             try:
@@ -633,6 +608,34 @@ def _run_auto(argv: list[str]) -> None:
                             log.warning("Auto-registration failed for %s: %s", slug, reg_exc)
             except Exception as exc:
                 log.debug("Auto-registration check failed: %s", exc)
+
+        # --- Wait for competition to go live ---
+        if comp_status and comp_status != "live":
+            start_time = comp_detail.get("startTime") if isinstance(comp_detail, dict) else None
+            if isinstance(start_time, (int, float)) and start_time > 0:
+                seconds_until_live = (start_time / 1000.0) - time.time()
+                if seconds_until_live > 0:
+                    log.info(
+                        "Competition %d is '%s' — goes live in %.1f min. Sleeping until then.",
+                        args.competition_id, comp_status, seconds_until_live / 60,
+                    )
+                    monitor.update_auto_loop({
+                        "phase": "waiting_for_live",
+                        "phase_started_at": time.time(),
+                        "live_at": start_time,
+                    })
+                    # Sleep until start time + small buffer, wake early to re-check
+                    wait = min(seconds_until_live + 5, 300)
+                    _interruptible_sleep(wait, lambda: stop_requested)
+                    continue
+            # No start time or already past — short poll
+            log.info(
+                "Competition %d is '%s' (not live yet) — rechecking in 30s.",
+                args.competition_id, comp_status,
+            )
+            monitor.update_auto_loop({"phase": "waiting_for_live", "phase_started_at": time.time()})
+            _interruptible_sleep(30, lambda: stop_requested)
+            continue
 
         # --- Pre-check: is the engine account still available? ---
         monitor.update_auto_loop({"phase": "account_check", "phase_started_at": time.time()})
