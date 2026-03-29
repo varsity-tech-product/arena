@@ -528,6 +528,8 @@ def _run_auto(argv: list[str]) -> None:
                     args.competition_id = next_comp_id
                     config_dict["competition_id"] = next_comp_id
                     # Reset runtime state for the new competition
+                    config_dict.pop("_last_indicator_values", None)
+                    config_dict.pop("_indicator_ranges", None)
                     consecutive_account_failures = 0
                     inactive_cycles = 0
                     inactive_since = None
@@ -911,11 +913,14 @@ def _run_auto(argv: list[str]) -> None:
                         config_dict["_expression_errors"] = [
                             {"expression": k, "error": v} for k, v in expr_errors.items()
                         ]
-                    # Last indicator values → LLM can calibrate thresholds
+                    # Last indicator values + ranges → LLM can calibrate thresholds
                     sb = getattr(runtime, "state_builder", None)
                     last_signal = getattr(sb, "_last_signal_values", None)
                     if isinstance(last_signal, dict) and last_signal:
                         config_dict["_last_indicator_values"] = last_signal
+                    indicator_ranges = getattr(sb, "_indicator_ranges", None)
+                    if isinstance(indicator_ranges, dict) and indicator_ranges:
+                        config_dict["_indicator_ranges"] = indicator_ranges
 
             # --- Inactivity watchdog ---
             if report is not None:

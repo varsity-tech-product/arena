@@ -165,9 +165,13 @@ def build_setup_context(
         "tick_interval_seconds": config.get("tick_interval_seconds", 60),
     }
 
-    # Current indicator values — so the LLM can calibrate expression thresholds
+    # Current indicator values with observed min/max ranges — so the LLM can
+    # calibrate expression thresholds to actual market conditions, not textbook levels.
+    indicator_ranges = config.get("_indicator_ranges")
     last_indicator_values = config.get("_last_indicator_values")
-    if isinstance(last_indicator_values, dict) and last_indicator_values:
+    if isinstance(indicator_ranges, dict) and indicator_ranges:
+        context["current_indicator_values"] = indicator_ranges
+    elif isinstance(last_indicator_values, dict) and last_indicator_values:
         context["current_indicator_values"] = last_indicator_values
 
     # Expression validation errors from previous cycle — so the LLM can fix them

@@ -224,6 +224,6 @@ Switch back to rule-based:
 
 The Current State section already contains recent price, trend, performance, and account data. Only call tools if you need deeper analysis (e.g. orderbook depth, detailed trade list). Kline requests are capped to 20 candles.
 
-If `current_indicator_values` is present in the context, use those values to calibrate your expression thresholds to current market conditions.
+If `current_indicator_values` is present in the context, it contains each indicator's **current value, observed min, and observed max** over recent runtime iterations (e.g. `"rsi_14": {"current": 48.2, "min": 41.5, "max": 59.3}`). **You MUST use these ranges to set realistic entry/exit thresholds.** If RSI has ranged 41-59, do NOT set entry_long to `rsi_14 < 30` — it will never fire. Instead use thresholds within or near the observed range (e.g. `rsi_14 < 42`). Textbook levels are meaningless if the market never reaches them.
 
 $memory_context

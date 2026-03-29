@@ -31,6 +31,9 @@ class StateBuilder:
             resolved_specs,
             minimum=config.kline_limit,
         )
+        # Rolling min/max tracker for indicator values across iterations
+        self._indicator_min: dict[str, float] = {}
+        self._indicator_max: dict[str, float] = {}
 
     def add_indicators(self, raw_specs: list[dict]) -> int:
         """Merge dynamic indicator specs into the feature engine.
@@ -80,11 +83,29 @@ class StateBuilder:
         candles = self._parse_candles(klines_payload)
         market_snapshot = self._build_market_snapshot(market_info, orderbook, candles)
         signal_state = self.feature_engine.compute(candles)
-        # Cache latest indicator values for setup agent context feedback
+        # Cache latest indicator values and track min/max ranges for setup agent
         if hasattr(signal_state, "values") and isinstance(signal_state.values, dict):
-            self._last_signal_values = {
-                k: round(v, 4) if isinstance(v, float) else v
-                for k, v in signal_state.values.items()
+            self._last_signal_values = {}
+            for k, v in signal_state.values.items():
+                if isinstance(v, (int, float)):
+                    val = round(float(v), 4)
+                    self._last_signal_values[k] = val
+                    # Update rolling min/max
+                    if k not in self._indicator_min or val < self._indicator_min[k]:
+                        self._indicator_min[k] = val
+                    if k not in self._indicator_max or val > self._indicator_max[k]:
+                        self._indicator_max[k] = val
+                else:
+                    self._last_signal_values[k] = v
+            # Build ranges dict: { indicator: { current, min, max } }
+            self._indicator_ranges = {
+                k: {
+                    "current": self._last_signal_values.get(k),
+                    "min": round(self._indicator_min.get(k, 0), 4),
+                    "max": round(self._indicator_max.get(k, 0), 4),
+                }
+                for k in self._last_signal_values
+                if isinstance(self._last_signal_values.get(k), (int, float))
             }
         account_snapshot = self._build_account_snapshot(account, trades)
         position_snapshot = self._build_position_snapshot(position, trades, account_snapshot)
