@@ -11,117 +11,44 @@ The agent runs as a persistent daemon that cycles through competitions. Each cyc
 1. **Setup phase** — LLM analyzes market, explores indicators, configures strategy
 2. **Runtime phase** — Expression engine evaluates strategy every tick, executes trades
 
-### Complete Agent Lifecycle
+### Setup Phase — LLM Decision Flow
 
 ```mermaid
 flowchart TD
-    START([Daemon Start]) --> COMP_CHECK{Competition<br/>Status?}
+    CTX[Build Context<br/>market + account + position<br/>+ indicator ranges + errors] --> PROMPT[Render Prompt<br/>+ tool catalog]
+    PROMPT --> LLM_CALL[LLM Call]
 
-    COMP_CHECK -->|live| SEED{First cycle?}
-    COMP_CHECK -->|completed / cancelled| FIND_NEXT[Find Next Competition<br/>_find_next_competition]
-    COMP_CHECK -->|announced / reg_open / reg_closed| WAIT_LIVE[Sleep until startTime<br/>re-check every 5 min]
-    WAIT_LIVE --> COMP_CHECK
+    LLM_CALL --> TOOL_CHECK{tool_calls<br/>in response?}
+    TOOL_CHECK -->|yes| EXEC_TOOLS[Execute Tools<br/>query_indicators / get_klines / etc.]
+    EXEC_TOOLS --> APPEND[Append results to prompt]
+    APPEND --> LLM_CALL
 
-    FIND_NEXT --> FOUND{Found?}
-    FOUND -->|yes| SWITCH[Switch competition_id<br/>Reset indicators & state]
-    FOUND -->|no| SLEEP_5M[Sleep 5 min]
-    SLEEP_5M --> COMP_CHECK
-    SWITCH --> COMP_CHECK
+    TOOL_CHECK -->|no| PARSE[Parse Decision<br/>normalize sizing / TP / SL]
+    PARSE --> COOLDOWN{Strategy<br/>cooldown<br/>active?}
+    COOLDOWN -->|yes, action=update| DEMOTE[Demote to hold]
+    COOLDOWN -->|no| ACTION
+    DEMOTE --> ACTION
 
-    SEED -->|yes| SEED_IND[Seed indicator ranges<br/>from historical klines]
-    SEED -->|no| SKIP_SEED[Use existing ranges]
-    SEED_IND --> SETUP
-    SKIP_SEED --> SETUP
+    ACTION{Action?}
 
-    subgraph SETUP [Setup Phase — LLM Decision]
-        CTX[Build Context<br/>market + account + position<br/>+ indicator ranges + errors] --> PROMPT[Render Prompt<br/>+ tool catalog]
-        PROMPT --> LLM_CALL[LLM Call]
-
-        LLM_CALL --> TOOL_CHECK{tool_calls<br/>in response?}
-        TOOL_CHECK -->|yes| EXEC_TOOLS[Execute Tools<br/>query_indicators / get_klines / etc.]
-        EXEC_TOOLS --> APPEND[Append results to prompt]
-        APPEND --> LLM_CALL
-
-        TOOL_CHECK -->|no| PARSE[Parse Decision<br/>normalize sizing / TP / SL]
-        PARSE --> COOLDOWN{Strategy<br/>cooldown<br/>active?}
-        COOLDOWN -->|yes, action=update| DEMOTE[Demote to hold]
-        COOLDOWN -->|no| APPLY_DECISION
-        DEMOTE --> APPLY_DECISION
-    end
-
-    APPLY_DECISION{Action?}
-
-    APPLY_DECISION -->|update| MERGE[Deep-merge overrides<br/>into config_dict]
-    APPLY_DECISION -->|hold| MODE_CHECK
-    APPLY_DECISION -->|trade| DISC_GUARD
+    ACTION -->|update| MERGE[Deep-merge overrides<br/>into config_dict]
+    ACTION -->|hold| MODE_CHECK
+    ACTION -->|trade| DISC_GUARD
 
     MERGE --> MODE_CHECK{Mode?}
 
-    subgraph DISC_FLOW [Discretionary Trade Flow]
-        DISC_GUARD{Direction<br/>guardrail?}
-        DISC_GUARD -->|blocked: 3+ losses| DEMOTE_HOLD[Demote to hold]
-        DISC_GUARD -->|ok| DISC_EXEC[Execute Trade<br/>open / close / tpsl]
-        DISC_EXEC --> DISC_RESULT[Record transition]
-        DEMOTE_HOLD --> DISC_DONE
-        DISC_RESULT --> DISC_DONE[Done]
-    end
+    DISC_GUARD{Direction<br/>guardrail<br/>3+ losses?}
+    DISC_GUARD -->|blocked| DEMOTE_HOLD[Demote to hold]
+    DISC_GUARD -->|ok| DISC_EXEC[Execute Trade<br/>open / close / tpsl]
+    DISC_EXEC --> MODE_CHECK
+    DEMOTE_HOLD --> MODE_CHECK
 
-    DISC_DONE --> MODE_CHECK
+    MODE_CHECK -->|rule_based| RUNTIME[Runtime Phase<br/>expression engine evaluates<br/>each tick for 10-20 min]
+    MODE_CHECK -->|discretionary| DISC_SLEEP[Sleep next_check_seconds<br/>min 60s trade / 600s hold]
 
-    MODE_CHECK -->|rule_based| RUNTIME
-    MODE_CHECK -->|discretionary| DISC_SLEEP[Sleep next_check_seconds<br/>min 60s active / 600s hold]
-
-    subgraph RUNTIME [Runtime Phase — Expression Engine]
-        BUILD_STATE[Build State<br/>fetch market + compute indicators<br/>FeatureEngine TA-Lib] --> VALIDATE{First tick?}
-        VALIDATE -->|yes| NS_CHECK[Validate expressions<br/>vs namespace keys]
-        VALIDATE -->|no| EVAL
-        NS_CHECK --> NS_OK{Valid?}
-        NS_OK -->|undefined vars / overlap| HOLD_ERR[HOLD + store errors<br/>for LLM feedback]
-        NS_OK -->|ok| EVAL
-
-        EVAL{Has position?}
-        EVAL -->|yes| EXIT_CHECK[Eval exit expression]
-        EVAL -->|no| COOLDOWN_CHK{Reentry<br/>cooldown?}
-
-        EXIT_CHECK -->|true| CLOSE[CLOSE_POSITION<br/>stamp reentry cooldown]
-        EXIT_CHECK -->|false| HOLD_POS[HOLD]
-
-        COOLDOWN_CHK -->|active| HOLD_CD["HOLD<br/>(cooldown: Ns remaining)"]
-        COOLDOWN_CHK -->|expired| ENTRY_CHECK[Eval entry_long / entry_short]
-
-        ENTRY_CHECK -->|entry_long true| OPEN_LONG[OPEN_LONG]
-        ENTRY_CHECK -->|entry_short true| OPEN_SHORT[OPEN_SHORT]
-        ENTRY_CHECK -->|neither| HOLD_NONE[HOLD]
-
-        CLOSE --> EXECUTE
-        OPEN_LONG --> EXECUTE
-        OPEN_SHORT --> EXECUTE
-        HOLD_POS --> NEXT_TICK
-        HOLD_CD --> NEXT_TICK
-        HOLD_NONE --> NEXT_TICK
-        HOLD_ERR --> NEXT_TICK
-
-        EXECUTE[OrderExecutor<br/>call Arena API] --> TRANSITION[Record transition<br/>update indicator ranges]
-        TRANSITION --> NEXT_TICK{More<br/>iterations?}
-        NEXT_TICK -->|yes| SLEEP_TICK[Sleep 60s] --> BUILD_STATE
-        NEXT_TICK -->|no| RUNTIME_DONE[Runtime complete]
-    end
-
-    RUNTIME_DONE --> FEEDBACK
-
-    subgraph FEEDBACK [Feedback Loop]
-        FB_ERRORS[Extract expression errors<br/>_validation_errors] --> FB_RANGES[Extract indicator ranges<br/>rolling 30-tick min/max/current]
-        FB_RANGES --> FB_STORE[Store in config_dict<br/>for next setup cycle]
-    end
-
-    DISC_SLEEP --> INACTIVITY
-    FB_STORE --> INACTIVITY
-
-    INACTIVITY{Inactive<br/>4+ cycles?}
-    INACTIVITY -->|yes| ALERT[Set inactivity_alert<br/>in next context]
-    INACTIVITY -->|no| NEXT_CYCLE
-    ALERT --> NEXT_CYCLE[Sleep next_check_seconds]
-    NEXT_CYCLE --> COMP_CHECK
+    RUNTIME --> FEEDBACK[Feedback Loop<br/>expression errors + indicator ranges<br/>stored for next cycle]
+    DISC_SLEEP --> NEXT[Next Setup Cycle]
+    FEEDBACK --> NEXT
 ```
 
 ### query_indicators Tool Flow
