@@ -664,6 +664,24 @@ def _run_auto(argv: list[str]) -> None:
         except Exception as exc:
             log.warning("Account pre-check failed: %s — continuing", exc)
 
+        # --- Seed indicator ranges if not yet available (first cycle) ---
+        if not config_dict.get("_indicator_ranges"):
+            try:
+                from arena_agent.core.state_builder import StateBuilder
+                from arena_agent.core.environment_adapter import EnvironmentAdapter
+                seed_adapter = EnvironmentAdapter()
+                seed_config = load_runtime_config(Path(args.config))
+                seed_config = replace(seed_config, competition_id=args.competition_id)
+                seed_builder = StateBuilder(seed_adapter, seed_config)
+                seed_state = seed_builder.build()
+                indicator_ranges = getattr(seed_builder, "_indicator_ranges", None)
+                if isinstance(indicator_ranges, dict) and indicator_ranges:
+                    config_dict["_indicator_ranges"] = indicator_ranges
+                    config_dict["_last_indicator_values"] = getattr(seed_builder, "_last_signal_values", {})
+                    log.info("Seeded indicator ranges from historical klines: %d indicators", len(indicator_ranges))
+            except Exception as exc:
+                log.debug("Failed to seed indicator ranges: %s", exc)
+
         try:
             # --- Setup phase ---
             monitor.update_auto_loop({"phase": "setup", "phase_started_at": time.time()})
