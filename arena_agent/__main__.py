@@ -738,6 +738,29 @@ def _run_auto(argv: list[str]) -> None:
                     config_dict["mode"] = decision.mode
                     monitor.update_auto_loop({"mode": decision.mode})
 
+                # --- Validate action against mode ---
+                current_mode = config_dict.get("mode", "rule_based")
+                if current_mode == "rule_based" and decision.action == "trade":
+                    log.warning("Action 'trade' invalid in rule_based mode — demoting to hold")
+                    decision = type(decision)(
+                        action="hold", overrides=None,
+                        reason="invalid: trade action in rule_based mode",
+                        restart_runtime=False,
+                        next_check_seconds=decision.next_check_seconds,
+                        chat_message=decision.chat_message,
+                        mode=decision.mode,
+                    )
+                elif current_mode == "discretionary" and decision.action == "update":
+                    log.warning("Action 'update' invalid in discretionary mode — demoting to hold")
+                    decision = type(decision)(
+                        action="hold", overrides=None,
+                        reason="invalid: update action in discretionary mode",
+                        restart_runtime=False,
+                        next_check_seconds=decision.next_check_seconds,
+                        chat_message=decision.chat_message,
+                        mode=decision.mode,
+                    )
+
                 # --- Execute discretionary trade ---
                 if decision.action == "trade" and decision.trade:
                     trade_result = _execute_discretionary_trade(
