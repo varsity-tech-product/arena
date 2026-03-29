@@ -58,6 +58,15 @@ def _validate_expression(expr: str) -> str | None:
     return None
 
 
+def _extract_variables(expr: str) -> set[str]:
+    """Extract all variable names referenced in an expression."""
+    try:
+        tree = ast.parse(expr, mode="eval")
+    except SyntaxError:
+        return set()
+    return {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
+
+
 def _build_namespace(state: AgentState) -> dict[str, Any]:
     """Build the expression evaluation namespace from state.
 
@@ -164,13 +173,57 @@ class ExpressionPolicy(Policy):
         ns = _build_namespace(state)
         has_position = state.position is not None
 
-        # Log namespace keys on first call for debugging
-        if not hasattr(self, "_ns_logged"):
+        # On first call, validate expression variables against actual namespace
+        if not hasattr(self, "_ns_validated"):
+            self._ns_validated = True
             self._logger.info(
                 "Expression namespace keys: %s",
                 sorted(ns.keys()),
             )
-            self._ns_logged = True
+            ns_keys = set(ns.keys())
+            for label, expr in [
+                ("entry_long", self.entry_long),
+                ("entry_short", self.entry_short),
+                ("exit", self.exit_expr),
+            ]:
+                vars_used = _extract_variables(expr)
+                undefined = vars_used - ns_keys
+                if undefined:
+                    available = sorted(ns_keys)
+                    error = (
+                        f"undefined variables: {sorted(undefined)}. "
+                        f"Available: {available}. "
+                        f"Fix: use the correct indicator key from the available list."
+                    )
+                    self._validation_errors[label] = error
+                    self._logger.warning(
+                        "Expression '%s' references undefined variables %s — will HOLD. Available: %s",
+                        label, sorted(undefined), available,
+                    )
+            # Check exit/entry overlap — if entry and exit both fire on the SAME
+            # namespace values, positions will close immediately after opening.
+            if not self._validation_errors:
+                if _safe_eval(self.entry_short, ns) and _safe_eval(self.exit_expr, ns):
+                    self._validation_errors["exit_overlap_short"] = (
+                        f"exit '{self.exit_expr}' is TRUE right now while entry_short '{self.entry_short}' is also TRUE. "
+                        f"Short positions will close immediately after opening. "
+                        f"Fix: exit threshold must be between entry_long and entry_short thresholds "
+                        f"(e.g. if entry_short is rsi > 60, exit should be rsi < 50, not rsi > 50)."
+                    )
+                    self._logger.warning("Exit/entry_short overlap — both true at current values, shorts will close immediately")
+                if _safe_eval(self.entry_long, ns) and _safe_eval(self.exit_expr, ns):
+                    self._validation_errors["exit_overlap_long"] = (
+                        f"exit '{self.exit_expr}' is TRUE right now while entry_long '{self.entry_long}' is also TRUE. "
+                        f"Long positions will close immediately after opening. "
+                        f"Fix: exit threshold must be between entry_long and entry_short thresholds."
+                    )
+                    self._logger.warning("Exit/entry_long overlap — both true at current values, longs will close immediately")
+
+            if self._validation_errors:
+                return Action.hold(
+                    reason=f"expression_errors: {self._validation_errors}",
+                    error=str(self._validation_errors),
+                )
 
         if has_position:
             # Check exit condition
