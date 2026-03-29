@@ -576,7 +576,7 @@ The `data` field contains the actual payload. MCP tools automatically unwrap `da
 
 ### Trading Constraints
 
-- **Fee rate**: ~0.05% per side (~0.1% round-trip). TP must exceed fees to be profitable.
+- **Fee rate**: ~0.04% per side (~0.08% round-trip). TP must exceed fees to be profitable.
 - **Max trades**: Set per competition (typically 40-1000). Check via `live_account.maxTrades`.
 - **Position limit**: One position at a time per competition.
 - **Close-only mode**: Some competitions enter close-only near end time — new positions blocked.
