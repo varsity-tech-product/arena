@@ -31,9 +31,9 @@ class StateBuilder:
             resolved_specs,
             minimum=config.kline_limit,
         )
-        # Rolling min/max tracker for indicator values across iterations
-        self._indicator_min: dict[str, float] = {}
-        self._indicator_max: dict[str, float] = {}
+        # Rolling window of recent indicator values (last 30 iterations ≈ 30 min at 1m ticks)
+        self._indicator_history: dict[str, list[float]] = {}
+        self._INDICATOR_WINDOW = 30
 
     def add_indicators(self, raw_specs: list[dict]) -> int:
         """Merge dynamic indicator specs into the feature engine.
@@ -83,30 +83,29 @@ class StateBuilder:
         candles = self._parse_candles(klines_payload)
         market_snapshot = self._build_market_snapshot(market_info, orderbook, candles)
         signal_state = self.feature_engine.compute(candles)
-        # Cache latest indicator values and track min/max ranges for setup agent
+        # Cache latest indicator values and track rolling min/max for setup agent
         if hasattr(signal_state, "values") and isinstance(signal_state.values, dict):
             self._last_signal_values = {}
             for k, v in signal_state.values.items():
                 if isinstance(v, (int, float)):
                     val = round(float(v), 4)
                     self._last_signal_values[k] = val
-                    # Update rolling min/max
-                    if k not in self._indicator_min or val < self._indicator_min[k]:
-                        self._indicator_min[k] = val
-                    if k not in self._indicator_max or val > self._indicator_max[k]:
-                        self._indicator_max[k] = val
+                    # Append to rolling window
+                    hist = self._indicator_history.setdefault(k, [])
+                    hist.append(val)
+                    if len(hist) > self._INDICATOR_WINDOW:
+                        hist.pop(0)
                 else:
                     self._last_signal_values[k] = v
-            # Build ranges dict: { indicator: { current, min, max } }
-            self._indicator_ranges = {
-                k: {
-                    "current": self._last_signal_values.get(k),
-                    "min": round(self._indicator_min.get(k, 0), 4),
-                    "max": round(self._indicator_max.get(k, 0), 4),
-                }
-                for k in self._last_signal_values
-                if isinstance(self._last_signal_values.get(k), (int, float))
-            }
+            # Build ranges from rolling window
+            self._indicator_ranges = {}
+            for k, hist in self._indicator_history.items():
+                if hist:
+                    self._indicator_ranges[k] = {
+                        "current": hist[-1],
+                        "min": round(min(hist), 4),
+                        "max": round(max(hist), 4),
+                    }
         account_snapshot = self._build_account_snapshot(account, trades)
         position_snapshot = self._build_position_snapshot(position, trades, account_snapshot)
         competition_snapshot = self._build_competition_snapshot(competition, account_snapshot, trades)
