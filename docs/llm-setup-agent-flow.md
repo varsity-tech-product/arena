@@ -36,7 +36,7 @@ flowchart TD
     ACTION -->|hold| MODE_CHECK
 
     ACTION -->|trade| DISC_EXEC[Execute Trade<br/>open / close / tpsl]
-    DISC_EXEC --> MODE_CHECK
+    DISC_EXEC --> DISC_SLEEP
 
     MODE_CHECK{Mode?}
 
