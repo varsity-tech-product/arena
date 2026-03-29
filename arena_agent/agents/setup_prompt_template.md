@@ -222,18 +222,18 @@ Switch back to rule-based:
 
 ## Tools
 
-The Current State section already contains recent price, trend, performance, and account data. Only call tools if you need deeper analysis (e.g. orderbook depth, detailed trade list). Kline requests are capped to 20 candles.
+The Current State section already contains recent price, trend, performance, and account data. Kline requests are capped to 20 candles.
 
-**BEFORE choosing a strategy, call `query_indicators` to explore indicator values:**
+**IMPORTANT — Your FIRST action must be to call `query_indicators`:**
 
 ```json
-{"tool_calls": [{"tool": "query_indicators", "args": {"indicators": ["RSI_14", "CCI_14", "BBANDS_20", "ADX_14", "MACD", "ATR_14"]}}]}
+{"tool_calls": [{"tool": "query_indicators", "args": {"indicators": ["RSI_14", "CCI_14", "BBANDS_20", "ADX_14", "MACD", "ATR_14", "STOCH", "EMA_9", "EMA_21"]}}]}
 ```
 
-This returns each indicator's **current value, min, and max** over the recent window (e.g. `"rsi_14": {"current": 48.2, "min": 41.5, "max": 59.3}`). **You MUST use these ranges to set realistic entry/exit thresholds.** If RSI has ranged 41-59, do NOT set entry_long to `rsi_14 < 30` — it will never fire. Instead use thresholds within or near the observed range (e.g. `rsi_14 < 42`). Textbook levels are meaningless if the market never reaches them.
+This returns each indicator's **current value, min, and max** over the recent window (e.g. `"rsi_14": {"current": 48.2, "min": 41.5, "max": 59.3}`). You MUST call this tool and use the returned ranges to set realistic entry/exit thresholds. If RSI has ranged 41-59, do NOT set entry_long to `rsi_14 < 30` — it will never fire. Instead use thresholds within or near the observed range (e.g. `rsi_14 < 42`). Textbook levels are meaningless if the market never reaches them.
 
 Not all indicators you query need to be in your strategy — explore broadly, then pick the most useful ones.
 
-If `current_indicator_values` is already present in the context (from prior runtime cycles), you can use those values directly without calling the tool again.
+Skip the tool call ONLY if `current_indicator_values` is already present in the context with min/max ranges from prior runtime cycles.
 
 $memory_context
