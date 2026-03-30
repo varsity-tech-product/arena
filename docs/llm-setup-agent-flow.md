@@ -160,7 +160,15 @@ The `query_indicators` tool computes any TA-Lib indicator from historical klines
 - **Indicators**: parses `"RSI_14"` → `FeatureSpec(indicator="RSI", params={"timeperiod": 14})`
 - **Expressions**: validated for safe AST (no function calls like `abs()`, `max()`)
 
-### Step 5: Cooldown Enforcement
+### Step 5: Expression Overlap Check
+
+`_check_expression_overlap()` tests the proposed expressions against current indicator values:
+
+- If entry and exit both evaluate to True → re-invoke LLM with error for immediate fix
+- If retry still overlaps → demote to "hold", keep previous strategy
+- Prevents the open→close churn that burns fees with zero profit
+
+### Step 6: Cooldown Enforcement
 
 `_apply_cooldown()` prevents strategy thrashing:
 
@@ -168,7 +176,7 @@ The `query_indicators` tool computes any TA-Lib indicator from historical klines
 - Exception: bypass if drawdown exceeds 3%
 - If cooldown active, "update" is demoted to "hold"
 
-### Step 6: Apply to Config
+### Step 7: Apply to Config
 
 `_deep_merge(config_dict, decision.overrides)` merges the LLM's changes:
 
@@ -196,10 +204,17 @@ ExpressionPolicy(
 ### Expression Validation (3 levels)
 
 1. **Syntax validation** (at construction) — AST parsing, only safe nodes allowed
-2. **Namespace validation** (on first tick) — checks all referenced variables exist in the runtime namespace. Catches `adx_14` vs `adx_timeperiod_14` mismatches. Shows available keys so LLM can fix.
-3. **Overlap detection** (on first tick) — if entry and exit both evaluate to True on current values, positions would close immediately. Flagged as error.
+2. **Namespace validation** (on first tick) — checks all referenced variables exist in the runtime namespace. Variable names follow a consistent `{indicator}_{period}` format (e.g. `adx_14`, `cci_14`, `rsi_14`). Shows available keys so LLM can fix.
+3. **Overlap detection** (on first tick) — if entry and exit both evaluate to True on current values, positions would close immediately. Flagged as error, policy holds every tick.
 
 Errors are stored in `_validation_errors` and fed back to the LLM on the next setup cycle via `context["expression_errors"]`.
+
+### Pre-merge Overlap Rejection (in setup_agent.decide)
+
+Before the decision is returned to `_run_auto`, the setup agent checks for exit/entry overlap at current indicator values. If detected:
+
+1. The LLM is **re-invoked** with an error message describing the overlap, giving it a chance to fix the expressions in the same round (no 10+ minute wait)
+2. If the retry still overlaps, the decision is demoted to "hold" and the previous strategy continues
 
 ### Tick-by-Tick Evaluation
 
@@ -266,9 +281,13 @@ When the LLM switches to `mode: "discretionary"`:
 
 | Guardrail | What it prevents | Default |
 |-----------|-----------------|---------|
+| Indicator name normalization | `adx_timeperiod_14` mismatches — all single-timeperiod indicators use `{name}_{period}` format | Always on |
 | Expression namespace validation | Dead zones from undefined variables | Always on |
-| Exit/entry overlap detection | 1-minute round trips from self-defeating exits | Always on |
-| Reentry cooldown | Rapid-fire open→close→open churning | 300s |
+| Exit/entry overlap rejection | Open→close churn from self-defeating exits. LLM gets one retry, then demoted to hold | Always on |
+| Exit/entry overlap detection (runtime) | Backup check on first tick if overlap wasn't caught pre-merge | Always on |
+| Setup failure skip | Runtime spinning with equity=None during network outages | Always on |
+| Mode→action validation | Trade action in rule_based mode or update in discretionary | Always on |
+| Reentry cooldown | Rapid-fire open→close→open churning within a runtime cycle | 300s |
 | Strategy change cooldown | LLM thrashing between strategies | 20 min or 5 trades |
 | Sizing normalization | Micro-positions from decimal parsing (0.8 → 80%) | Min 10% |
 | TP/SL minimums | Trades that can't overcome fees | TP ≥ 0.5%, SL ≥ 0.3% |
