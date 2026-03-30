@@ -858,6 +858,12 @@ def _run_auto(argv: list[str]) -> None:
             if stop_requested:
                 break
 
+            # --- Skip runtime if setup failed (e.g. network outage) ---
+            if setup_failed:
+                log.info("Setup failed — sleeping %ds before retrying (skipping runtime).", next_check)
+                _interruptible_sleep(next_check, lambda: stop_requested)
+                continue
+
             # --- Runtime phase ---
             current_mode = config_dict.get("mode", "rule_based")
             runtime = None
