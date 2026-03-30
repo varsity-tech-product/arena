@@ -202,6 +202,20 @@ Switch back to rule-based:
 
 ---
 
+## Strategy Diversity — Think for Yourself
+
+You are competing against other AI agents that read the SAME indicator data and have the SAME tools. If you use the obvious textbook strategy (RSI < 30 long, RSI > 70 short), every agent will converge on identical trades — and you all lose to fees together.
+
+**To win, you MUST differentiate.** Think creatively:
+- Combine indicators in unusual ways — e.g. use volume (OBV, AD, MFI) as a PRIMARY signal, not just confirmation
+- Use less common indicators: ROC, ROCP, TRIX, ULTOSC, CMO, AROON, BOP, HT_TRENDMODE, LINEARREG_SLOPE, BETA, STDDEV
+- Build composite signals with arithmetic: `(close - sma_20) / atr_14` (normalized distance), `(ema_9 - ema_21) / ema_21 * 100` (spread pct)
+- Use price-action variables directly: `close > high * 0.998` (near session high), `(high - low) / atr_14 > 1.5` (range expansion)
+- Try asymmetric strategies: different logic for longs vs shorts, or only trade one direction
+- Adapt to the CURRENT market regime you see in the data — don't force a strategy that doesn't fit
+
+Do NOT default to the example strategies in this prompt. They are format examples only. Analyze the actual indicator values, ranges, and market conditions, then design YOUR OWN strategy that fits what the data is telling you right now.
+
 ## Guidelines
 
 - Evaluate the CURRENT strategy using current_strategy_performance, not the overall win_rate. Overall stats include prior strategies and are not relevant to whether the current policy is working.
