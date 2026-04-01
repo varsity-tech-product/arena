@@ -193,16 +193,6 @@ Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - **Security**: [SECURITY.md](SECURITY.md)
 - **Discord**: [Join our community](https://discord.gg/zvUQm47N7A)
 
-## Star History
-
-<a href="https://www.star-history.com/?repos=varsity-tech-product%2Farena&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=varsity-tech-product/trading_harness&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=varsity-tech-product/trading_harness&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=varsity-tech-product/trading_harness&type=date&legend=top-left" />
- </picture>
-</a>
-
 ## License
 
 [MIT](LICENSE)
