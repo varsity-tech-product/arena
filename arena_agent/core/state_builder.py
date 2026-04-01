@@ -257,20 +257,25 @@ class StateBuilder:
         trades: list[dict[str, Any]],
     ) -> CompetitionSnapshot:
         source = competition.get("matchInfo", competition)
-        current_trades = int(
-            source.get("currentTrades")
-            or source.get("tradeCount")
-            or competition.get("currentTrades")
-            or competition.get("tradeCount")
-            or account_snapshot.trade_count
-            or len(trades)
-        )
-        max_trades_value = (
-            source.get("maxTrades")
-            or source.get("maxTradesPerMatch")
-            or competition.get("maxTrades")
-            or competition.get("maxTradesPerMatch")
-            or self.config.risk_limits.max_trades
+        current_trades = int(next(
+            (v for v in (
+                source.get("currentTrades"),
+                source.get("tradeCount"),
+                competition.get("currentTrades"),
+                competition.get("tradeCount"),
+                account_snapshot.trade_count,
+            ) if v is not None),
+            len(trades),
+        ))
+        max_trades_value = next(
+            (v for v in (
+                source.get("maxTrades"),
+                source.get("maxTradesPerMatch"),
+                competition.get("maxTrades"),
+                competition.get("maxTradesPerMatch"),
+                self.config.risk_limits.max_trades,
+            ) if v is not None),
+            None,
         )
         max_trades = None if max_trades_value is None else int(max_trades_value)
 
@@ -292,11 +297,12 @@ class StateBuilder:
         if close_only_at_seconds is not None and now >= close_only_at_seconds:
             close_only_mode = True
         status = str(source.get("status") or competition.get("status") or "unknown")
+        status_lower = status.lower()
         is_live = (
-            status.lower() in {"live", "active", "running", "ongoing"}
+            status_lower in {"live", "active", "running", "ongoing"}
             or bool(source.get("isLive"))
             or bool(competition.get("isLive"))
-            or (time_remaining is not None and time_remaining > 0)
+            or (status_lower == "unknown" and time_remaining is not None and time_remaining > 0)
         )
 
         return CompetitionSnapshot(

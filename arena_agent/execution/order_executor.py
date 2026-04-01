@@ -174,17 +174,6 @@ class OrderExecutor:
             raw_size = buying_power * self.risk_limits.max_position_size_pct / state.market.last_price
             size = raw_size
 
-        if self.risk_limits.max_absolute_size is not None:
-            size = min(size, self.risk_limits.max_absolute_size)
-
-        # Cap size so notional value never exceeds available balance * max_position_size_pct.
-        # This prevents oversized orders regardless of what the LLM or strategy layer produces.
-        if state.market.last_price > 0:
-            buying_power = max(state.account.balance, state.account.equity)
-            max_notional = buying_power * self.risk_limits.max_position_size_pct
-            max_size = max_notional / state.market.last_price
-            size = min(size, max_size)
-
         precision = 10 ** self.risk_limits.quantity_precision
         rounded = math.floor(size * precision) / precision
         return max(self.risk_limits.min_size, rounded)

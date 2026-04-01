@@ -63,6 +63,7 @@ def _get(path: str, params: dict | None = None, auth: bool = True) -> dict:
     r = requests.get(
         f"{_base_url()}{path}", headers=_headers(auth), params=params, timeout=_timeout()
     )
+    r.raise_for_status()
     return r.json()
 
 
@@ -70,6 +71,7 @@ def _post(path: str, body: dict | None = None, auth: bool = True) -> dict:
     r = requests.post(
         f"{_base_url()}{path}", headers=_headers(auth), json=body, timeout=_timeout()
     )
+    r.raise_for_status()
     return r.json()
 
 
@@ -77,6 +79,7 @@ def _put(path: str, body: dict | None = None, auth: bool = True) -> dict:
     r = requests.put(
         f"{_base_url()}{path}", headers=_headers(auth), json=body, timeout=_timeout()
     )
+    r.raise_for_status()
     return r.json()
 
 
@@ -84,6 +87,7 @@ def _delete(path: str, auth: bool = True) -> dict:
     r = requests.delete(
         f"{_base_url()}{path}", headers=_headers(auth), timeout=_timeout()
     )
+    r.raise_for_status()
     return r.json()
 
 

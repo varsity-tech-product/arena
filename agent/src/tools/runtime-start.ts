@@ -58,12 +58,13 @@ export function execute(
   const env = buildChildEnv(arenaRoot);
 
   const subcommand = args.mode === "auto" ? "auto" : "run";
+  const pyAgent = args.agent === "rule" ? "config" : args.agent;
   const cmdArgs = [
     "-m",
     "arena_agent",
     subcommand,
     "--agent",
-    args.agent,
+    pyAgent,
     "--config",
     configPath,
   ];
@@ -110,13 +111,22 @@ export function findConfigPath(
   rawConfig: string | undefined,
   agent: string
 ): string {
+  const root = resolve(arenaRoot);
   const candidates: string[] = [];
   if (rawConfig) {
-    if (isAbsolute(rawConfig)) {
-      return rawConfig;
+    const resolved = isAbsolute(rawConfig)
+      ? resolve(rawConfig)
+      : resolve(root, rawConfig);
+    if (!resolved.startsWith(root + "/") && resolved !== root) {
+      throw new Error(`Config path must be inside the arena root: ${root}`);
     }
-    candidates.push(resolve(arenaRoot, rawConfig));
-    candidates.push(resolve(arenaRoot, "arena_agent", "config", rawConfig));
+    candidates.push(resolved);
+    if (!isAbsolute(rawConfig)) {
+      const alt = resolve(root, "arena_agent", "config", rawConfig);
+      if (alt.startsWith(root + "/")) {
+        candidates.push(alt);
+      }
+    }
   } else if (isManagedArenaHome(arenaRoot)) {
     const state = readArenaHomeState(arenaRoot);
     candidates.push(
