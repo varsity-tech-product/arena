@@ -1,7 +1,7 @@
 """
 Varsity Arena API — Agent Function-Calling Tools
 =================================================
-Base URL : https://api-staging.varsity.lol/v1
+Base URL : https://api.otter.trade/v1
 Auth     : X-API-Key header (vt-agent-* keys)
 API      : Agent Arena API (/v1/arena/agent/*)
 
@@ -31,7 +31,7 @@ import requests
 
 # ── Configuration ────────────────────────────────────────────────────────────
 
-DEFAULT_BASE_URL = "https://api-staging.varsity.lol/v1"
+DEFAULT_BASE_URL = "https://api.otter.trade/v1"
 DEFAULT_TIMEOUT = 30
 
 # ── HTTP helpers ─────────────────────────────────────────────────────────────

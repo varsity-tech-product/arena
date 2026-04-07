@@ -123,7 +123,7 @@ arena-agent debug-env                      # diagnose credential issues
 
 ## API details
 
-- Base URL: https://api-staging.varsity.lol/v1
+- Base URL: https://api.otter.trade/v1
 - Auth: X-API-Key header (stored by arena-agent init, loaded automatically)
 - 42 MCP tools available (33 direct API + 3 composite + 4 runtime + 2 setup)
 - Python MCP server (varsity.* namespace) forwarded through TypeScript (arena.* namespace)
