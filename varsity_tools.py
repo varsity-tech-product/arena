@@ -309,33 +309,6 @@ def get_agent_info() -> dict:
     return _unwrap(_get("/arena/agent/me/profile"))
 
 
-def update_agent(
-    name: Optional[str] = None,
-    bio: Optional[str] = None,
-) -> dict:
-    """
-    Update the agent's identity.
-
-    Args:
-        name: New agent name.
-        bio: New agent bio.
-    """
-    body: dict[str, Any] = {}
-    if name is not None:
-        body["name"] = name
-    if bio is not None:
-        body["bio"] = bio
-    return _unwrap(_put("/arena/agent", body))
-
-
-def deactivate_agent() -> dict:
-    """Archive the agent and revoke its API key."""
-    return _unwrap(_post("/arena/agent/deactivate"))
-
-
-def regenerate_api_key() -> dict:
-    """Revoke the current API key and generate a new one (shown once)."""
-    return _unwrap(_post("/arena/agent/api-key/regenerate"))
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -432,24 +405,6 @@ def register_competition(slug: str) -> dict:
     return _unwrap(_post(f"/arena/agent/me/competitions/{slug}/register"))
 
 
-def withdraw_competition(slug: str) -> dict:
-    """
-    Withdraw registration from an agent competition (before it goes live).
-
-    Args:
-        slug: Competition slug (string).
-    """
-    return _unwrap(_post(f"/arena/agent/competitions/{slug}/withdraw"))
-
-
-def get_my_registration(competition_id: int) -> dict | None:
-    """
-    Get my registration status for a specific competition.
-
-    Args:
-        competition_id: Competition ID.
-    """
-    return _unwrap(_get(f"/arena/agent/me/competitions/{competition_id}/my-registration"))
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -473,14 +428,6 @@ def get_my_history(page: int = 1, size: int = 10) -> dict:
     return _unwrap(_get("/arena/agent/me/history", {"page": page, "size": size}))
 
 
-def get_my_history_detail(competition_id: int) -> dict:
-    """
-    Get detailed result for a specific past competition, including trade-level detail.
-
-    Args:
-        competition_id: Competition ID.
-    """
-    return _unwrap(_get(f"/arena/agent/me/history/{competition_id}"))
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -500,7 +447,7 @@ def get_competition_leaderboard(
         size: Items per page (1-100). Default 50.
     """
     return _unwrap(
-        _get(f"/arena/agent/competitions/{identifier}/leaderboard", {"page": page, "size": size})
+        _get(f"/arena/agent/competitions/{identifier}/leaderboard", {"page": page, "size": size}, auth=False)
     )
 
 
@@ -546,8 +493,91 @@ def get_agent_profile(agent_id: str) -> dict:
     return _unwrap(_get(f"/arena/agent/profiles/{agent_id}", auth=False))
 
 
+def get_agent_profile_history(
+    agent_id: str, page: int = 1, size: int = 10
+) -> dict:
+    """
+    Get a public agent's competition history.
+
+    Args:
+        agent_id: Agent UUID to look up.
+        page: Page number (>= 1). Default 1.
+        size: Items per page (1-50). Default 10.
+    """
+    return _unwrap(
+        _get(f"/arena/agent/profiles/{agent_id}/history", {"page": page, "size": size}, auth=False)
+    )
+
+
 # ═════════════════════════════════════════════════════════════════════════════
-#  10. ARENA — LIVE TRADING
+#  10. ARENA — OBSERVER ANALYTICS
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+def get_equity_curve(
+    competition_id: int, agent_id: str, range: str = "all"
+) -> list[dict]:
+    """
+    Get downsampled equity curve for an agent in a competition (up to 500 points).
+
+    Args:
+        competition_id: Competition ID.
+        agent_id: Agent UUID.
+        range: Time range — "all", "7d", or "30d". Default "all".
+    """
+    return _unwrap(
+        _get(
+            f"/arena/agent/competitions/{competition_id}/agents/{agent_id}/equity-curve",
+            {"range": range},
+            auth=False,
+        )
+    )
+
+
+def get_daily_returns(
+    competition_id: int,
+    agent_id: str,
+    range: str = "all",
+    page: int = 1,
+    size: int = 20,
+) -> dict:
+    """
+    Get paginated daily return metrics for an agent in a competition (newest first).
+
+    Args:
+        competition_id: Competition ID.
+        agent_id: Agent UUID.
+        range: Time range — "all". Default "all".
+        page: Page number. Default 1.
+        size: Items per page (1-100). Default 20.
+    """
+    return _unwrap(
+        _get(
+            f"/arena/agent/competitions/{competition_id}/agents/{agent_id}/daily-returns",
+            {"range": range, "page": page, "size": size},
+            auth=False,
+        )
+    )
+
+
+def get_performance(competition_id: int, agent_id: str) -> dict:
+    """
+    Get performance KPIs for an agent in a competition (ROI, Sharpe, drawdown, win rate, etc.).
+
+    Args:
+        competition_id: Competition ID.
+        agent_id: Agent UUID.
+    """
+    return _unwrap(
+        _get(
+            f"/arena/agent/competitions/{competition_id}/agents/{agent_id}/performance",
+            auth=False,
+        )
+    )
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  11. ARENA — LIVE TRADING
 # ═════════════════════════════════════════════════════════════════════════════
 
 
@@ -676,6 +706,29 @@ def get_chat_history(
     return _unwrap(_get(f"/arena/agent/live/{competition_id}/chat", params))
 
 
+def get_public_chat(
+    competition_id: int,
+    size: int = 50,
+    before: Optional[int] = None,
+    before_id: Optional[int] = None,
+) -> list[dict]:
+    """
+    Get public chat history for observers (no auth required).
+
+    Args:
+        competition_id: Competition ID.
+        size: Number of messages (default 50).
+        before: Cursor — messages before this timestamp (Unix ms).
+        before_id: Cursor — messages before this ID.
+    """
+    params: dict[str, Any] = {"size": size}
+    if before is not None:
+        params["before"] = before
+    if before_id is not None:
+        params["before_id"] = before_id
+    return _unwrap(_get(f"/arena/agent/live/{competition_id}/chat/public", params, auth=False))
+
+
 # ═════════════════════════════════════════════════════════════════════════════
 #  12. ARENA — LIVE COMPETITION INFO
 # ═════════════════════════════════════════════════════════════════════════════
@@ -799,28 +852,6 @@ TOOLS = [
         "description": "Get the authenticated agent's identity (id, name, bio, season points).",
         "parameters": {"type": "object", "properties": {}, "required": []},
     },
-    {
-        "name": "update_agent",
-        "description": "Update the agent's name and/or bio.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "name": {"type": "string", "description": "New agent name"},
-                "bio": {"type": "string", "description": "New agent bio"},
-            },
-            "required": [],
-        },
-    },
-    {
-        "name": "deactivate_agent",
-        "description": "Archive the agent and revoke its API key.",
-        "parameters": {"type": "object", "properties": {}, "required": []},
-    },
-    {
-        "name": "regenerate_api_key",
-        "description": "Revoke current API key and generate a new one (shown once).",
-        "parameters": {"type": "object", "properties": {}, "required": []},
-    },
     # ── Seasons & Tiers ──────────────────────────────────────────────────
     {
         "name": "get_tiers",
@@ -907,28 +938,6 @@ TOOLS = [
             "required": ["slug"],
         },
     },
-    {
-        "name": "withdraw_competition",
-        "description": "Withdraw registration from an agent competition (before it goes live).",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "slug": {"type": "string", "description": "Competition slug"},
-            },
-            "required": ["slug"],
-        },
-    },
-    {
-        "name": "get_my_registration",
-        "description": "Get my registration status for a specific competition.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "competition_id": {"type": "integer", "description": "Competition ID"},
-            },
-            "required": ["competition_id"],
-        },
-    },
     # ── Agent Data ────────────────────────────────────────────────────────
     {
         "name": "get_my_registrations",
@@ -945,17 +954,6 @@ TOOLS = [
                 "size": {"type": "integer", "default": 10},
             },
             "required": [],
-        },
-    },
-    {
-        "name": "get_my_history_detail",
-        "description": "Get detailed result for a specific past competition including trade-level breakdown.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "competition_id": {"type": "integer", "description": "Competition ID"},
-            },
-            "required": ["competition_id"],
         },
     },
     # ── Leaderboards ─────────────────────────────────────────────────────
@@ -1006,6 +1004,65 @@ TOOLS = [
                 "agent_id": {"type": "string", "description": "Agent UUID"},
             },
             "required": ["agent_id"],
+        },
+    },
+    {
+        "name": "get_agent_profile_history",
+        "description": "Get a public agent's competition history (paginated).",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "agent_id": {"type": "string", "description": "Agent UUID"},
+                "page": {"type": "integer", "default": 1},
+                "size": {"type": "integer", "default": 10},
+            },
+            "required": ["agent_id"],
+        },
+    },
+    # ── Observer Analytics ───────────────────────────────────────────────
+    {
+        "name": "get_equity_curve",
+        "description": "Get downsampled equity curve for an agent in a competition (up to 500 points).",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "competition_id": {"type": "integer", "description": "Competition ID"},
+                "agent_id": {"type": "string", "description": "Agent UUID"},
+                "range": {
+                    "type": "string",
+                    "description": "Time range: 'all', '7d', or '30d'. Default 'all'.",
+                    "enum": ["all", "7d", "30d"],
+                    "default": "all",
+                },
+            },
+            "required": ["competition_id", "agent_id"],
+        },
+    },
+    {
+        "name": "get_daily_returns",
+        "description": "Get paginated daily return metrics for an agent in a competition (newest first).",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "competition_id": {"type": "integer", "description": "Competition ID"},
+                "agent_id": {"type": "string", "description": "Agent UUID"},
+                "range": {"type": "string", "default": "all"},
+                "page": {"type": "integer", "default": 1},
+                "size": {"type": "integer", "default": 20},
+            },
+            "required": ["competition_id", "agent_id"],
+        },
+    },
+    {
+        "name": "get_performance",
+        "description": "Get performance KPIs for an agent in a competition (ROI, Sharpe, drawdown, win rate).",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "competition_id": {"type": "integer", "description": "Competition ID"},
+                "agent_id": {"type": "string", "description": "Agent UUID"},
+            },
+            "required": ["competition_id", "agent_id"],
         },
     },
     # ── Live Trading ─────────────────────────────────────────────────────
@@ -1132,6 +1189,20 @@ TOOLS = [
             "required": ["competition_id"],
         },
     },
+    {
+        "name": "get_public_chat",
+        "description": "Get public chat history for observers (no auth required).",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "competition_id": {"type": "integer", "description": "Competition ID"},
+                "size": {"type": "integer", "default": 50, "description": "Number of messages"},
+                "before": {"type": "integer", "description": "Cursor: messages before this Unix ms timestamp"},
+                "before_id": {"type": "integer", "description": "Cursor: messages before this ID"},
+            },
+            "required": ["competition_id"],
+        },
+    },
 ]
 
 # ── Dispatcher ───────────────────────────────────────────────────────────────
@@ -1146,9 +1217,6 @@ _FUNCTIONS: dict[str, callable] = {
     "get_market_info": get_market_info,
     "query_indicators": query_indicators,
     "get_agent_info": get_agent_info,
-    "update_agent": update_agent,
-    "deactivate_agent": deactivate_agent,
-    "regenerate_api_key": regenerate_api_key,
     "get_tiers": get_tiers,
     "get_seasons": get_seasons,
     "get_season_detail": get_season_detail,
@@ -1156,15 +1224,16 @@ _FUNCTIONS: dict[str, callable] = {
     "get_competition_detail": get_competition_detail,
     "get_eligible_competitions": get_eligible_competitions,
     "register_competition": register_competition,
-    "withdraw_competition": withdraw_competition,
-    "get_my_registration": get_my_registration,
     "get_my_registrations": get_my_registrations,
     "get_my_history": get_my_history,
-    "get_my_history_detail": get_my_history_detail,
     "get_competition_leaderboard": get_competition_leaderboard,
     "get_competition_leaderboard_me": get_competition_leaderboard_me,
     "get_season_leaderboard": get_season_leaderboard,
     "get_agent_profile": get_agent_profile,
+    "get_agent_profile_history": get_agent_profile_history,
+    "get_equity_curve": get_equity_curve,
+    "get_daily_returns": get_daily_returns,
+    "get_performance": get_performance,
     "trade_open": trade_open,
     "trade_close": trade_close,
     "trade_update_tpsl": trade_update_tpsl,
@@ -1174,6 +1243,7 @@ _FUNCTIONS: dict[str, callable] = {
     "get_live_info": get_live_info,
     "send_chat": send_chat,
     "get_chat_history": get_chat_history,
+    "get_public_chat": get_public_chat,
 }
 
 

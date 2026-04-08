@@ -33,6 +33,7 @@ import { all as liveTools } from "./tools/platform-live.js";
 import { all as compositeTools } from "./tools/platform-composite.js";
 import { all as setupTools } from "./tools/platform-setup.js";
 import { all as agentTools } from "./tools/platform-agent.js";
+import { all as analyticsTools } from "./tools/platform-analytics.js";
 
 export function createServer(arenaRoot?: string): McpServer {
   const root = arenaRoot ?? findArenaRoot();
@@ -64,6 +65,7 @@ export function createServer(arenaRoot?: string): McpServer {
     ...compositeTools,
     ...setupTools,
     ...agentTools,
+    ...analyticsTools,
   ];
 
   for (const tool of forwardedTools) {

@@ -47,21 +47,4 @@ export const competitionDetail = {
   pythonTool: "varsity.competition_detail",
 };
 
-export const participants = {
-  name: "arena.participants",
-  description:
-    "List accepted participants for a competition (public, paginated).",
-  inputSchema: z.object({
-    identifier: z.string().describe("Competition ID or slug."),
-    page: z.number().int().optional().default(1).describe("Page number."),
-    size: z
-      .number()
-      .int()
-      .optional()
-      .default(50)
-      .describe("Items per page (1-100)."),
-  }),
-  pythonTool: "varsity.participants",
-};
-
-export const all = [competitions, competitionDetail, participants] as const;
+export const all = [competitions, competitionDetail] as const;

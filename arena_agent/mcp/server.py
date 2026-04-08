@@ -65,7 +65,7 @@ def create_server(host: str = "127.0.0.1", port: int = 8000):
 
     @mcp.tool(name="varsity.trade_close", description="Close current position. Works in live and settling states. Returns realizedPnl.")
     def trade_close(competition_id: int) -> dict:
-        return to_jsonable(varsity_tools.trade_close(competition_id))
+        return to_jsonable(tools.trade_close(competition_id))
 
     @mcp.tool(name="varsity.last_transition", description="Get the last stored transition.")
     def last_transition(config_path: str | None = None) -> dict:
@@ -135,14 +135,6 @@ def create_server(host: str = "127.0.0.1", port: int = 8000):
     def register(slug: str = "", competition_id: int | None = None) -> dict:
         return tools.register(slug=slug, competition_id=competition_id)
 
-    @mcp.tool(name="varsity.withdraw", description="Withdraw registration from a competition (before it goes live).")
-    def withdraw(slug: str) -> dict:
-        return tools.withdraw(slug)
-
-    @mcp.tool(name="varsity.my_registration", description="Get my registration status for a specific competition.")
-    def my_registration(competition_id: int) -> dict:
-        return tools.my_registration(competition_id)
-
     # ── Leaderboards ─────────────────────────────────────────────────────
 
     @mcp.tool(name="varsity.leaderboard", description="Get competition leaderboard with rankings, PnL, trades, and prizes.")
@@ -167,31 +159,19 @@ def create_server(host: str = "127.0.0.1", port: int = 8000):
     def agent_info() -> dict:
         return tools.agent_info()
 
-    @mcp.tool(name="varsity.update_agent", description="Update the agent's name and/or bio.")
-    def update_agent(name: Optional[str] = None, bio: Optional[str] = None) -> dict:
-        return tools.update_agent(name=name, bio=bio)
-
-    @mcp.tool(name="varsity.deactivate_agent", description="Archive the agent and revoke its API key.")
-    def deactivate_agent() -> dict:
-        return tools.deactivate_agent()
-
-    @mcp.tool(name="varsity.regenerate_api_key", description="Revoke current API key and generate a new one (shown once).")
-    def regenerate_api_key() -> dict:
-        return tools.regenerate_api_key()
-
     @mcp.tool(name="varsity.agent_profile", description="Get a public agent profile by agent ID.")
     def agent_profile(agent_id: str) -> dict:
         return tools.agent_profile(agent_id)
+
+    @mcp.tool(name="varsity.agent_profile_history", description="Get a public agent's competition history (paginated).")
+    def agent_profile_history(agent_id: str, page: int = 1, size: int = 10) -> dict:
+        return tools.agent_profile_history(agent_id, page, size)
 
     # ── History & Registrations ──────────────────────────────────────────
 
     @mcp.tool(name="varsity.my_history", description="Get my competition history with rankings, PnL, and points earned (paginated).")
     def my_history(page: int = 1, size: int = 10) -> dict:
         return tools.my_history(page, size)
-
-    @mcp.tool(name="varsity.my_history_detail", description="Get detailed result for a specific past competition including trade-level breakdown.")
-    def my_history_detail(competition_id: int) -> dict:
-        return tools.my_history_detail(competition_id)
 
     @mcp.tool(name="varsity.my_registrations", description="Get all my active registrations (pending/accepted/waitlisted).")
     def my_registrations() -> dict:
@@ -243,6 +223,35 @@ def create_server(host: str = "127.0.0.1", port: int = 8000):
         before_id: Optional[int] = None,
     ) -> dict:
         return tools.chat_history(competition_id, size, before, before_id)
+
+    @mcp.tool(name="varsity.public_chat", description="Get public chat history for observers (no auth required).")
+    def public_chat(
+        competition_id: int,
+        size: int = 50,
+        before: Optional[int] = None,
+        before_id: Optional[int] = None,
+    ) -> dict:
+        return tools.public_chat(competition_id, size, before, before_id)
+
+    # ── Observer Analytics ───────────────────────────────────────────────
+
+    @mcp.tool(name="varsity.equity_curve", description="Get downsampled equity curve for an agent in a competition (up to 500 points).")
+    def equity_curve(competition_id: int, agent_id: str, range: str = "all") -> dict:
+        return tools.equity_curve(competition_id, agent_id, range)
+
+    @mcp.tool(name="varsity.daily_returns", description="Get paginated daily return metrics for an agent in a competition (newest first).")
+    def daily_returns(
+        competition_id: int,
+        agent_id: str,
+        range: str = "all",
+        page: int = 1,
+        size: int = 20,
+    ) -> dict:
+        return tools.daily_returns(competition_id, agent_id, range, page, size)
+
+    @mcp.tool(name="varsity.performance", description="Get performance KPIs for an agent in a competition (ROI, Sharpe, drawdown, win rate).")
+    def performance(competition_id: int, agent_id: str) -> dict:
+        return tools.performance(competition_id, agent_id)
 
     # ── Composite tools (higher-level, combine multiple API calls) ────────
 

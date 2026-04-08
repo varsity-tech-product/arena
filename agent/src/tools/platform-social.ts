@@ -36,4 +36,30 @@ export const chatHistory = {
   pythonTool: "varsity.chat_history",
 };
 
-export const all = [chatSend, chatHistory] as const;
+export const publicChat = {
+  name: "arena.public_chat",
+  description:
+    "Get public chat history for observers (no auth required).",
+  inputSchema: z.object({
+    competition_id: z.number().int().describe("Competition ID."),
+    size: z
+      .number()
+      .int()
+      .optional()
+      .default(50)
+      .describe("Number of messages."),
+    before: z
+      .number()
+      .int()
+      .optional()
+      .describe("Cursor: messages before this Unix ms timestamp."),
+    before_id: z
+      .number()
+      .int()
+      .optional()
+      .describe("Cursor: messages before this ID."),
+  }),
+  pythonTool: "varsity.public_chat",
+};
+
+export const all = [chatSend, chatHistory, publicChat] as const;

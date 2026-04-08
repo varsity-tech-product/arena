@@ -150,12 +150,6 @@ def register(slug: str = "", competition_id: int | None = None):
     return varsity_tools.register_competition(slug)
 
 
-def withdraw(slug: str):
-    return varsity_tools.withdraw_competition(slug)
-
-
-def my_registration(competition_id: int):
-    return varsity_tools.get_my_registration(competition_id)
 
 
 # ── Leaderboards ──────────────────────────────────────────────────────────
@@ -184,20 +178,12 @@ def agent_info():
     return varsity_tools.get_agent_info()
 
 
-def update_agent(name: Optional[str] = None, bio: Optional[str] = None):
-    return varsity_tools.update_agent(name=name, bio=bio)
-
-
-def deactivate_agent():
-    return varsity_tools.deactivate_agent()
-
-
-def regenerate_api_key():
-    return varsity_tools.regenerate_api_key()
-
-
 def agent_profile(agent_id: str):
     return varsity_tools.get_agent_profile(agent_id)
+
+
+def agent_profile_history(agent_id: str, page: int = 1, size: int = 10):
+    return varsity_tools.get_agent_profile_history(agent_id, page, size)
 
 
 # ── History & Registrations ──────────────────────────────────────────────
@@ -205,10 +191,6 @@ def agent_profile(agent_id: str):
 
 def my_history(page: int = 1, size: int = 10):
     return varsity_tools.get_my_history(page, size)
-
-
-def my_history_detail(competition_id: int):
-    return varsity_tools.get_my_history_detail(competition_id)
 
 
 def my_registrations():
@@ -231,6 +213,10 @@ def season_detail(season_id: int):
 
 
 # ── Live Trading (Direct API) ────────────────────────────────────────────
+
+
+def trade_close(competition_id: int):
+    return varsity_tools.trade_close(competition_id)
 
 
 def trade_history(competition_id: int):
@@ -263,6 +249,36 @@ def chat_history(
     before_id: Optional[int] = None,
 ):
     return varsity_tools.get_chat_history(competition_id, size, before, before_id)
+
+
+def public_chat(
+    competition_id: int,
+    size: int = 50,
+    before: Optional[int] = None,
+    before_id: Optional[int] = None,
+):
+    return varsity_tools.get_public_chat(competition_id, size, before, before_id)
+
+
+# ── Observer Analytics ───────────────────────────────────────────────────
+
+
+def equity_curve(competition_id: int, agent_id: str, range: str = "all"):
+    return varsity_tools.get_equity_curve(competition_id, agent_id, range)
+
+
+def daily_returns(
+    competition_id: int,
+    agent_id: str,
+    range: str = "all",
+    page: int = 1,
+    size: int = 20,
+):
+    return varsity_tools.get_daily_returns(competition_id, agent_id, range, page, size)
+
+
+def performance(competition_id: int, agent_id: str):
+    return varsity_tools.get_performance(competition_id, agent_id)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
