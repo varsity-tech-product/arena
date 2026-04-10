@@ -51,11 +51,12 @@ def _run_runtime(argv: list[str]) -> None:
     parser = argparse.ArgumentParser(description="Run an Arena trading agent runtime.")
     parser.add_argument(
         "--agent",
-        choices=["config", "tap"],
+        choices=["config", "tap"] + list(_AGENT_EXEC_BACKENDS),
         default="config",
         help="Policy to run. 'config' keeps the YAML policy unchanged. "
-        "'rule' uses the built-in rule policy. 'tap' uses an external HTTP endpoint. "
-        "For LLM-backed trading, use 'arena_agent auto' instead.",
+        "'tap' uses an external HTTP endpoint. "
+        "LLM backend names (claude/gemini/openclaw/codex/auto) are accepted "
+        "and treated as 'config' (the setup agent configures the policy).",
     )
     parser.add_argument(
         "--config",
@@ -96,6 +97,11 @@ def _run_runtime(argv: list[str]) -> None:
         help="Decision timeout when --agent tap is used.",
     )
     args = parser.parse_args(argv)
+
+    # LLM backend names are accepted for compatibility with the npm auto daemon
+    # but the runtime always uses the config-based policy.
+    if args.agent in _AGENT_EXEC_BACKENDS:
+        args.agent = "config"
 
     logging.basicConfig(
         level=getattr(logging, args.log_level.upper(), logging.INFO),
@@ -470,6 +476,8 @@ def _run_auto(argv: list[str]) -> None:
     inactive_since: float | None = None  # wall-clock timestamp when inactivity started
     total_runtime_iterations = 0 # total iterations since last strategy change
     max_inactive_cycles = 4      # trigger inactivity alert after this many consecutive idle cycles
+    tight_exit_detected = False      # set True when recent trades avg hold < 60s
+    tight_exit_avg_hold = 0.0        # avg hold seconds for the alert
     consecutive_setup_failures = 0
     max_setup_failures = 5       # apply fallback strategy after this many
     consecutive_account_failures = 0  # stop after 3 consecutive "account not found"
@@ -695,6 +703,8 @@ def _run_auto(argv: list[str]) -> None:
                     args.competition_id, config_dict, memory.recent(5),
                     inactivity_alert=inactive_cycles >= max_inactive_cycles,
                     inactive_minutes=actual_inactive_minutes,
+                    tight_exit_alert=tight_exit_detected,
+                    tight_exit_avg_hold=tight_exit_avg_hold,
                     consecutive_hold_cycles=inactive_cycles,
                     total_runtime_iterations=total_runtime_iterations,
                 )
@@ -794,6 +804,8 @@ def _run_auto(argv: list[str]) -> None:
                     config_dict["_strategy_start_time"] = time.time()
                     inactive_cycles = 0
                     inactive_since = None
+                    tight_exit_detected = False
+                    tight_exit_avg_hold = 0.0
                     total_runtime_iterations = 0
                     _deep_merge(config_dict, decision.overrides)
                     # Apply agent-requested cooldown override
@@ -964,6 +976,47 @@ def _run_auto(argv: list[str]) -> None:
                 # Don't reset here — reset happens after the next setup cycle
                 # successfully produces an "update" decision
 
+            # --- Tight exit watchdog ---
+            # Check if recent trades are closing too fast (avg hold < 60s)
+            tight_exit_detected = False
+            tight_exit_avg_hold = 0.0
+            try:
+                recent_trades = varsity_tools.get_trade_history(args.competition_id)
+                if isinstance(recent_trades, list) and len(recent_trades) >= 3:
+                    window = recent_trades[-3:]
+                    hold_secs: list[float] = []
+                    for t in window:
+                        if not isinstance(t, dict):
+                            continue
+                        hs = t.get("holdDuration")
+                        if hs is not None:
+                            try:
+                                hold_secs.append(float(hs))
+                            except (TypeError, ValueError):
+                                pass
+                        else:
+                            ot = t.get("openTime") or t.get("entryTime")
+                            ct = t.get("closeTime") or t.get("exitTime")
+                            if ot is not None and ct is not None:
+                                try:
+                                    ot_f = float(ot) / 1000 if float(ot) > 1e12 else float(ot)
+                                    ct_f = float(ct) / 1000 if float(ct) > 1e12 else float(ct)
+                                    if ct_f - ot_f >= 0:
+                                        hold_secs.append(ct_f - ot_f)
+                                except (TypeError, ValueError):
+                                    pass
+                    if hold_secs:
+                        avg_hold = sum(hold_secs) / len(hold_secs)
+                        if avg_hold < 60:
+                            tight_exit_detected = True
+                            tight_exit_avg_hold = round(avg_hold, 1)
+                            log.warning(
+                                "Tight exit watchdog: avg hold %.1fs over last %d trades — alerting setup agent",
+                                avg_hold, len(hold_secs),
+                            )
+            except Exception as exc:
+                log.debug("Tight exit watchdog check failed: %s", exc)
+
             # --- Publish watchdog + runtime result to monitor ---
             if current_mode == "discretionary":
                 stop_reason_label = "discretionary"
@@ -975,6 +1028,8 @@ def _run_auto(argv: list[str]) -> None:
                 "inactive_cycles": inactive_cycles,
                 "inactive_since": inactive_since,
                 "inactive_minutes": round((time.time() - inactive_since) / 60) if inactive_since else 0,
+                "tight_exit_detected": tight_exit_detected,
+                "tight_exit_avg_hold": tight_exit_avg_hold,
                 "total_runtime_iterations": total_runtime_iterations,
                 "consecutive_setup_failures": consecutive_setup_failures,
                 "consecutive_account_failures": consecutive_account_failures,

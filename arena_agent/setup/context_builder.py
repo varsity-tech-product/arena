@@ -20,6 +20,8 @@ def build_setup_context(
     *,
     inactivity_alert: bool = False,
     inactive_minutes: int = 0,
+    tight_exit_alert: bool = False,
+    tight_exit_avg_hold: float = 0,
     consecutive_hold_cycles: int = 0,
     total_runtime_iterations: int = 0,
 ) -> dict[str, Any]:
@@ -36,6 +38,18 @@ def build_setup_context(
                 f"NOTE: Your current strategy has produced NO trades for {inactive_minutes} minutes. "
                 "Consider whether the current policy is suitable for this market, or if different "
                 "parameters or a different strategy type would generate more signals."
+            ),
+        }
+
+    if tight_exit_alert:
+        context["tight_exit_alert"] = {
+            "active": True,
+            "avg_hold_seconds": tight_exit_avg_hold,
+            "message": (
+                f"WARNING: Your recent trades are closing in {tight_exit_avg_hold:.0f}s on average — "
+                "TP/SL or exit expression is too tight. "
+                "Widen tp_pct to at least 1.5% and sl_pct to at least 1.0%, "
+                "or relax exit expression thresholds to give trades room to breathe."
             ),
         }
 
@@ -315,6 +329,7 @@ def _summarize_trades(trades: list[dict]) -> dict[str, Any]:
     pnls: list[float] = []
     hold_times: list[float] = []
     trades_stopped_out = 0
+    trades_exited_fast = 0  # any trade closing < 60s regardless of pnl
 
     for trade in trades:
         if not isinstance(trade, dict):
@@ -339,6 +354,8 @@ def _summarize_trades(trades: list[dict]) -> dict[str, Any]:
                 hold_times.append(hold_sec)
                 if pnl < 0 and hold_sec < 120:
                     trades_stopped_out += 1
+                if hold_sec < 60:
+                    trades_exited_fast += 1
             except (TypeError, ValueError):
                 pass
         else:
@@ -353,6 +370,8 @@ def _summarize_trades(trades: list[dict]) -> dict[str, Any]:
                         hold_times.append(hs)
                         if pnl < 0 and hs < 120:
                             trades_stopped_out += 1
+                        if hs < 60:
+                            trades_exited_fast += 1
                 except (TypeError, ValueError):
                     pass
 
@@ -387,6 +406,7 @@ def _summarize_trades(trades: list[dict]) -> dict[str, Any]:
         "total_fees": round(total_fees, 4),
         "avg_hold_seconds": round(avg_hold_seconds, 1),
         "trades_stopped_out": trades_stopped_out,
+        "trades_exited_fast": trades_exited_fast,
         "recent_pnls": [round(p, 4) for p in pnls[-10:]],
         "consecutive_long_losses": _consecutive_losses_for("long"),
         "consecutive_short_losses": _consecutive_losses_for("short"),
