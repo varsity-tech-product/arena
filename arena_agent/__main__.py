@@ -983,7 +983,8 @@ def _run_auto(argv: list[str]) -> None:
             try:
                 recent_trades = varsity_tools.get_trade_history(args.competition_id)
                 if isinstance(recent_trades, list) and len(recent_trades) >= 3:
-                    window = recent_trades[-3:]
+                    # API returns trades sorted by closeTime descending (newest first)
+                    window = recent_trades[:3]
                     hold_secs: list[float] = []
                     for t in window:
                         if not isinstance(t, dict):
