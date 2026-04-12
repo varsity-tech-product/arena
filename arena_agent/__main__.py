@@ -478,6 +478,8 @@ def _run_auto(argv: list[str]) -> None:
     max_inactive_cycles = 4      # trigger inactivity alert after this many consecutive idle cycles
     tight_exit_detected = False      # set True when recent trades avg hold < 60s
     tight_exit_avg_hold = 0.0        # avg hold seconds for the alert
+    competition_ending_soon = False  # set True when competition has < 30 min remaining
+    competition_remaining_minutes = 0.0  # minutes until competition ends
     consecutive_setup_failures = 0
     max_setup_failures = 5       # apply fallback strategy after this many
     consecutive_account_failures = 0  # stop after 3 consecutive "account not found"
@@ -645,6 +647,28 @@ def _run_auto(argv: list[str]) -> None:
             _interruptible_sleep(30, lambda: stop_requested)
             continue
 
+        # --- Competition ending soon detection ---
+        competition_ending_soon = False
+        competition_remaining_minutes = 0.0
+        _ENDING_SOON_THRESHOLD_MINUTES = 30
+        try:
+            end_time_ms = comp_detail.get("endTime") if isinstance(comp_detail, dict) else None
+            if isinstance(end_time_ms, (int, float)) and end_time_ms > 0:
+                remaining_sec = (end_time_ms / 1000.0) - time.time()
+                competition_remaining_minutes = max(0.0, remaining_sec / 60.0)
+                if 0 < competition_remaining_minutes <= _ENDING_SOON_THRESHOLD_MINUTES:
+                    competition_ending_soon = True
+                    log.warning(
+                        "Competition ending soon: %.1f min remaining — alerting setup agent",
+                        competition_remaining_minutes,
+                    )
+                monitor.update_auto_loop({
+                    "competition_remaining_minutes": round(competition_remaining_minutes, 1),
+                    "competition_ending_soon": competition_ending_soon,
+                })
+        except Exception as exc:
+            log.debug("Competition end time check failed: %s", exc)
+
         # --- Pre-check: is the engine account still available? ---
         monitor.update_auto_loop({"phase": "account_check", "phase_started_at": time.time()})
         try:
@@ -707,6 +731,8 @@ def _run_auto(argv: list[str]) -> None:
                     tight_exit_avg_hold=tight_exit_avg_hold,
                     consecutive_hold_cycles=inactive_cycles,
                     total_runtime_iterations=total_runtime_iterations,
+                    competition_ending_soon=competition_ending_soon,
+                    competition_remaining_minutes=competition_remaining_minutes,
                 )
                 # Skip LLM call if account context is broken (API error)
                 acct_ctx = context.get("account_state", {})

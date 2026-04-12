@@ -24,6 +24,8 @@ def build_setup_context(
     tight_exit_avg_hold: float = 0,
     consecutive_hold_cycles: int = 0,
     total_runtime_iterations: int = 0,
+    competition_ending_soon: bool = False,
+    competition_remaining_minutes: float = 0,
 ) -> dict[str, Any]:
     """Assemble everything the setup agent needs to make a decision."""
     context: dict[str, Any] = {}
@@ -50,6 +52,19 @@ def build_setup_context(
                 "TP/SL or exit expression is too tight. "
                 "Widen tp_pct to at least 1.5% and sl_pct to at least 1.0%, "
                 "or relax exit expression thresholds to give trades room to breathe."
+            ),
+        }
+
+    if competition_ending_soon:
+        mins = round(competition_remaining_minutes, 1)
+        context["competition_ending_soon"] = {
+            "active": True,
+            "remaining_minutes": mins,
+            "message": (
+                f"ALERT: Competition ends in {mins} minutes. "
+                "Close any open positions and stop opening new trades. "
+                "Switch to defensive mode — protect your current PnL. "
+                "Do NOT open new positions unless you can close them before time runs out."
             ),
         }
 
