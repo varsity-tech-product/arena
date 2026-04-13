@@ -624,11 +624,11 @@ def trade_open(
     Args:
         competition_id: Competition ID.
         direction: "long" or "short".
-        size: Position size (> 0).
+        size: Position quantity (> 0). Sent as ``quantity`` to the Arena API.
         take_profit: Take profit price (optional).
         stop_loss: Stop loss price (optional).
     """
-    body: dict[str, Any] = {"direction": direction, "size": size}
+    body: dict[str, Any] = {"direction": direction, "quantity": size}
     if take_profit is not None:
         body["takeProfit"] = take_profit
     if stop_loss is not None:

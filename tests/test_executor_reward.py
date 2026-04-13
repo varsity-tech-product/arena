@@ -46,6 +46,7 @@ def make_state(
     position: PositionSnapshot | None = None,
     equity: float = 1000.0,
     price: float = 100.0,
+    market_metadata: dict | None = None,
 ) -> AgentState:
     return AgentState(
         timestamp=time.time(),
@@ -57,6 +58,7 @@ def make_state(
             volatility=0.02,
             orderbook_imbalance=0.1,
             recent_candles=[],
+            metadata=market_metadata or {},
         ),
         account=AccountSnapshot(
             balance=1000.0,
@@ -103,6 +105,41 @@ class ExecutorAndRewardTest(unittest.TestCase):
         self.assertTrue(result.executed)
         self.assertAlmostEqual(result.order_size or 0.0, 1.0)
         self.assertAlmostEqual(result.fee, 1.5)
+
+    def test_executor_truncates_size_to_live_symbol_precision(self) -> None:
+        executor = OrderExecutor(
+            adapter=FakeAdapter(),
+            competition_id=4,
+            risk_limits=RiskLimits(
+                max_position_size_pct=0.7,
+                max_absolute_size=None,
+                min_size=0.001,
+                quantity_precision=3,
+                price_precision=2,
+                max_trades=10,
+                min_seconds_between_trades=0.0,
+                allow_long=True,
+                allow_short=True,
+            ),
+            dry_run=False,
+        )
+
+        result = executor.execute(
+            Action(type=ActionType.OPEN_SHORT),
+            make_state(
+                equity=9980.08635595,
+                price=81.75,
+                market_metadata={
+                    "quantityPrecision": 2,
+                    "stepSize": 0.01,
+                    "minQty": 0.01,
+                },
+            ),
+        )
+
+        self.assertTrue(result.accepted)
+        self.assertTrue(result.executed)
+        self.assertAlmostEqual(result.order_size or 0.0, 85.45)
 
     def test_transition_reward_model_accounts_for_pnl_and_invalid_actions(self) -> None:
         reward_model = TransitionRewardModel(RewardWeights(invalid_action_penalty=2.0))

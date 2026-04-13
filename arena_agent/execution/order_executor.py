@@ -174,9 +174,39 @@ class OrderExecutor:
             raw_size = buying_power * self.risk_limits.max_position_size_pct / state.market.last_price
             size = raw_size
 
-        precision = 10 ** self.risk_limits.quantity_precision
-        rounded = math.floor(size * precision) / precision
-        return max(self.risk_limits.min_size, rounded)
+        market_meta = state.market.metadata if isinstance(state.market.metadata, dict) else {}
+        quantity_precision = _first_int(
+            market_meta,
+            "quantityPrecision",
+            "quantity_precision",
+            default=self.risk_limits.quantity_precision,
+        )
+        min_size = max(
+            self.risk_limits.min_size,
+            _first_float(
+                market_meta,
+                "minQty",
+                "min_qty",
+                default=self.risk_limits.min_size,
+            ),
+        )
+        step_size = _first_float(
+            market_meta,
+            "stepSize",
+            "step_size",
+            default=0.0,
+        )
+
+        if step_size > 0:
+            rounded = math.floor(size / step_size) * step_size
+        else:
+            precision = 10 ** quantity_precision
+            rounded = math.floor(size * precision) / precision
+
+        if rounded <= 0:
+            rounded = min_size
+        rounded = max(min_size, rounded)
+        return round(rounded, quantity_precision)
 
     def _rounded_price(self, value: float | None) -> float | None:
         if value is None:
@@ -239,4 +269,24 @@ def _extract_float(data: dict[str, Any], *keys: str, default: float = 0.0) -> fl
                             pass
         if found:
             return total
+    return default
+
+
+def _first_float(data: dict[str, Any], *keys: str, default: float = 0.0) -> float:
+    for key in keys:
+        if key in data and data[key] is not None:
+            try:
+                return float(data[key])
+            except (TypeError, ValueError):
+                return default
+    return default
+
+
+def _first_int(data: dict[str, Any], *keys: str, default: int = 0) -> int:
+    for key in keys:
+        if key in data and data[key] is not None:
+            try:
+                return int(data[key])
+            except (TypeError, ValueError):
+                return default
     return default
