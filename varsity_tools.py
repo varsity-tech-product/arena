@@ -25,6 +25,7 @@ from __future__ import annotations
 import json
 import os
 import time
+from urllib.parse import urlparse
 from typing import Any, Optional
 
 import requests
@@ -37,8 +38,37 @@ DEFAULT_TIMEOUT = 30
 # ── HTTP helpers ─────────────────────────────────────────────────────────────
 
 
+def _is_loopback_host(hostname: str | None) -> bool:
+    normalized = (hostname or "").strip().lower()
+    return normalized in {"localhost", "127.0.0.1", "::1"}
+
+
+def _validated_base_url(raw_value: str) -> str:
+    value = raw_value.strip()
+    parsed = urlparse(value)
+
+    if not parsed.scheme or not parsed.netloc:
+        raise RuntimeError("Arena API base URL must be a valid absolute URL.")
+
+    if parsed.username or parsed.password:
+        raise RuntimeError("Arena API base URL must not include embedded credentials.")
+
+    if parsed.query or parsed.fragment:
+        raise RuntimeError("Arena API base URL must not include query parameters or fragments.")
+
+    if parsed.scheme == "https":
+        return value.rstrip("/")
+
+    if parsed.scheme == "http" and _is_loopback_host(parsed.hostname):
+        return value.rstrip("/")
+
+    raise RuntimeError(
+        "Arena API base URL must use HTTPS, or HTTP only for localhost/loopback."
+    )
+
+
 def _base_url() -> str:
-    return os.environ.get("VARSITY_BASE_URL", DEFAULT_BASE_URL)
+    return _validated_base_url(os.environ.get("VARSITY_BASE_URL", DEFAULT_BASE_URL))
 
 
 def _timeout() -> int:
